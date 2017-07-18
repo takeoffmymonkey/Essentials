@@ -1,22 +1,27 @@
 package com.example.android.essentials;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 
+import static java.security.AccessController.getContext;
+
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<String> categories;
-
     public static String mainPath;
-
     public static File mainDir;
+    ArrayList<String> categories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,27 @@ public class MainActivity extends AppCompatActivity {
                 R.id.main_list_item_text, categories);
 
         list.setAdapter(adapter);
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.main_menu_search:
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

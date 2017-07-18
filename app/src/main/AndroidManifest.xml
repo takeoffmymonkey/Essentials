@@ -21,7 +21,9 @@
         </activity>
 
 
-        <activity android:name=".SubActivity"></activity>
+        <activity android:name=".SubActivity"
+            android:label="SubActivity"
+            ></activity>
 
     </application>
 
