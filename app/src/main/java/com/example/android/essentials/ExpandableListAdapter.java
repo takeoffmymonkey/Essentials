@@ -15,6 +15,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this._listDataChild;
+        return this._listDataChild.get(this._listDataHeader.get(groupPosition));
     }
 
     @Override
@@ -48,7 +49,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-//        final String childText = (String) getChild(groupPosition, childPosition);
+
+        final String childText = (String) getChild(groupPosition, childPosition);
+
+        Log.e ("WARNING: ", childText);
 
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context

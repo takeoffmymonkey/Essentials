@@ -22,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         // get the listview
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
@@ -33,6 +32,36 @@ public class MainActivity extends AppCompatActivity {
 
         // setting list adapter
         expListView.setAdapter(listAdapter);
+
+    }
+
+
+    /*
+         * Preparing the list data
+         */
+    private void prepareListData() {
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, String>();
+
+        // Adding header data
+        listDataHeader.add("Header 1");
+        listDataHeader.add("Header 2");
+        listDataHeader.add("Header 3");
+
+        // Adding child data
+        String child1 = "Child 1";
+        String child2 = "Child 2";
+        String child3 = "Child 3";
+
+
+        listDataChild.put(listDataHeader.get(0), child1); // Header, Child data
+        listDataChild.put(listDataHeader.get(1), child2);
+        listDataChild.put(listDataHeader.get(2), child3);
+    }
+
+}
+
+
 
         /*// Listview Group click listener
         expListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
@@ -88,34 +117,3 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });*/
-
-
-    }
-
-
-    /*
-         * Preparing the list data
-         */
-    private void prepareListData() {
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, String>();
-
-        // Adding header data
-        listDataHeader.add("Top 250");
-        listDataHeader.add("Now Showing");
-        listDataHeader.add("Coming Soon..");
-
-        // Adding child data
-        String top250 = "The Shawshank Redemption";
-
-        String nowShowing = "The Conjuring";
-
-        String comingSoon = "2 Guns";
-
-
-        listDataChild.put(listDataHeader.get(0), top250); // Header, Child data
-        listDataChild.put(listDataHeader.get(1), nowShowing);
-        listDataChild.put(listDataHeader.get(2), comingSoon);
-    }
-
-}
