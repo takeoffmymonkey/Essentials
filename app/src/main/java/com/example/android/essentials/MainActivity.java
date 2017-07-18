@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         //Arrays for current dir files, category names and their paths
         File[] dirFiles;
         ArrayList<String> dirCategories = new ArrayList<String>();
-        ArrayList<String> dirCategoriesPaths = new ArrayList<String>();
+        final ArrayList<String> dirCategoriesPaths = new ArrayList<String>();
 
 
         //Check if card is mount
@@ -77,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
-                //intent.putExtra("currentPath", dirCategoriesPaths[id]);
+                intent.putExtra("currentPath", dirCategoriesPaths.get((int) id));
                 view.getContext().startActivity(intent);
 
             }

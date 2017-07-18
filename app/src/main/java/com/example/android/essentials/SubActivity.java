@@ -2,6 +2,7 @@ package com.example.android.essentials;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
 import java.util.ArrayList;
@@ -22,6 +23,16 @@ public class SubActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
 
+
+        //Get subactivity path
+        String currentPath = getIntent().getStringExtra("currentPath");
+
+
+        //Set activity name
+        String subActivityName = currentPath.substring(currentPath.lastIndexOf("/") + 1);
+        setTitle(subActivityName);
+
+
         // get the listview
         expListView = (ExpandableListView) findViewById(R.id.sub_list);
 
@@ -33,8 +44,23 @@ public class SubActivity extends AppCompatActivity {
         // setting list adapter
         expListView.setAdapter(listAdapter);
 
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /*
          * Preparing the list data
