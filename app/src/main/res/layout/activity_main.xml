@@ -4,13 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.android.essentials.MainActivity">
 
-<WebView
-    android:id="@+id/test_webv"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-</WebView>
+    <ExpandableListView
+        android:id="@+id/lvExp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ExpandableListView>
+
+
+
+    <WebView
+        android:id="@+id/test_webv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </WebView>
 
 </LinearLayout>
