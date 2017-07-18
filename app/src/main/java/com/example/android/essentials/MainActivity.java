@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -56,6 +58,21 @@ public class MainActivity extends AppCompatActivity {
                 R.id.main_list_item_text, categories);
 
         list.setAdapter(adapter);
+
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, Long.toString(id), Toast.LENGTH_SHORT).show();
+
+                /*Intent intent = new Intent(HistoryActivity.this, ListInfoActivity.class);
+                intent.setFlags(intent.getFlags()|Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.putExtra("listName", listName);
+                intent.putExtra("listVersion", listVersion);
+                view.getContext().startActivity(intent);*/
+
+            }
+        });
     }
 
 
