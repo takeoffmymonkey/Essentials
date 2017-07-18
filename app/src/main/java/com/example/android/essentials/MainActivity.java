@@ -17,22 +17,28 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
-import static java.security.AccessController.getContext;
-
 public class MainActivity extends AppCompatActivity {
 
     public static String mainPath;
     public static File mainDir;
-    ArrayList<String> categories;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ListView list = (ListView) findViewById(R.id.main_list);
 
-        categories = new ArrayList<String>();
+        ListView dirList = (ListView) findViewById(R.id.main_list);
+
+
+        //Arrays for current dir files, category names and their paths
+        File[] dirFiles;
+        ArrayList<String> dirCategories = new ArrayList<String>();
+        ArrayList<String> dirCategoriesPaths = new ArrayList<String>();
+
 
         //Check if card is mount
         boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
@@ -41,45 +47,46 @@ public class MainActivity extends AppCompatActivity {
         } else {//Card is mount
             //Store global path and folder file
             mainPath = Environment.getExternalStorageDirectory().getPath() + "/Essentials";
-            Log.e("WARNING: ", "path: " + mainPath);
             mainDir = new File(mainPath);
-            File[] mainFiles = mainDir.listFiles();
-            Log.e("WARNING: ", "mainFiles size: " + mainFiles.length);
 
-            //update array list
-            for (int i = 0; i < mainFiles.length; i++) {
-                String absPath = mainFiles[i].getAbsolutePath();
-                categories.add(absPath.substring(absPath.lastIndexOf("/") + 1));
+            //Save paths of all files in the current dir
+            dirFiles = mainDir.listFiles();
+            for (int i = 0; i < dirFiles.length; i++) {
+                dirCategoriesPaths.add(dirFiles[i].getAbsolutePath());
+            }
+
+            //add category names to dirCategories dirList
+            for (int i = 0; i < dirFiles.length; i++) {
+                String category = dirCategoriesPaths.get(i).substring(dirCategoriesPaths.get(i)
+                        .lastIndexOf("/") + 1);
+                dirCategories.add(category);
             }
 
         }
 
+
+        //Set array adapter
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
-                R.id.main_list_item_text, categories);
+                R.id.main_list_item_text, dirCategories);
+        dirList.setAdapter(adapter);
 
-        list.setAdapter(adapter);
 
-
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //Set clicklistener
+        dirList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, Long.toString(id), Toast.LENGTH_SHORT).show();
 
-                /*Intent intent = new Intent(HistoryActivity.this, ListInfoActivity.class);
-                intent.setFlags(intent.getFlags()|Intent.FLAG_ACTIVITY_NO_HISTORY);
-                intent.putExtra("listName", listName);
-                intent.putExtra("listVersion", listVersion);
-                view.getContext().startActivity(intent);*/
+                Intent intent = new Intent(MainActivity.this, SubActivity.class);
+                //intent.putExtra("currentPath", dirCategoriesPaths[id]);
+                view.getContext().startActivity(intent);
 
             }
         });
     }
 
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;

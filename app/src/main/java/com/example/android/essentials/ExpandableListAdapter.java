@@ -66,10 +66,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             Log.e("WARNING: ", "No sd card");
         } else {
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                    "Essentials/const.htm");
+                    "Essentials/CS/const.htm");
             if (file.exists()) {
                 webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
-                        + "/Essentials/const.htm");
+                        + "/Essentials/CS/const.htm");
             } else Log.e("WARNING: ", "File not found");
 
         }
