@@ -1,19 +1,35 @@
 package com.example.android.essentials;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class SubActivity extends AppCompatActivity {
 
+    String subPath;
+    File subDir;
+    String subActivityName;
 
-    ExpandableListAdapter listAdapter;
-    ExpandableListView expListView;
+    File[] subFiles;
+    ArrayList<String> subCategories;
+
+    ListView subList;
+    ExpandableListView subExpList;
+    ExpandableListAdapter subExpListAdapter;
     List<String> listDataHeader;
     HashMap<String, String> listDataChild;
 
@@ -24,30 +40,78 @@ public class SubActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sub);
 
 
-        //Get subactivity path
-        String currentPath = getIntent().getStringExtra("currentPath");
-
+        //Get subActivity path
+        subPath = getIntent().getStringExtra("subPath");
+        Log.e ("WARNING: ", "subPath: " + subPath);
 
         //Set activity name
-        String subActivityName = currentPath.substring(currentPath.lastIndexOf("/") + 1);
+        subActivityName = subPath.substring(subPath.lastIndexOf("/") + 1);
         setTitle(subActivityName);
 
 
-        // get the listview
-        expListView = (ExpandableListView) findViewById(R.id.sub_list);
+        //Arrays for current dir category names and their paths
+        subCategories = new ArrayList<String>();
+        final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
 
-        // preparing list data
+
+        //Save paths of all files in the current dir
+        subDir = new File(subPath);
+        subFiles = subDir.listFiles();
+        for (int i = 0; i < subFiles.length; i++) {
+            subCategoriesPaths.add(subFiles[i].getAbsolutePath());
+        }
+
+        //add category names to mainCategories mainList
+        for (int i = 0; i < subFiles.length; i++) {
+            String category = subCategoriesPaths.get(i).substring(subCategoriesPaths.get(i)
+                    .lastIndexOf("/") + 1);
+            subCategories.add(category);
+        }
+
+
+        //Make list and set array adapter
+        subList = (ListView) findViewById(R.id.sub_list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
+                R.id.main_list_item_text, subCategories);
+        subList.setAdapter(adapter);
+
+
+        //Set clicklistener on it
+        subList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent intent = new Intent(SubActivity.this, SubActivity.class);
+                intent.putExtra("subPath", subCategoriesPaths.get((int) id));
+                view.getContext().startActivity(intent);
+
+            }
+        });
+
+
+        //Make expandable list
+        subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
+
+        //Prepare list data
         prepareListData();
 
-        listAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
 
-        // setting list adapter
-        expListView.setAdapter(listAdapter);
+        //Set adapter
+        subExpListAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
+        subExpList.setAdapter(subExpListAdapter);
 
 
+        //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+    }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
     }
 
 
@@ -55,12 +119,15 @@ public class SubActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
+            case R.id.main_menu_search:
+                return true;
             case android.R.id.home:
                 this.finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     /*
          * Preparing the list data
@@ -90,7 +157,7 @@ public class SubActivity extends AppCompatActivity {
 
 
         /*// Listview Group click listener
-        expListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+        subExpList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
 
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v,
@@ -103,7 +170,7 @@ public class SubActivity extends AppCompatActivity {
         });
 
         // Listview Group expanded listener
-        expListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+        subExpList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
 
             @Override
             public void onGroupExpand(int groupPosition) {
@@ -114,7 +181,7 @@ public class SubActivity extends AppCompatActivity {
         });
 
         // Listview Group collasped listener
-        expListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+        subExpList.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
 
             @Override
             public void onGroupCollapse(int groupPosition) {
@@ -126,7 +193,7 @@ public class SubActivity extends AppCompatActivity {
         });
 
         // Listview on child click listener
-        expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+        subExpList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,

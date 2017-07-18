@@ -18,9 +18,11 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String mainPath;
-    public static File mainDir;
-
+    String mainPath;
+    File mainDir;
+    ListView mainList;
+    File[] mainFiles;
+    ArrayList<String> mainCategories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +32,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        ListView dirList = (ListView) findViewById(R.id.main_list);
+        mainList = (ListView) findViewById(R.id.main_list);
 
 
-        //Arrays for current dir files, category names and their paths
-        File[] dirFiles;
-        ArrayList<String> dirCategories = new ArrayList<String>();
-        final ArrayList<String> dirCategoriesPaths = new ArrayList<String>();
+        //Arrays for current dir category names and their paths
+        mainCategories = new ArrayList<String>();
+        final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
 
 
         //Check if card is mount
@@ -46,19 +47,20 @@ public class MainActivity extends AppCompatActivity {
         } else {//Card is mount
             //Store global path and folder file
             mainPath = Environment.getExternalStorageDirectory().getPath() + "/Essentials";
+            Log.e ("WARNING: ", "mainPath: " + mainPath);
             mainDir = new File(mainPath);
 
             //Save paths of all files in the current dir
-            dirFiles = mainDir.listFiles();
-            for (int i = 0; i < dirFiles.length; i++) {
-                dirCategoriesPaths.add(dirFiles[i].getAbsolutePath());
+            mainFiles = mainDir.listFiles();
+            for (int i = 0; i < mainFiles.length; i++) {
+                mainCategoriesPaths.add(mainFiles[i].getAbsolutePath());
             }
 
-            //add category names to dirCategories dirList
-            for (int i = 0; i < dirFiles.length; i++) {
-                String category = dirCategoriesPaths.get(i).substring(dirCategoriesPaths.get(i)
+            //add category names to mainCategories mainList
+            for (int i = 0; i < mainFiles.length; i++) {
+                String category = mainCategoriesPaths.get(i).substring(mainCategoriesPaths.get(i)
                         .lastIndexOf("/") + 1);
-                dirCategories.add(category);
+                mainCategories.add(category);
             }
 
         }
@@ -66,17 +68,17 @@ public class MainActivity extends AppCompatActivity {
 
         //Set array adapter
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
-                R.id.main_list_item_text, dirCategories);
-        dirList.setAdapter(adapter);
+                R.id.main_list_item_text, mainCategories);
+        mainList.setAdapter(adapter);
 
 
         //Set clicklistener
-        dirList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
-                intent.putExtra("currentPath", dirCategoriesPaths.get((int) id));
+                intent.putExtra("subPath", mainCategoriesPaths.get((int) id));
                 view.getContext().startActivity(intent);
 
             }

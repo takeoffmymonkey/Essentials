@@ -8,8 +8,14 @@
     tools:context="com.example.android.essentials.SubActivity">
 
 
-    <ExpandableListView
+    <ListView
         android:id="@+id/sub_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
+
+    <ExpandableListView
+        android:id="@+id/sub_exp_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
     </ExpandableListView>
