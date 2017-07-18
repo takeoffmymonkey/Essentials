@@ -1,16 +1,9 @@
 package com.example.android.essentials;
 
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     ExpandableListAdapter listAdapter;
     ExpandableListView expListView;
     List<String> listDataHeader;
-    HashMap<String, List<String>> listDataChild;
+    HashMap<String, String> listDataChild;
 
 
     @Override
@@ -29,7 +22,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-                // get the listview
+
+        // get the listview
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
         // preparing list data
@@ -40,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         // setting list adapter
         expListView.setAdapter(listAdapter);
 
-        // Listview Group click listener
+        /*// Listview Group click listener
         expListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
 
             @Override
@@ -93,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                         .show();
                 return false;
             }
-        });
+        });*/
 
 
     }
@@ -104,24 +98,19 @@ public class MainActivity extends AppCompatActivity {
          */
     private void prepareListData() {
         listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
+        listDataChild = new HashMap<String, String>();
 
-        // Adding child data
+        // Adding header data
         listDataHeader.add("Top 250");
         listDataHeader.add("Now Showing");
         listDataHeader.add("Coming Soon..");
 
         // Adding child data
-        List<String> top250 = new ArrayList<String>();
-        top250.add("The Shawshank Redemption");
+        String top250 = "The Shawshank Redemption";
 
+        String nowShowing = "The Conjuring";
 
-        List<String> nowShowing = new ArrayList<String>();
-        nowShowing.add("The Conjuring");
-
-
-        List<String> comingSoon = new ArrayList<String>();
-        comingSoon.add("2 Guns");
+        String comingSoon = "2 Guns";
 
 
         listDataChild.put(listDataHeader.get(0), top250); // Header, Child data
