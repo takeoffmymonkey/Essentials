@@ -29,32 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WebView webView = (WebView) findViewById(R.id.test_webv);
-
-        //This is sdcard0
-        //Access to secondary storage is available through getExternalFilesDirs(String),
-        //getExternalCacheDirs(), and getExternalMediaDirs().
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Log.e("WARNING: ", "No sd card");
-        } else {
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                    "Essentials/princ.htm");
-            if (file.exists()) {
-                webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
-                        + "/Essentials/princ.htm");
-            } else Log.e("WARNING: ", "File not found");
-
-        }
-
-
-        //Text size and zoomable
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setTextZoom(140);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-
-
-        // get the listview
+                // get the listview
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
         // preparing list data
@@ -139,27 +114,15 @@ public class MainActivity extends AppCompatActivity {
         // Adding child data
         List<String> top250 = new ArrayList<String>();
         top250.add("The Shawshank Redemption");
-        top250.add("The Godfather");
-        top250.add("The Godfather: Part II");
-        top250.add("Pulp Fiction");
-        top250.add("The Good, the Bad and the Ugly");
-        top250.add("The Dark Knight");
-        top250.add("12 Angry Men");
+
 
         List<String> nowShowing = new ArrayList<String>();
         nowShowing.add("The Conjuring");
-        nowShowing.add("Despicable Me 2");
-        nowShowing.add("Turbo");
-        nowShowing.add("Grown Ups 2");
-        nowShowing.add("Red 2");
-        nowShowing.add("The Wolverine");
+
 
         List<String> comingSoon = new ArrayList<String>();
         comingSoon.add("2 Guns");
-        comingSoon.add("The Smurfs 2");
-        comingSoon.add("The Spectacular Now");
-        comingSoon.add("The Canyons");
-        comingSoon.add("Europa Report");
+
 
         listDataChild.put(listDataHeader.get(0), top250); // Header, Child data
         listDataChild.put(listDataHeader.get(1), nowShowing);
