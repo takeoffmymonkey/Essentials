@@ -30,7 +30,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 
     @Override
-    public Object getChild(int groupPosition, int childPosititon) {
+    public Object getChild(int groupPosition, int childPosition) {
         return questions.get(groupPosition);
     }
 
@@ -102,9 +102,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //If view is empty
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) context
+            LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.sub_list_group, null);
+            convertView = inflater.inflate(R.layout.sub_list_group, null);
         }
 
 

@@ -133,13 +133,11 @@ public class SubActivity extends AppCompatActivity {
 
 
         //Make expandable navigator
-
         subExpNav = (ExpandableListView) findViewById(R.id.sub_exp_navigate);
         prepareNavData();
-
-        /*subExpNavAdapter = new ExpandableNavAdapter(this, questions);
+        subExpNavAdapter = new ExpandableNavAdapter(this, subPathArray);
         subExpNav.setAdapter(subExpNavAdapter);
-*/
+
 
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

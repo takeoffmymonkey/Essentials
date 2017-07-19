@@ -9,29 +9,26 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
-import com.example.android.essentials.Question;
+
 import com.example.android.essentials.R;
-import java.util.ArrayList;
 
 public class ExpandableNavAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private ArrayList<Question> questions;
+    private String[] locations;
 
 
-    public ExpandableNavAdapter(Context context, ArrayList<Question> questions) {
+    public ExpandableNavAdapter(Context context, String[] locations) {
         this.context = context;
-        this.questions = questions;
+        this.locations = locations;
     }
 
 
     @Override
-    public Object getChild(int groupPosition, int childPosititon) {
-        return questions.get(groupPosition);
+    public Object getChild(int groupPosition, int childPosition) {
+        return locations[childPosition];
     }
 
 
@@ -45,27 +42,22 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        //Get current question's path
-        final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
 
         //For new view
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.sub_list_item, null);
+            convertView = inflater.inflate(R.layout.sub_nav_item, null);
         }
 
 
-        //Make webview and load url
-        WebView webView = (WebView) convertView.findViewById(R.id.sub_list_web_view);
-        webView.loadUrl("file://" + path);
+        //Get current question's path
+        final String location = (String) getChild(groupPosition, childPosition);
 
 
-        //Text size and zoomable
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setTextZoom(140);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
+        //Set text
+        TextView textView = (TextView) convertView.findViewById(R.id.sub_nav_text);
+        textView.setText(location);
 
 
         return convertView;
@@ -74,19 +66,19 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return 1;
+        return locations.length;
     }
 
 
     @Override
     public Object getGroup(int groupPosition) {
-        return questions.get(groupPosition);
+        return "Navigate";
     }
 
 
     @Override
     public int getGroupCount() {
-        return questions.size();
+        return 1;
     }
 
 
@@ -102,14 +94,14 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
 
         //If view is empty
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) context
+            LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.sub_list_group, null);
+            convertView = inflater.inflate(R.layout.sub_list_group, null);
         }
 
 
         //Set title of header
-        String headerTitle = ((Question) getGroup(groupPosition)).getQuestion();
+        String headerTitle = (String) getGroup(groupPosition);
         TextView headerTextView = (TextView) convertView
                 .findViewById(R.id.sub_list_header);
         headerTextView.setTypeface(null, Typeface.BOLD);
