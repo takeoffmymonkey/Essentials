@@ -10,12 +10,12 @@ public class Question {
 
     private String question;
 
-    private File file;
+    private String filePath;
 
 
-    public Question(String question, File file) {
+    public Question(String question, String filePath) {
         this.question = question;
-        this.file = file;
+        this.filePath = filePath;
     }
 
     public String getQuestion() {
@@ -26,11 +26,11 @@ public class Question {
         this.question = question;
     }
 
-    public File getFile() {
-        return file;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setFile(File file) {
-        this.file = file;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }
