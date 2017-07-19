@@ -152,7 +152,7 @@ public class SubActivity extends AppCompatActivity {
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
         prepareListData();
-        subExpListAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
+        subExpListAdapter = new ExpandableListAdapter(this, subQuestionsNames, listDataChild);
         subExpList.setAdapter(subExpListAdapter);
 
 
@@ -188,23 +188,11 @@ public class SubActivity extends AppCompatActivity {
          * Preparing the list data
          */
     private void prepareListData() {
-        listDataHeader = new ArrayList<String>();
         listDataChild = new HashMap<String, String>();
 
-        // Adding header data
-        listDataHeader.add("Header 1");
-        listDataHeader.add("Header 2");
-        listDataHeader.add("Header 3");
-
-        // Adding child data
-        String child1 = "Child 1";
-        String child2 = "Child 2";
-        String child3 = "Child 3";
-
-
-        listDataChild.put(listDataHeader.get(0), child1); // Header, Child data
-        listDataChild.put(listDataHeader.get(1), child2);
-        listDataChild.put(listDataHeader.get(2), child3);
+        for (int i = 0; i < subQuestionsNames.size(); i++) {
+            listDataChild.put(subQuestionsNames.get(i), "child" + i);
+        }
     }
 
 }
