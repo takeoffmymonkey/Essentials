@@ -56,8 +56,14 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
 
 
         //Set text
+        String arrow = "";
+        for (int i = 0; i < childPosition; i++) {
+            arrow += "-";
+        }
+        arrow += "> ";
         TextView textView = (TextView) convertView.findViewById(R.id.sub_nav_text);
-        textView.setText(location);
+        textView.setText(arrow + location);
+        textView.setTextSize(18);
 
 
         return convertView;
