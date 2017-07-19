@@ -139,6 +139,17 @@ public class SubActivity extends AppCompatActivity {
         subExpNav.setAdapter(subExpNavAdapter);
 
 
+        //Set click listener on navigation exp list
+        subExpNav.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                navigateToActivity(v, id);
+                return false;
+            }
+        });
+
+
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -186,4 +197,26 @@ public class SubActivity extends AppCompatActivity {
         }
 
     }
+
+
+    /*Navigate to main or sub activity based on clicked child element*/
+    private void navigateToActivity(View v, long id) {
+        Intent intent;
+        String tempSubPath = "";
+        String[] tempSubPathArray = subPath.split("/", -1);
+        if (id == 0) {//main activity selected
+            intent = new Intent(SubActivity.this, MainActivity.class);
+        } else { //sub activity selected
+            id += 4;
+            for (int i = 0; i < id; i++) {//Form new path
+                tempSubPath += "/" + tempSubPathArray[i];
+            }
+            intent = new Intent(SubActivity.this, SubActivity.class);
+            intent.putExtra("subPath", tempSubPath);
+        }
+        v.getContext().startActivity(intent);
+
+    }
+
+
 }
