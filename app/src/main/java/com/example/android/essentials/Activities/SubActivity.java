@@ -20,6 +20,7 @@ import com.example.android.essentials.R;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class SubActivity extends AppCompatActivity {
 
@@ -193,8 +194,9 @@ public class SubActivity extends AppCompatActivity {
         subPathArray = new String[tempPath.length - 4];
         for (int i = 3; i < (tempPath.length - 1); i++) {
             subPathArray[i - 3] = tempPath[i];
-            Log.e("WARNING: ", subPathArray[i - 3]);
         }
+        String str = Arrays.toString(subPathArray);
+        Log.e("WARNING: ", "prepared nav data: " + str);
 
     }
 
@@ -204,18 +206,23 @@ public class SubActivity extends AppCompatActivity {
         Intent intent;
         String tempSubPath = "";
         String[] tempSubPathArray = subPath.split("/", -1);
+
+
+        //Prepare intent
         if (id == 0) {//main activity selected
             intent = new Intent(SubActivity.this, MainActivity.class);
         } else { //sub activity selected
-            id += 4;
+            id += 3;
             for (int i = 0; i < id; i++) {//Form new path
-                tempSubPath += "/" + tempSubPathArray[i];
+                tempSubPath += "/" + tempSubPathArray[i + 1];
             }
             intent = new Intent(SubActivity.this, SubActivity.class);
             intent.putExtra("subPath", tempSubPath);
         }
-        v.getContext().startActivity(intent);
 
+
+        //Start intent
+        v.getContext().startActivity(intent);
     }
 
 
