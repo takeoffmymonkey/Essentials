@@ -59,7 +59,7 @@ public class SubActivity extends AppCompatActivity {
 
 
         //Get relative path
-        subRelativePath = subPath.substring(MainActivity.mainPath.length() + 1);
+        subRelativePath = subPath.substring(MainActivity.getMainPath().length() + 1);
 
 
         //Get dir file, get all its files and folders

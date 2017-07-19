@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    static String mainPath;
+    String mainPath;
     File mainDir;
     ListView mainList;
     File[] mainFiles;
@@ -33,29 +33,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        //Check if card is mount
-        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-        if (!cardMount) {
-            Log.e("WARNING: ", "No sd card");
-        } else {//Card is mount
-            //Store global path and folder file
-            mainPath = Environment.getExternalStorageDirectory().getPath() + "/Essentials";
-            mainDir = new File(mainPath);
+        //Get main path and files inside
+        mainPath = getMainPath();
+        mainDir = new File(mainPath);
 
-            //Save paths of all files in the current dir
-            mainFiles = mainDir.listFiles();
-            for (File file :
-                    mainFiles) {
-                mainCategoriesPaths.add(file.getAbsolutePath());
-            }
 
-            //add category names to mainCategories mainList
-            for (int i = 0; i < mainFiles.length; i++) {
-                String category = mainCategoriesPaths.get(i).substring(mainCategoriesPaths.get(i)
-                        .lastIndexOf("/") + 1);
-                mainCategories.add(category);
-            }
+        //Save paths of all files in the current dir
+        mainFiles = mainDir.listFiles();
+        for (File file :
+                mainFiles) {
+            mainCategoriesPaths.add(file.getAbsolutePath());
+        }
 
+        //add category names to mainCategories mainList
+        for (int i = 0; i < mainFiles.length; i++) {
+            String category = mainCategoriesPaths.get(i).substring(mainCategoriesPaths.get(i)
+                    .lastIndexOf("/") + 1);
+            mainCategories.add(category);
         }
 
 
@@ -97,6 +91,18 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public static String getMainPath() {
+        //Check if card is mount
+        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        if (!cardMount) {
+            Log.e("WARNING: ", "No sd card");
+            return "Card not found";
+        } else {//Card is mount
+            return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
+        }
     }
 
 }
