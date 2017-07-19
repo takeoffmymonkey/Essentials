@@ -22,21 +22,21 @@ import java.util.List;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private Context _context;
-    private List<String> _listDataHeader; // header titles
+    private Context context;
+    private List<String> listDataHeader; // header titles
     // child data in format of header title, child title
-    private HashMap<String, String> _listDataChild;
+    private HashMap<String, String> listDataChild;
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, String> listChildData) {
-        this._context = context;
-        this._listDataHeader = listDataHeader;
-        this._listDataChild = listChildData;
+        this.context = context;
+        this.listDataHeader = listDataHeader;
+        this.listDataChild = listChildData;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this._listDataChild.get(this._listDataHeader.get(groupPosition));
+        return this.listDataChild.get(this.listDataHeader.get(groupPosition));
     }
 
     @Override
@@ -52,27 +52,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         final String childText = (String) getChild(groupPosition, childPosition);
 
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this._context
+            LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.sub_list_item, null);
         }
 
         WebView webView = (WebView) convertView.findViewById(R.id.sub_list_web_view);
 
-        //This is sdcard0
-        //Access to secondary storage is available through getExternalFilesDirs(String),
-        //getExternalCacheDirs(), and getExternalMediaDirs().
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Log.e("WARNING: ", "No sd card");
-        } else {
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                    "Essentials/CS/const.htm");
-            if (file.exists()) {
-                webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
-                        + "/Essentials/CS/const.htm");
-            } else Log.e("WARNING: ", "File not found");
 
-        }
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
+                "Essentials/CS/const.htm");
+        if (file.exists()) {
+            webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
+                    + "/Essentials/CS/const.htm");
+        } else Log.e("WARNING: ", "File not found");
 
 
         //Text size and zoomable
@@ -91,12 +84,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getGroup(int groupPosition) {
-        return this._listDataHeader.get(groupPosition);
+        return this.listDataHeader.get(groupPosition);
     }
 
     @Override
     public int getGroupCount() {
-        return this._listDataHeader.size();
+        return this.listDataHeader.size();
     }
 
     @Override
@@ -109,7 +102,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                              View convertView, ViewGroup parent) {
         String headerTitle = (String) getGroup(groupPosition);
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this._context
+            LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.sub_list_group, null);
         }

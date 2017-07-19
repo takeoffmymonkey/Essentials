@@ -95,9 +95,9 @@ public class SubActivity extends AppCompatActivity {
         for (int i = 0; i < foldersTemp.size(); i++) {
             //Get folder name
             String folderPath = foldersTemp.get(i).getAbsolutePath();
-            Log.e ("WARNING: ", "folderPath: " + folderPath);
+            Log.e("WARNING: ", "folderPath: " + folderPath);
             String folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
-            Log.e ("WARNING: ", "folderName: " + folderName);
+            Log.e("WARNING: ", "folderName: " + folderName);
             //Search for it in file names
             boolean found = false;
             for (int a = 0; a < subQuestionsNames.size(); a++) {
@@ -149,14 +149,9 @@ public class SubActivity extends AppCompatActivity {
         });
 
 
-        //Make expandable list
+        //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
-
-        //Prepare list data
         prepareListData();
-
-
-        //Set adapter
         subExpListAdapter = new ExpandableListAdapter(this, listDataHeader, listDataChild);
         subExpList.setAdapter(subExpListAdapter);
 
