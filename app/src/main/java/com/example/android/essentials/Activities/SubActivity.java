@@ -3,7 +3,6 @@ package com.example.android.essentials.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,9 +11,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -25,15 +26,14 @@ public class SubActivity extends AppCompatActivity {
     File subDir;
     String subActivityName;
     File[] subAllFiles;
-    File[] subFolders;
-    File[] subFiles;
-    ArrayList<String> subCategoriesNames;
-    ArrayList<String> subQuestionsNames;
+    ArrayList<String> subCategoriesNames = new ArrayList<String>();
+    ArrayList<String> subQuestionsNames = new ArrayList<String>();
+    final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
     final ArrayList<String> subQuestionPaths = new ArrayList<String>();
     ListView subList;
     ExpandableListView subExpList;
     ExpandableListAdapter subExpListAdapter;
-    ArrayList<Question> questions;
+    ArrayList<Question> questions = new ArrayList<Question>();
 
 
     @Override
@@ -44,10 +44,9 @@ public class SubActivity extends AppCompatActivity {
 
         //Get subActivity path
         subPath = getIntent().getStringExtra("subPath");
-        Log.e("WARNING: ", "subPath: " + subPath);
 
 
-        //Set activity name
+        //Set subActivity name
         subActivityName = subPath.substring(subPath.lastIndexOf("/") + 1);
         setTitle(subActivityName);
 
@@ -56,29 +55,21 @@ public class SubActivity extends AppCompatActivity {
         subRelativePath = subPath.substring(MainActivity.mainPath.length() + 1);
 
 
-        //Names and paths of current dir's categories and questions
-        subCategoriesNames = new ArrayList<String>();
-        subQuestionsNames = new ArrayList<String>();
-        final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
-
-
         //Get dir file, get all its files and folders
         subDir = new File(subPath);
         subAllFiles = subDir.listFiles();
 
 
         //Separate files from folders and store files' paths and names (not folders' yet)
-        ArrayList<File> filesTemp = new ArrayList<File>();
         ArrayList<File> foldersTemp = new ArrayList<File>();
-        for (int i = 0; i < subAllFiles.length; i++) {
-            if (subAllFiles[i].isDirectory()) { //file is a folder
-                foldersTemp.add(subAllFiles[i]);
+        for (File file :
+                subAllFiles) {
+            if (file.isDirectory()) { //file is a folder
+                foldersTemp.add(file);
             } else { // file is a file... yep
-                filesTemp.add(subAllFiles[i]);
-                //store its path
-                String path = subAllFiles[i].getAbsolutePath();
+                //store its path and name (question)
+                String path = file.getAbsolutePath();
                 subQuestionPaths.add(path);
-                //store its name as name of question
                 String question = path.substring(path.lastIndexOf("/") + 1);
                 question = question.substring(0, question.indexOf('.'));
                 subQuestionsNames.add(question);
@@ -90,9 +81,7 @@ public class SubActivity extends AppCompatActivity {
         for (int i = 0; i < foldersTemp.size(); i++) {
             //Get folder name
             String folderPath = foldersTemp.get(i).getAbsolutePath();
-            Log.e("WARNING: ", "folderPath: " + folderPath);
             String folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
-            Log.e("WARNING: ", "folderName: " + folderName);
             //Search for it in file names
             boolean found = false;
             for (int a = 0; a < subQuestionsNames.size(); a++) {
@@ -107,20 +96,6 @@ public class SubActivity extends AppCompatActivity {
                 //store its name as name of category
                 subCategoriesNames.add(folderName);
             }
-        }
-
-
-        //Move temp files and folders array lists to arrays
-        // TODO: 019 19 Jul 17 why do i do this?
-        int foldersSize = foldersTemp.size();
-        subFolders = new File[foldersSize];
-        for (int i = 0; i < foldersSize; i++) {
-            subFolders[i] = foldersTemp.get(i);
-        }
-        int filesSize = filesTemp.size();
-        subFiles = new File[filesSize];
-        for (int i = 0; i < filesSize; i++) {
-            subFiles[i] = filesTemp.get(i);
         }
 
 
@@ -169,7 +144,6 @@ public class SubActivity extends AppCompatActivity {
     /*Menu options*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.main_menu_search:
                 return true;
@@ -183,8 +157,6 @@ public class SubActivity extends AppCompatActivity {
 
     /*Prepare questions for adapter*/
     private void prepareListData() {
-        questions = new ArrayList<Question>();
-
         for (int i = 0; i < subQuestionsNames.size(); i++) {
             questions.add(new Question(subQuestionsNames.get(i), subQuestionPaths.get(i)));
         }
