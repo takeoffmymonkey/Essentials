@@ -13,10 +13,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
-
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
-
 import java.util.ArrayList;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -25,59 +23,42 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private ArrayList<Question> questions;
 
 
-/*    private List<String> listDataHeader; // header titles
-    // child data in format of header title, child title
-    private HashMap<String, String> listDataChild;
-
-    public ExpandableListAdapter(Context context, List<String> listDataHeader,
-                                 HashMap<String, String> listChildData) {
-        this.context = context;
-        this.listDataHeader = listDataHeader;
-        this.listDataChild = listChildData;
-    }*/
-
-
     public ExpandableListAdapter(Context context, ArrayList<Question> questions) {
         this.context = context;
         this.questions = questions;
     }
+
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
         return questions.get(groupPosition);
     }
 
+
     @Override
     public long getChildId(int groupPosition, int childPosition) {
         return childPosition;
     }
 
+
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-
+        //Get current question's path
         final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
 
+        //For new view
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this.context
+            LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.sub_list_item, null);
+            convertView = inflater.inflate(R.layout.sub_list_item, null);
         }
 
+
+        //Make webview and load url
         WebView webView = (WebView) convertView.findViewById(R.id.sub_list_web_view);
-
         webView.loadUrl("file://" + path);
-
-
-/*
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                "Essentials/CS/const.htm");
-        if (file.exists()) {
-            webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
-                    + "/Essentials/CS/const.htm");
-        } else Log.e("WARNING: ", "File not found");
-*/
 
 
         //Text size and zoomable
@@ -86,57 +67,68 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
 
+
         return convertView;
     }
+
 
     @Override
     public int getChildrenCount(int groupPosition) {
         return 1;
     }
 
+
     @Override
     public Object getGroup(int groupPosition) {
         return questions.get(groupPosition);
     }
+
 
     @Override
     public int getGroupCount() {
         return questions.size();
     }
 
+
     @Override
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
 
+
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
 
-
-        String headerTitle = ((Question) getGroup(groupPosition)).getQuestion();
-
+        //If view is empty
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this.context
+            LayoutInflater infalInflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.sub_list_group, null);
         }
 
-        TextView lblListHeader = (TextView) convertView
+
+        //Set title of header
+        String headerTitle = ((Question) getGroup(groupPosition)).getQuestion();
+        TextView headerTextView = (TextView) convertView
                 .findViewById(R.id.sub_list_header);
-        lblListHeader.setTypeface(null, Typeface.BOLD);
-        lblListHeader.setText(headerTitle);
+        headerTextView.setTypeface(null, Typeface.BOLD);
+        headerTextView.setText(headerTitle);
+
 
         return convertView;
     }
+
 
     @Override
     public boolean hasStableIds() {
         return false;
     }
 
+
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
+
 }
