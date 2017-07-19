@@ -24,7 +24,10 @@ public class SubActivity extends AppCompatActivity {
     File subDir;
     String subActivityName;
 
+    File[] subAllFiles;
+    File[] subFolders;
     File[] subFiles;
+
     ArrayList<String> subCategories;
 
     ListView subList;
@@ -42,7 +45,7 @@ public class SubActivity extends AppCompatActivity {
 
         //Get subActivity path
         subPath = getIntent().getStringExtra("subPath");
-        Log.e ("WARNING: ", "subPath: " + subPath);
+        Log.e("WARNING: ", "subPath: " + subPath);
 
         //Set activity name
         subActivityName = subPath.substring(subPath.lastIndexOf("/") + 1);
@@ -54,18 +57,26 @@ public class SubActivity extends AppCompatActivity {
         final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
 
 
-        //Save paths of all files in the current dir
+        //Get dir file, get all its files and folders
         subDir = new File(subPath);
-        subFiles = subDir.listFiles();
-        for (int i = 0; i < subFiles.length; i++) {
-            subCategoriesPaths.add(subFiles[i].getAbsolutePath());
-        }
+        subAllFiles = subDir.listFiles();
 
-        //add category names to mainCategories mainList
-        for (int i = 0; i < subFiles.length; i++) {
-            String category = subCategoriesPaths.get(i).substring(subCategoriesPaths.get(i)
-                    .lastIndexOf("/") + 1);
-            subCategories.add(category);
+
+        //Separate files from folders and get folders paths and categories names
+        ArrayList<File> filesTemp = new ArrayList<File>();
+        ArrayList<File> foldersTemp = new ArrayList<File>();
+        for (int i = 0; i < subAllFiles.length; i++) {
+            if (subAllFiles[i].isDirectory()) { //file is a folder
+                foldersTemp.add(subAllFiles[i]);
+                //store its path
+                subCategoriesPaths.add(subAllFiles[i].getAbsolutePath());
+                //store its name as name of category
+                String category = subCategoriesPaths.get(i).substring(subCategoriesPaths.get(i)
+                        .lastIndexOf("/") + 1);
+                subCategories.add(category);
+            } else { // file is a file... yep
+                filesTemp.add(subAllFiles[i]);
+            }
         }
 
 
