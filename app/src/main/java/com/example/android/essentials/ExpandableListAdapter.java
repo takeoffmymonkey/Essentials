@@ -6,8 +6,6 @@ package com.example.android.essentials;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +14,15 @@ import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private List<String> listDataHeader; // header titles
+    private ArrayList<Question> questions;
+
+
+/*    private List<String> listDataHeader; // header titles
     // child data in format of header title, child title
     private HashMap<String, String> listDataChild;
 
@@ -32,11 +31,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         this.listDataHeader = listDataHeader;
         this.listDataChild = listChildData;
+    }*/
+
+
+    public ExpandableListAdapter(Context context, ArrayList<Question> questions) {
+        this.context = context;
+        this.questions = questions;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this.listDataChild.get(this.listDataHeader.get(groupPosition));
+        return questions.get(groupPosition);
     }
 
     @Override
@@ -49,7 +54,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
 
-        final String childText = (String) getChild(groupPosition, childPosition);
+        final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
 
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.context
@@ -59,13 +64,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         WebView webView = (WebView) convertView.findViewById(R.id.sub_list_web_view);
 
+        webView.loadUrl("file://" + path);
 
+
+/*
         File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
                 "Essentials/CS/const.htm");
         if (file.exists()) {
             webView.loadUrl("file://" + Environment.getExternalStorageDirectory()
                     + "/Essentials/CS/const.htm");
         } else Log.e("WARNING: ", "File not found");
+*/
 
 
         //Text size and zoomable
@@ -84,12 +93,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getGroup(int groupPosition) {
-        return this.listDataHeader.get(groupPosition);
+        return questions.get(groupPosition);
     }
 
     @Override
     public int getGroupCount() {
-        return this.listDataHeader.size();
+        return questions.size();
     }
 
     @Override
@@ -100,7 +109,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
+
+
+        String headerTitle = ((Question) getGroup(groupPosition)).getQuestion();
+
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

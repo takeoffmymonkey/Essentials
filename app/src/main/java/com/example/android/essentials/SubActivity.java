@@ -33,11 +33,13 @@ public class SubActivity extends AppCompatActivity {
     ArrayList<String> subQuestionsNames;
 
 
+    final ArrayList<String> subQuestionPaths = new ArrayList<String>();
+
     ListView subList;
     ExpandableListView subExpList;
     ExpandableListAdapter subExpListAdapter;
     List<String> listDataHeader;
-    HashMap<String, String> listDataChild;
+    ArrayList<Question> questions;
 
 
     @Override
@@ -64,7 +66,6 @@ public class SubActivity extends AppCompatActivity {
         subCategoriesNames = new ArrayList<String>();
         subQuestionsNames = new ArrayList<String>();
         final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
-        final ArrayList<String> subQuestionPaths = new ArrayList<String>();
 
 
         //Get dir file, get all its files and folders
@@ -152,7 +153,7 @@ public class SubActivity extends AppCompatActivity {
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
         prepareListData();
-        subExpListAdapter = new ExpandableListAdapter(this, subQuestionsNames, listDataChild);
+        subExpListAdapter = new ExpandableListAdapter(this, questions);
         subExpList.setAdapter(subExpListAdapter);
 
 
@@ -188,10 +189,10 @@ public class SubActivity extends AppCompatActivity {
          * Preparing the list data
          */
     private void prepareListData() {
-        listDataChild = new HashMap<String, String>();
+        questions = new ArrayList<Question>();
 
         for (int i = 0; i < subQuestionsNames.size(); i++) {
-            listDataChild.put(subQuestionsNames.get(i), "child" + i);
+            questions.add(new Question(subQuestionsNames.get(i), subQuestionPaths.get(i)));
         }
     }
 
