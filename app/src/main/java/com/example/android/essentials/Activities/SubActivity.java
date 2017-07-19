@@ -3,6 +3,7 @@ package com.example.android.essentials.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,6 +14,7 @@ import android.widget.ExpandableListView;
 import android.widget.ListView;
 
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
+import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 public class SubActivity extends AppCompatActivity {
 
     String subPath;
+    String[] subPathArray;
     String subRelativePath;
     File subDir;
     String subActivityName;
@@ -32,7 +35,10 @@ public class SubActivity extends AppCompatActivity {
     final ArrayList<String> subQuestionPaths = new ArrayList<String>();
     ListView subList;
     ExpandableListView subExpList;
+    ExpandableListView subExpNav;
     ExpandableListAdapter subExpListAdapter;
+    ExpandableNavAdapter subExpNavAdapter;
+
     ArrayList<Question> questions = new ArrayList<Question>();
 
 
@@ -126,6 +132,15 @@ public class SubActivity extends AppCompatActivity {
         subExpList.setAdapter(subExpListAdapter);
 
 
+        //Make expandable navigator
+
+        subExpNav = (ExpandableListView) findViewById(R.id.sub_exp_navigate);
+        prepareNavData();
+
+        /*subExpNavAdapter = new ExpandableNavAdapter(this, questions);
+        subExpNav.setAdapter(subExpNavAdapter);
+*/
+
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -162,4 +177,15 @@ public class SubActivity extends AppCompatActivity {
         }
     }
 
+
+    /*Prepare navigation data for adapter*/
+    private void prepareNavData() {
+        String[] tempPath = subPath.split("/", -1);
+        subPathArray = new String[tempPath.length - 4];
+        for (int i = 3; i < (tempPath.length - 1); i++) {
+            subPathArray[i - 3] = tempPath[i];
+            Log.e("WARNING: ", subPathArray[i - 3]);
+        }
+
+    }
 }

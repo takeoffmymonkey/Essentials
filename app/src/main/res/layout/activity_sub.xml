@@ -7,6 +7,13 @@
     tools:context="com.example.android.essentials.Activities.SubActivity">
 
 
+    <ExpandableListView
+        android:id="@+id/sub_exp_navigate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </ExpandableListView>
+
     <ScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -15,77 +22,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TableLayout
+
+            <LinearLayout
+                android:id="@+id/sub_linear_layout"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp">
+                android:layout_height="wrap_content">
 
-                <TableRow>
+                <TextView
+                    android:id="@+id/navigate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Navigate:"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/navigate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Navigate:"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/level_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="Essentials" />
-
-                    <TextView
-                        android:id="@+id/level_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="/CS" />
-
-
-                    <TextView
-                        android:id="@+id/level_3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="/Technologies" />
-
-
-                    <TextView
-                        android:id="@+id/level_4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="/Java" />
-
-
-                    <TextView
-                        android:id="@+id/level_5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="/2 Язык" />
-
-
-                    <TextView
-                        android:id="@+id/level_6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="2dp"
-                        android:textSize="20sp"
-                        android:text="/Блок кода { } (составной оператор)" />
-
-                </TableRow>
-
-
-            </TableLayout>
+            </LinearLayout>
 
 
         </HorizontalScrollView>
