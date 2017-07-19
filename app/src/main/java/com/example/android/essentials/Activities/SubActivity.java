@@ -1,4 +1,4 @@
-package com.example.android.essentials;
+package com.example.android.essentials.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,11 +12,11 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
-
+import com.example.android.essentials.Adapters.ExpandableListAdapter;
+import com.example.android.essentials.Question;
+import com.example.android.essentials.R;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class SubActivity extends AppCompatActivity {
 
@@ -24,21 +24,15 @@ public class SubActivity extends AppCompatActivity {
     String subRelativePath;
     File subDir;
     String subActivityName;
-
     File[] subAllFiles;
     File[] subFolders;
     File[] subFiles;
-
     ArrayList<String> subCategoriesNames;
     ArrayList<String> subQuestionsNames;
-
-
     final ArrayList<String> subQuestionPaths = new ArrayList<String>();
-
     ListView subList;
     ExpandableListView subExpList;
     ExpandableListAdapter subExpListAdapter;
-    List<String> listDataHeader;
     ArrayList<Question> questions;
 
 
@@ -137,7 +131,7 @@ public class SubActivity extends AppCompatActivity {
         subList.setAdapter(adapter);
 
 
-        //Set clicklistener on it
+        //Set clicklistener on list
         subList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -163,6 +157,7 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
+    /*Create menu*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -171,6 +166,7 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
+    /*Menu options*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -185,9 +181,7 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
-    /*
-         * Preparing the list data
-         */
+    /*Prepare questions for adapter*/
     private void prepareListData() {
         questions = new ArrayList<Question>();
 
@@ -197,60 +191,3 @@ public class SubActivity extends AppCompatActivity {
     }
 
 }
-
-
-
-        /*// Listview Group click listener
-        subExpList.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v,
-                                        int groupPosition, long id) {
-                // Toast.makeText(getApplicationContext(),
-                // "Group Clicked " + listDataHeader.get(groupPosition),
-                // Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-
-        // Listview Group expanded listener
-        subExpList.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                Toast.makeText(getApplicationContext(),
-                        listDataHeader.get(groupPosition) + " Expanded",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Listview Group collasped listener
-        subExpList.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
-
-            @Override
-            public void onGroupCollapse(int groupPosition) {
-                Toast.makeText(getApplicationContext(),
-                        listDataHeader.get(groupPosition) + " Collapsed",
-                        Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
-        // Listview on child click listener
-        subExpList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
-                // TODO Auto-generated method stub
-                Toast.makeText(
-                        getApplicationContext(),
-                        listDataHeader.get(groupPosition)
-                                + " : "
-                                + listDataChild.get(
-                                listDataHeader.get(groupPosition)).get(
-                                childPosition), Toast.LENGTH_SHORT)
-                        .show();
-                return false;
-            }
-        });*/

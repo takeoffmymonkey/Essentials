@@ -1,4 +1,4 @@
-package com.example.android.essentials;
+package com.example.android.essentials.Adapters;
 
 /**
  * Created by takeoff on 018 18 Jul 17.
@@ -13,6 +13,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+import com.example.android.essentials.Question;
+import com.example.android.essentials.R;
 
 import java.util.ArrayList;
 

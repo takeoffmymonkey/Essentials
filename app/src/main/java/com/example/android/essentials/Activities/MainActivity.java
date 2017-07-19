@@ -1,4 +1,4 @@
-package com.example.android.essentials;
+package com.example.android.essentials.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +13,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.android.essentials.R;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -22,22 +24,13 @@ public class MainActivity extends AppCompatActivity {
     File mainDir;
     ListView mainList;
     File[] mainFiles;
-    ArrayList<String> mainCategories;
+    ArrayList<String> mainCategories = new ArrayList<String>();
+    final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        mainList = (ListView) findViewById(R.id.main_list);
-
-
-        //Arrays for current dir category names and their paths
-        mainCategories = new ArrayList<String>();
-        final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
 
 
         //Check if card is mount
@@ -47,13 +40,13 @@ public class MainActivity extends AppCompatActivity {
         } else {//Card is mount
             //Store global path and folder file
             mainPath = Environment.getExternalStorageDirectory().getPath() + "/Essentials";
-            Log.e ("WARNING: ", "mainPath: " + mainPath);
             mainDir = new File(mainPath);
 
             //Save paths of all files in the current dir
             mainFiles = mainDir.listFiles();
-            for (int i = 0; i < mainFiles.length; i++) {
-                mainCategoriesPaths.add(mainFiles[i].getAbsolutePath());
+            for (File file :
+                    mainFiles) {
+                mainCategoriesPaths.add(file.getAbsolutePath());
             }
 
             //add category names to mainCategories mainList
@@ -66,13 +59,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        //Set array adapter
+        //Make list and set array adapter
+        mainList = (ListView) findViewById(R.id.main_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
                 R.id.main_list_item_text, mainCategories);
         mainList.setAdapter(adapter);
 
 
-        //Set clicklistener
+        //Set clicklistener on list
         mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -86,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /*Create menu*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -94,9 +89,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /*Menu options*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.main_menu_search:
                 return true;
