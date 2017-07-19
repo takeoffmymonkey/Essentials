@@ -21,6 +21,7 @@ import java.util.List;
 public class SubActivity extends AppCompatActivity {
 
     String subPath;
+    String subRelativePath;
     File subDir;
     String subActivityName;
 
@@ -47,9 +48,14 @@ public class SubActivity extends AppCompatActivity {
         subPath = getIntent().getStringExtra("subPath");
         Log.e("WARNING: ", "subPath: " + subPath);
 
+
         //Set activity name
         subActivityName = subPath.substring(subPath.lastIndexOf("/") + 1);
         setTitle(subActivityName);
+
+
+        //Get relative path
+        subRelativePath = subPath.substring(MainActivity.mainPath.length() + 1);
 
 
         //Arrays for current dir category names and their paths
@@ -77,6 +83,20 @@ public class SubActivity extends AppCompatActivity {
             } else { // file is a file... yep
                 filesTemp.add(subAllFiles[i]);
             }
+        }
+
+
+        //Move temp files and folders array lists to arrays
+        // TODO: 019 19 Jul 17 why do i do this?
+        int foldersSize = foldersTemp.size();
+        subFolders = new File[foldersSize];
+        for (int i = 0; i < foldersSize; i++) {
+            subFolders[i] = foldersTemp.get(i);
+        }
+        int filesSize = filesTemp.size();
+        subFiles = new File[filesSize];
+        for (int i = 0; i < filesSize; i++) {
+            subFiles[i] = filesTemp.get(i);
         }
 
 

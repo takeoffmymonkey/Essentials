@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    String mainPath;
+    static String mainPath;
     File mainDir;
     ListView mainList;
     File[] mainFiles;
