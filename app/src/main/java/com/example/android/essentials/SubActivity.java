@@ -29,7 +29,9 @@ public class SubActivity extends AppCompatActivity {
     File[] subFolders;
     File[] subFiles;
 
-    ArrayList<String> subCategories;
+    ArrayList<String> subCategoriesNames;
+    ArrayList<String> subQuestionsNames;
+
 
     ListView subList;
     ExpandableListView subExpList;
@@ -58,9 +60,11 @@ public class SubActivity extends AppCompatActivity {
         subRelativePath = subPath.substring(MainActivity.mainPath.length() + 1);
 
 
-        //Arrays for current dir category names and their paths
-        subCategories = new ArrayList<String>();
+        //Names and paths of current dir's categories and questions
+        subCategoriesNames = new ArrayList<String>();
+        subQuestionsNames = new ArrayList<String>();
         final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
+        final ArrayList<String> subQuestionPaths = new ArrayList<String>();
 
 
         //Get dir file, get all its files and folders
@@ -68,20 +72,45 @@ public class SubActivity extends AppCompatActivity {
         subAllFiles = subDir.listFiles();
 
 
-        //Separate files from folders and get folders paths and categories names
+        //Separate files from folders and store files' paths and names (not folders' yet)
         ArrayList<File> filesTemp = new ArrayList<File>();
         ArrayList<File> foldersTemp = new ArrayList<File>();
         for (int i = 0; i < subAllFiles.length; i++) {
             if (subAllFiles[i].isDirectory()) { //file is a folder
                 foldersTemp.add(subAllFiles[i]);
-                //store its path
-                subCategoriesPaths.add(subAllFiles[i].getAbsolutePath());
-                //store its name as name of category
-                String category = subCategoriesPaths.get(i).substring(subCategoriesPaths.get(i)
-                        .lastIndexOf("/") + 1);
-                subCategories.add(category);
             } else { // file is a file... yep
                 filesTemp.add(subAllFiles[i]);
+                //store its path
+                String path = subAllFiles[i].getAbsolutePath();
+                subQuestionPaths.add(path);
+                //store its name as name of question
+                String question = path.substring(path.lastIndexOf("/") + 1);
+                question = question.substring(0, question.indexOf('.'));
+                subQuestionsNames.add(question);
+            }
+        }
+
+
+        //Now store folders paths and names if it is not named as %file%.files
+        for (int i = 0; i < foldersTemp.size(); i++) {
+            //Get folder name
+            String folderPath = foldersTemp.get(i).getAbsolutePath();
+            Log.e ("WARNING: ", "folderPath: " + folderPath);
+            String folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+            Log.e ("WARNING: ", "folderName: " + folderName);
+            //Search for it in file names
+            boolean found = false;
+            for (int a = 0; a < subQuestionsNames.size(); a++) {
+                if (folderName.equals(subQuestionsNames.get(a) + ".files")) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {//name was not found
+                //store its path
+                subCategoriesPaths.add(folderPath);
+                //store its name as name of category
+                subCategoriesNames.add(folderName);
             }
         }
 
@@ -103,7 +132,7 @@ public class SubActivity extends AppCompatActivity {
         //Make list and set array adapter
         subList = (ListView) findViewById(R.id.sub_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
-                R.id.main_list_item_text, subCategories);
+                R.id.main_list_item_text, subCategoriesNames);
         subList.setAdapter(adapter);
 
 
