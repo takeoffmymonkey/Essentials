@@ -94,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
         //if this searchable activity is the current activity
         ComponentName componentName = new ComponentName(this, SearchableActivity.class);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
+        searchView.setSubmitButtonEnabled(true);
+/*        searchView.setQueryRefinementEnabled(true);
+        searchView.setIconifiedByDefault(false);*/
 
         return true;
     }
