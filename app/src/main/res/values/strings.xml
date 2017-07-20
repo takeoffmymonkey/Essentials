@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Essentials</string>
+    <string name="action_search">Search</string>
+    <string name="action_search_hint">Search for topic or question</string>
 </resources>

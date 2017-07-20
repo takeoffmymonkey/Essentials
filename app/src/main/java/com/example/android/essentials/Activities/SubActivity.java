@@ -170,7 +170,7 @@ public class SubActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.main_menu_search:
+            case R.id.action_search:
                 return true;
             case android.R.id.home:
                 this.finish();
