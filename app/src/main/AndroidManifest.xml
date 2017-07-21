@@ -40,6 +40,10 @@
                 android:resource="@xml/searchable" />
         </activity>
 
+        <provider
+            android:name=".EssentialsContentProvider"
+            android:authorities="com.example.android.essentials"
+            android:exported="false" />
 
     </application>
 

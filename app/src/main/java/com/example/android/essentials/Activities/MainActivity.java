@@ -2,18 +2,14 @@ package com.example.android.essentials.Activities;
 
 import android.app.SearchManager;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.UserDictionary;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.android.essentials.EssentialsContract;
 import com.example.android.essentials.R;
 import com.example.android.essentials.SearchableActivity;
 
@@ -87,7 +84,28 @@ public class MainActivity extends AppCompatActivity {
 
         //==================================================
 
-        ContentValues mNewValues = new ContentValues();
+
+        Cursor mCursor = getContentResolver().query(
+                EssentialsContract.QuestionEntry.CONTENT_URI,  // The content URI of the words table
+                null,                       // The columns to return for each row
+                null,                   // Either null, or the word the user entered
+                null,                    // Either empty, or the string the user entered
+                null);                       // The sort order for the returned rows
+
+
+        if (null == mCursor) {
+
+            Log.e("WARNING: ", "cursor is null");
+            // If the Cursor is empty, the provider found no matches
+        } else if (mCursor.getCount() < 1) {
+            Toast.makeText(this, "nothing is found", Toast.LENGTH_SHORT).show();
+
+        } else {
+            // Insert code here to do something with the results
+            Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
+
+
+    /*    ContentValues mNewValues = new ContentValues();
         mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
         mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
         mNewValues.put(UserDictionary.Words.WORD, "insert");
@@ -97,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
                 mNewValues                          // the values to insert
         );
+
+        Toast.makeText(this, "Returned Uri: " + mNewUri.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "ID: " + ContentUris.parseId(mNewUri), Toast.LENGTH_SHORT).show();
 
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
@@ -109,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         // Does a query against the table and returns a Cursor object
         Cursor mCursor = getContentResolver().query(
                 UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
-                null,                       // The columns to return for each row
+                mProjection,                       // The columns to return for each row
                 null,                   // Either null, or the word the user entered
                 null,                    // Either empty, or the string the user entered
                 null);                       // The sort order for the returned rows
@@ -125,9 +146,10 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Insert code here to do something with the results
             Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
+        }*/
+
+
         }
-
-
     }
 
 
