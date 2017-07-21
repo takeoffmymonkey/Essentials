@@ -2,9 +2,11 @@ package com.example.android.essentials.Activities;
 
 import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.UserDictionary;
@@ -85,6 +87,17 @@ public class MainActivity extends AppCompatActivity {
 
         //==================================================
 
+        ContentValues mNewValues = new ContentValues();
+        mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+        mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
+        mNewValues.put(UserDictionary.Words.WORD, "insert");
+        mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+        Uri mNewUri = getContentResolver().insert(
+                UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
+                mNewValues                          // the values to insert
+        );
+
         // A "projection" defines the columns that will be returned for each row
         String[] mProjection =
                 {
@@ -111,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             // Insert code here to do something with the results
-            Toast.makeText(this, "Cursor has items", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
         }
 
 
