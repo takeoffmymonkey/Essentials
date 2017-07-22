@@ -1,13 +1,17 @@
 package com.example.android.essentials.Activities;
 
+import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -20,14 +24,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.android.essentials.EssentialsContract;
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.R;
 import com.example.android.essentials.SearchableActivity;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+import static com.example.android.essentials.EssentialsContract.QuestionEntry.CONTENT_URI;
+
+public class MainActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     String mainPath;
     File mainDir;
@@ -35,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
     File[] mainFiles;
     ArrayList<String> mainCategories = new ArrayList<String>();
     final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
+
+    private static final int QUESTION_LOADER = 0;
+
+    SimpleCursorAdapter tempAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,10 +94,30 @@ public class MainActivity extends AppCompatActivity {
 
 
         //==================================================
-
-
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(QUESTION_LOADER, null, this);
+        ListView tempList = (ListView) findViewById(R.id.main_temp_list);
         Cursor mCursor = getContentResolver().query(
-                EssentialsContract.QuestionEntry.CONTENT_URI,  // The content URI of the words table
+                CONTENT_URI,  // The content URI of the words table
+                null,
+                null,                   // Either null, or the word the user entered
+                null,                    // Either empty, or the string the user entered
+                null);
+
+        tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.activity_main,
+                mCursor,
+                new String[]{QuestionEntry.COLUMN_QUESTION},
+                new int[]{R.id.main_list_item_text},
+                0
+        );
+
+        tempList.setAdapter(tempAdapter);
+
+        //==============================================
+        /*Cursor mCursor = getContentResolver().query(
+                CONTENT_URI,  // The content URI of the words table
                 null,                       // The columns to return for each row
                 null,                   // Either null, or the word the user entered
                 null,                    // Either empty, or the string the user entered
@@ -94,62 +125,14 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (null == mCursor) {
-
             Log.e("WARNING: ", "cursor is null");
-            // If the Cursor is empty, the provider found no matches
-        } else if (mCursor.getCount() < 1) {
+        } else if (mCursor.getCount() < 1) {//Cursor is empty, no matches
             Toast.makeText(this, "nothing is found", Toast.LENGTH_SHORT).show();
-
-        } else {
-            // Insert code here to do something with the results
-            Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
-
-
-    /*    ContentValues mNewValues = new ContentValues();
-        mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
-        mNewValues.put(UserDictionary.Words.LOCALE, "en_US");
-        mNewValues.put(UserDictionary.Words.WORD, "insert");
-        mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
-
-        Uri mNewUri = getContentResolver().insert(
-                UserDictionary.Words.CONTENT_URI,   // the user dictionary content URI
-                mNewValues                          // the values to insert
-        );
-
-        Toast.makeText(this, "Returned Uri: " + mNewUri.toString(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(this, "ID: " + ContentUris.parseId(mNewUri), Toast.LENGTH_SHORT).show();
-
-        // A "projection" defines the columns that will be returned for each row
-        String[] mProjection =
-                {
-                        UserDictionary.Words._ID,    // Contract class constant for the _ID column name
-                        UserDictionary.Words.WORD,   // Contract class constant for the word column name
-                        UserDictionary.Words.LOCALE  // Contract class constant for the locale column name
-                };
-
-        // Does a query against the table and returns a Cursor object
-        Cursor mCursor = getContentResolver().query(
-                UserDictionary.Words.CONTENT_URI,  // The content URI of the words table
-                mProjection,                       // The columns to return for each row
-                null,                   // Either null, or the word the user entered
-                null,                    // Either empty, or the string the user entered
-                null);                       // The sort order for the returned rows
-
-        // Some providers return null if an error occurs, others throw an exception
-        if (null == mCursor) {
-
-            Log.e("WARNING: ", "cursor is null");
-            // If the Cursor is empty, the provider found no matches
-        } else if (mCursor.getCount() < 1) {
-            Toast.makeText(this, "nothing is found", Toast.LENGTH_SHORT).show();
-
-        } else {
-            // Insert code here to do something with the results
+        } else {//Found results
             Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
         }*/
 
 
-        }
     }
 
 
@@ -197,4 +180,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Define a projection that specifies the columns from the table we care about.
+
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,   // Parent activity context
+                QuestionEntry.CONTENT_URI,   // Provider content URI to query
+                null,             // Columns to include in the resulting Cursor
+                null,                   // No selection clause
+                null,                   // No selection arguments
+                null);                  // Default sort order
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        tempAdapter.swapCursor(data);
+        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        tempAdapter.swapCursor(null);
+    }
 }

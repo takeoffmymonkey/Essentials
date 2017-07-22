@@ -108,7 +108,7 @@ public class EssentialsContentProvider extends ContentProvider {
                 break;
             case QUESTION_ID:
                 //Single row - extract ID from the URI and perform a query
-                selection = QuestionEntry._ID + "=?";
+                selection = QuestionEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
                 cursor = database.query(QuestionEntry.TABLE_NAME,
                         projection,

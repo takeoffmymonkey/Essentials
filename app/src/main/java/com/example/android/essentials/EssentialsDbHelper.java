@@ -28,7 +28,7 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
 
         // Create a String that contains the SQL statement to create the pets table
         String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + QuestionEntry.TABLE_NAME + " ("
-                + QuestionEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + QuestionEntry.COLUMN_QUESTION + " TEXT NOT NULL, "
                 + QuestionEntry.COLUMN_QUESTION_TAGS + " TEXT);";
 
