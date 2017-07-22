@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(QUESTION_LOADER, null, this);
+
         ListView tempList = (ListView) findViewById(R.id.main_temp_list);
         Cursor mCursor = getContentResolver().query(
                 CONTENT_URI,  // The content URI of the words table
@@ -106,12 +107,13 @@ public class MainActivity extends AppCompatActivity implements
                 null);
 
         tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
-                R.layout.activity_main,
+                R.layout.main_list_item,
                 mCursor,
                 new String[]{QuestionEntry.COLUMN_QUESTION},
                 new int[]{R.id.main_list_item_text},
                 0
         );
+
 
         tempList.setAdapter(tempAdapter);
 
