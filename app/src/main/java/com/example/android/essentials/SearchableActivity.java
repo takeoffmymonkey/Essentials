@@ -36,8 +36,15 @@ public class SearchableActivity extends AppCompatActivity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             TextView tv = (TextView) findViewById(R.id.search_query);
-            tv.setText(query);
 
+
+            Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
+            if (appData != null) {
+                String path = appData.getString("path");
+                tv.setText(path);
+            } else {
+                tv.setText(query);
+            }
             //doMySearch(query);
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             // Handle a suggestions click (because the suggestions all use ACTION_VIEW)

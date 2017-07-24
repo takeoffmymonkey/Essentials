@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)),true);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)),false);
                 return true;
             }
         });
@@ -186,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                Bundle appData = new Bundle();
+                appData.putString("path", "dasdadasdadasd"); // put extra data to Bundle
+                searchView.setAppSearchData(appData); // pass the search context data
                 return false;
             }
 
@@ -196,12 +199,6 @@ public class MainActivity extends AppCompatActivity implements
                 final String sa1 = "%"+newText+"%"; // contains an "A"
                 Cursor cursor = resolver.query(CONTENT_URI, projection, COLUMN_QUESTION + " LIKE ?",
                         new String[] { sa1 }, null);
-
-               /* Cursor cursor = db.query(LOG_TABLE_NAME,
-                        new String[]{LOG_VERSION_COLUMN},
-                        LOG_VERSION_COLUMN + "=?", new String[]{Integer.toString(version)},
-                        null, null, null);*/
-
 
                 tempAdapter.changeCursor(cursor);
                 return false;
