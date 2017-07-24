@@ -5,7 +5,6 @@
     android:searchSuggestAuthority="com.example.android.essentials"
     android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
     android:searchSuggestIntentAction="android.intent.action.VIEW"
-    android:searchSuggestSelection="word MATCH ?"
     android:includeInGlobalSearch = "true">
 
 </searchable>

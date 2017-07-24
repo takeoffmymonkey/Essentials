@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
             public boolean onSuggestionSelect(int position) {
-                return true;
+                return false;
             }
 
             @Override
@@ -177,8 +177,7 @@ public class MainActivity extends AppCompatActivity implements
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)),false);
-
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)),true);
                 return true;
             }
         });
@@ -192,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public boolean onQueryTextChange(String newText) {
-
                 final ContentResolver resolver = getContentResolver();
                 final String[] projection = {COLUMN_ID, COLUMN_QUESTION};
                 final String sa1 = "%"+newText+"%"; // contains an "A"
