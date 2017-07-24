@@ -32,8 +32,8 @@ public final class EssentialsContract {
 
         public final static String TABLE_NAME = "questions";
         public final static String COLUMN_ID = BaseColumns._ID;
-        public final static String COLUMN_QUESTION = "question";
-        public final static String COLUMN_QUESTION_TAGS = "tags";
+        public final static String COLUMN_QUESTION = "SUGGEST_COLUMN_TEXT_1";
+
 
 
         //The content URI to access the pet data in the provider

@@ -29,13 +29,12 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
         // Create a String that contains the SQL statement to create the pets table
         String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + QuestionEntry.TABLE_NAME + " ("
                 + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + QuestionEntry.COLUMN_QUESTION + " TEXT NOT NULL, "
-                + QuestionEntry.COLUMN_QUESTION_TAGS + " TEXT);";
+                + QuestionEntry.COLUMN_QUESTION + " TEXT NOT NULL);";
 
         // Execute the SQL statement
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
 
-        String[] temp = {"str", "fss"};
+        String[] temp = {"str", "fss", "fsdfs", "fsdfss", "ss"};
         for (String i : temp) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(QuestionEntry.COLUMN_QUESTION, i);

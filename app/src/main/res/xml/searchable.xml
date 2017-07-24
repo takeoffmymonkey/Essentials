@@ -2,6 +2,10 @@
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:hint="@string/action_search_hint"
     android:label="@string/app_name"
-    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer">
+    android:searchSuggestAuthority="com.example.android.essentials"
+    android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
+    android:searchSuggestIntentAction="android.intent.action.VIEW"
+    android:searchSuggestSelection="word MATCH ?"
+    android:includeInGlobalSearch = "true">
 
 </searchable>

@@ -2,9 +2,11 @@ package com.example.android.essentials;
 
 import android.app.SearchManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
@@ -37,6 +39,14 @@ public class SearchableActivity extends AppCompatActivity {
             tv.setText(query);
 
             //doMySearch(query);
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+            Uri data = intent.getData();
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            TextView tv = (TextView) findViewById(R.id.search_query);
+            tv.setText(query);
+            Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
+            //showResult(data);
         }
     }
 }
