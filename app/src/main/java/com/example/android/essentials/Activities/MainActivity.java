@@ -32,8 +32,12 @@ import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
 import com.example.android.essentials.SearchableActivity;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_ID;
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_QUESTION;
@@ -227,6 +231,26 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static boolean syncTags(String currentPath) {
+
+        File file = new File(currentPath, "tags.txt");
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                Log.e("WARNING: ", line);
+                String[] separated = line.split(":");
+                String name = separated[0];
+                String[] tags = separated[1].split(",");
+                Log.e("WARNING: ", name);
+                Log.e("WARNING: ", Arrays.toString(tags));
+
+
+            }
+            br.close();
+        } catch (IOException e) {
+            //You'll need to add proper error handling here
+        }
 
 
         return true;
