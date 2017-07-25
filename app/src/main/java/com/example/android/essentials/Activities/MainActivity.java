@@ -230,33 +230,49 @@ public class MainActivity extends AppCompatActivity implements
 
     public boolean syncTags(String currentPath) {
 
-        File file = new File(currentPath, "tags.txt");
-        try {
-            //Put file into buffered reader
-            BufferedReader br = new BufferedReader(new FileReader(file));
+        File dir = new File(currentPath);
+        File tagsFile = new File(currentPath, "tags.txt");
 
-            //Parse each line
-            String line;
-            while ((line = br.readLine()) != null) {
-                //Separate file name from tags and create path of this file
-                String[] separated = line.split(":");
-                String name = separated[0].trim();
-                String tagPath = currentPath + "/" + name;
+        //add tags from tags.txt to tags table
+        if (tagsFile.exists()) {
+            try {
+                //Parse file by line
+                BufferedReader br = new BufferedReader(new FileReader(tagsFile));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    //Separate fileTags name from tags and create path of this fileTags
+                    String[] separated = line.split(":");
+                    String name = separated[0].trim();
+                    String tagPath = currentPath + "/" + name;
 
-                //Insert each tag into tags table and specify its file name
-                String[] tags = separated[1].split(",");
-                for (String tag : tags) {
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(TagEntry.COLUMN_PATH, tagPath);
-                    contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                    getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                    //Insert each tag into tags table and specify its fileTags name
+                    String[] tags = separated[2].split(",");
+                    for (String tag : tags) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                        contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                        getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                    }
                 }
+                br.close();
+            } catch (IOException e) {
+                //You'll need to add proper error handling here
             }
-            br.close();
-        } catch (IOException e) {
-            //You'll need to add proper error handling here
         }
 
+        //Go through all files in the dir
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                if (file.isDirectory()) {//This is a dir
+                    syncTags(currentPath + "/" + file.getName());
+                } else {//This is a file
+                    if (!file.getName().equalsIgnoreCase("tags")) {//This is a question file
+
+                    }
+                }
+            }
+        }
 
         return true;
     }
