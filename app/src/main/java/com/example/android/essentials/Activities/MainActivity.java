@@ -78,9 +78,9 @@ public class MainActivity extends AppCompatActivity implements
         sync("");
 
 
-        //TESTING TABLES===========================================
+        //For debuging
         testTagsTable();
-        testQuestionsTable("/CS/Technologies/Java/2 Язык");
+        testQuestionsTable("");
 
 
         //Save paths of all files in the current dir
@@ -117,30 +117,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-
-        //==================================================
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(TAG_LOADER, null, this);
-
-        ListView tempList = (ListView) findViewById(R.id.main_temp_list);
-        mCursor = getContentResolver().query(
-                TagEntry.CONTENT_URI,  // The content URI of the words table
-                null,
-                null,                   // Either null, or the word the user entered
-                null,                    // Either empty, or the string the user entered
-                null);
-
-        tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
-                R.layout.main_list_item,
-                mCursor,
-                new String[]{TagEntry.COLUMN_SUGGESTION},
-                new int[]{R.id.main_list_item_text},
-                0
-        );
-
-
-        tempList.setAdapter(tempAdapter);
+        prepareSuggestions();
 
 
     }
@@ -389,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+
     public static void testQuestionsTable(String relativePath) {
 
         Cursor c1 = db.query(pathToTableName(relativePath), null, null, null, null, null, null);
@@ -413,4 +391,28 @@ public class MainActivity extends AppCompatActivity implements
         Log.e("WARNING: ", "========================================================");
         c1.close();
     }
+
+
+    public void prepareSuggestions() {
+        // Prepare the loader.  Either re-connect with an existing one,
+        // or start a new one.
+        getLoaderManager().initLoader(TAG_LOADER, null, this);
+
+        mCursor = getContentResolver().query(
+                TagEntry.CONTENT_URI,  // The content URI of the words table
+                null,
+                null,                   // Either null, or the word the user entered
+                null,                    // Either empty, or the string the user entered
+                null);
+
+        tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.main_list_item,
+                mCursor,
+                new String[]{TagEntry.COLUMN_SUGGESTION},
+                new int[]{R.id.main_list_item_text},
+                0
+        );
+
+    }
+
 }
