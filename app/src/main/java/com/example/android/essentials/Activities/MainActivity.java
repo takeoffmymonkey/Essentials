@@ -78,16 +78,9 @@ public class MainActivity extends AppCompatActivity implements
         sync("");
 
 
-
-
-
-
         //TESTING TABLES===========================================
         testTagsTable();
         testQuestionsTable("/CS/Technologies/Java/2 Язык");
-
-
-
 
 
         //Save paths of all files in the current dir
@@ -247,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements
 
         Log.e("WARNING: ", relativePath);
 
-        String fullPath = mainPath + "/" + relativePath;
+        String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
         String table = null;
@@ -262,13 +255,13 @@ public class MainActivity extends AppCompatActivity implements
             for (File file : files) {
                 ContentValues contentValues = new ContentValues();
                 if (file.isDirectory()) {//This is a dir
-                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
                     contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
                     db.insert(table, null, contentValues);
                     sync(relativePath + "/" + file.getName());
                 } else {//This is a file
                     if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
-                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
                         db.insert(table, null, contentValues);
                     }
@@ -286,19 +279,22 @@ public class MainActivity extends AppCompatActivity implements
                     //Separate name, question and tags in fileTags and create path of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
-                    name = name.replaceAll("\uFEFF", "");
+                    name = name.replaceAll("\uFEFF", "").toLowerCase();
                     String tagPath = relativePath + "/" + name;
                     Log.e("WARNING: ", tagPath);
 
                     //Insert question if there is one
                     String question = separated[1].trim();
+                    Log.e ("WARNING: ", "QUESTION: " + question);
                     if (!question.equals("") && !question.isEmpty()) {//We have a question here
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                        db.update(table,
+                        int rows = db.update(table,
                                 contentValues,
                                 QuestionEntry.COLUMN_NAME + "=?",
                                 new String[]{name});
+                        Log.e ("WARNING: ", "searching for name: " + name);
+                        Log.e ("WARNING: ", "changed rows: " + rows);
                     }
 
                     //Insert each tag into tags table and specify its fileTags name
@@ -372,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoaderReset(Loader<Cursor> loader) {
         tempAdapter.swapCursor(null);
     }
-
 
 
     public static void testTagsTable() {
