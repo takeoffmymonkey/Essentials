@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -269,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements
 
         //Go through all files in the dir
         if (dir.exists()) {
+            pathToTableName(relativePath);
             File[] files = dir.listFiles();
             for (File file : files) {
                 if (file.isDirectory()) {//This is a dir
@@ -285,11 +287,20 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-/*    public static String convertTableName(String path) {
-        String convertedName = path.;
+    public static String pathToTableName(String relativePath) {
+        String[] locations = relativePath.split("/");
+        Log.e("WARNING: ", Arrays.toString(locations));
 
-        return convertedName;
-    }*/
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < locations.length; i++) {
+            sb.append(locations[i]);
+            if (i < locations.length - 1) {
+                sb.append("_");
+            }
+        }
+        Log.e ("WARNING: ", sb.toString());
+        return sb.toString();
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
