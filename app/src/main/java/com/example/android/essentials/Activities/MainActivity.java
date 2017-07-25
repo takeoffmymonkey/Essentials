@@ -28,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
@@ -270,7 +271,10 @@ public class MainActivity extends AppCompatActivity implements
 
         //Go through all files in the dir
         if (dir.exists()) {
-            pathToTableName(relativePath);
+            //Create a table for the current folder
+            createQuestionsTable(relativePath);
+
+            //Add all its content to the table
             File[] files = dir.listFiles();
             for (File file : files) {
                 if (file.isDirectory()) {//This is a dir
@@ -293,13 +297,25 @@ public class MainActivity extends AppCompatActivity implements
 
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
-            sb.append(locations[i]);
-            if (i < locations.length - 1) {
-                sb.append("_");
-            }
+            sb.append(locations[i].replaceAll(" ", "_"));
+            sb.append("_");
         }
-        Log.e ("WARNING: ", sb.toString());
+        sb.append("FILES");
+        Log.e("WARNING: ", sb.toString());
         return sb.toString();
+    }
+
+
+    public static void createQuestionsTable(String relativePath) {
+        String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + pathToTableName(relativePath) + " ("
+                + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
+                + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
+                + QuestionEntry.COLUMN_QUESTION + " TEXT, "
+                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
+                + QuestionEntry.COLUMN_TIME + " INTEGER);";
+        db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
+        Log.e("WARNING: ", "created table for path: " + relativePath);
     }
 
     @Override

@@ -18,13 +18,6 @@ public final class EssentialsContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 
-    /**
-     * Possible path (appended to base content URI for possible URI's)
-     * For instance, content://com.example.android.pets/pets/ is a valid path for
-     * looking at pet data. content://com.example.android.pets/staff/ will fail,
-     * as the ContentProvider hasn't been given any information on what to do with "staff".
-     */
-
     public static final String PATH_TAGS = "tags";
 
 
@@ -44,6 +37,17 @@ public final class EssentialsContract {
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
 
+
+    }
+
+
+    public static final class QuestionEntry implements BaseColumns {
+        public final static String COLUMN_ID = BaseColumns._ID;
+        public final static String COLUMN_NAME = "NAME";
+        public final static String COLUMN_FOLDER = "FOLDER";
+        public final static String COLUMN_QUESTION = "QUESTION";
+        public final static String COLUMN_LEVEL = "LEVEL";
+        public final static String COLUMN_TIME = "TIME";
 
     }
 
