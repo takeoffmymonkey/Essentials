@@ -124,22 +124,6 @@ public class MainActivity extends AppCompatActivity implements
 
         tempList.setAdapter(tempAdapter);
 
-        //==============================================
-        /*Cursor mCursor = getContentResolver().query(
-                CONTENT_URI,  // The content URI of the words table
-                null,                       // The columns to return for each row
-                null,                   // Either null, or the word the user entered
-                null,                    // Either empty, or the string the user entered
-                null);                       // The sort order for the returned rows
-
-
-        if (null == mCursor) {
-            Log.e("WARNING: ", "cursor is null");
-        } else if (mCursor.getCount() < 1) {//Cursor is empty, no matches
-            Toast.makeText(this, "nothing is found", Toast.LENGTH_SHORT).show();
-        } else {//Found results
-            Toast.makeText(this, "Cursor has " + mCursor.getCount() + " items", Toast.LENGTH_SHORT).show();
-        }*/
 
 
     }

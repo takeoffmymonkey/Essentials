@@ -44,6 +44,7 @@ public class EssentialsContentProvider extends ContentProvider {
         // The content URI of the form "content://com.example.android.pets/pets" will map to the
         // integer code {@link #PETS}. This URI is used to provide access to MULTIPLE rows
         // of the pets table.
+        //com.example.android.essentials questions
         sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
                 EssentialsContract.PATH_QUESTIONS, QUESTIONS);
 
