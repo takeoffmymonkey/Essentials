@@ -10,9 +10,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.example.android.essentials.EssentialsContract.QuestionEntry;
+
 import com.example.android.essentials.EssentialsContract.TagEntry;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
@@ -24,7 +25,6 @@ public class EssentialsContentProvider extends ContentProvider {
     /**
      * URI matcher code for the content URI for the questions table
      */
-    private static final int QUESTIONS = 100;
 
     private static final int TAGS = 200;
     private static final int TAG_ID = 201;
@@ -33,7 +33,7 @@ public class EssentialsContentProvider extends ContentProvider {
     /**
      * URI matcher code for the content URI for a single question in the questions table
      */
-    private static final int QUESTION_ID = 101;
+
 
 
     /**
@@ -53,8 +53,7 @@ public class EssentialsContentProvider extends ContentProvider {
         // integer code {@link #PETS}. This URI is used to provide access to MULTIPLE rows
         // of the pets table.
         //com.example.android.essentials questions
-        sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
-                EssentialsContract.PATH_QUESTIONS, QUESTIONS);
+
 
         sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
                 EssentialsContract.PATH_TAGS, TAGS);
@@ -67,8 +66,6 @@ public class EssentialsContentProvider extends ContentProvider {
         // In this case, the "#" wildcard is used where "#" can be substituted for an integer.
         // For example, "content://com.example.android.pets/pets/3" matches, but
         // "content://com.example.android.pets/pets" (without a number at the end) doesn't match.
-        sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
-                EssentialsContract.PATH_QUESTIONS + "/#", QUESTION_ID);
 
         sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
                 EssentialsContract.PATH_TAGS + "/#", TAG_ID);
@@ -93,10 +90,10 @@ public class EssentialsContentProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            case QUESTIONS:
-                return QuestionEntry.CONTENT_LIST_TYPE;
-            case QUESTION_ID:
-                return QuestionEntry.CONTENT_ITEM_TYPE;
+            case TAGS:
+                return TagEntry.CONTENT_LIST_TYPE;
+            case TAG_ID:
+                return TagEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
         }
@@ -112,9 +109,9 @@ public class EssentialsContentProvider extends ContentProvider {
         // Figure out if the URI matcher can match the URI to a specific code
         int match = sUriMatcher.match(uri);
         switch (match) {
-            case QUESTIONS:
+            case TAGS:
                 //Multiple rows - perform a query
-                cursor = db.query(QuestionEntry.TABLE_NAME,
+                cursor = db.query(TagEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -122,11 +119,11 @@ public class EssentialsContentProvider extends ContentProvider {
                         null,
                         sortOrder);
                 break;
-            case QUESTION_ID:
+            case TAG_ID:
                 //Single row - extract ID from the URI and perform a query
-                selection = QuestionEntry.COLUMN_ID + "=?";
+                selection = TagEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                cursor = db.query(QuestionEntry.TABLE_NAME,
+                cursor = db.query(TagEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,

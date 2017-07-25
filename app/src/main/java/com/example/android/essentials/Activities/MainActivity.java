@@ -28,7 +28,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
@@ -40,9 +39,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_ID;
-import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_QUESTION;
-import static com.example.android.essentials.EssentialsContract.QuestionEntry.CONTENT_URI;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -54,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements
     ArrayList<String> mainCategories = new ArrayList<String>();
     final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
 
-    private static final int QUESTION_LOADER = 0;
+    private static final int TAG_LOADER = 0;
 
     SimpleCursorAdapter tempAdapter;
 
@@ -77,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements
         mainPath = getMainPath();
         mainDir = new File(mainPath);
 
+        syncTags(mainPath);
 
         //Save paths of all files in the current dir
         mainFiles = mainDir.listFiles();
@@ -116,11 +113,11 @@ public class MainActivity extends AppCompatActivity implements
         //==================================================
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
-        getLoaderManager().initLoader(QUESTION_LOADER, null, this);
+        getLoaderManager().initLoader(TAG_LOADER, null, this);
 
         ListView tempList = (ListView) findViewById(R.id.main_temp_list);
         mCursor = getContentResolver().query(
-                CONTENT_URI,  // The content URI of the words table
+                TagEntry.CONTENT_URI,  // The content URI of the words table
                 null,
                 null,                   // Either null, or the word the user entered
                 null,                    // Either empty, or the string the user entered
@@ -129,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements
         tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
                 R.layout.main_list_item,
                 mCursor,
-                new String[]{COLUMN_QUESTION},
+                new String[]{TagEntry.COLUMN_SUGGESTION},
                 new int[]{R.id.main_list_item_text},
                 0
         );
@@ -172,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)), false);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_SUGGESTION)), false);
                 return true;
             }
         });
@@ -190,9 +187,9 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public boolean onQueryTextChange(String newText) {
                 final ContentResolver resolver = getContentResolver();
-                final String[] projection = {COLUMN_ID, COLUMN_QUESTION};
-                final String sa1 = "%" + newText + "%"; // contains an "A"
-                Cursor cursor = resolver.query(CONTENT_URI, projection, COLUMN_QUESTION + " LIKE ?",
+                final String[] projection = {TagEntry.COLUMN_ID, TagEntry.COLUMN_SUGGESTION};
+                final String sa1 = "%" + newText + "%";
+                Cursor cursor = resolver.query(TagEntry.CONTENT_URI, projection, TagEntry.COLUMN_SUGGESTION + " LIKE ?",
                         new String[]{sa1}, null);
 
                 tempAdapter.changeCursor(cursor);
@@ -271,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
-                QuestionEntry.CONTENT_URI,   // Provider content URI to query
+                TagEntry.CONTENT_URI,   // Provider content URI to query
                 null,             // Columns to include in the resulting Cursor
                 null,                   // No selection clause
                 null,                   // No selection arguments
