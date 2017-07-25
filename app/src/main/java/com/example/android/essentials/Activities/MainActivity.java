@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
 import com.example.android.essentials.SearchableActivity;
@@ -37,7 +39,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_ID;
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_QUESTION;
@@ -230,22 +231,29 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public static boolean syncTags(String currentPath) {
+    public boolean syncTags(String currentPath) {
 
         File file = new File(currentPath, "tags.txt");
-
         try {
+            //Put file into buffered reader
             BufferedReader br = new BufferedReader(new FileReader(file));
+
+            //Parse each line
             String line;
             while ((line = br.readLine()) != null) {
-                Log.e("WARNING: ", line);
+                //Separate file name from tags and create path of this file
                 String[] separated = line.split(":");
-                String name = separated[0];
+                String name = separated[0].trim();
+                String tagPath = currentPath + "/" + name;
+
+                //Insert each tag into tags table and specify its file name
                 String[] tags = separated[1].split(",");
-                Log.e("WARNING: ", name);
-                Log.e("WARNING: ", Arrays.toString(tags));
-
-
+                for (String tag : tags) {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                    contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                    getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                }
             }
             br.close();
         } catch (IOException e) {

@@ -5,13 +5,13 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import com.example.android.essentials.EssentialsContract.QuestionEntry;
-import com.example.android.essentials.EssentialsContract.TagEntry;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.TagEntry;
 
 import static com.example.android.essentials.Activities.MainActivity.db;
 
@@ -60,7 +60,6 @@ public class EssentialsContentProvider extends ContentProvider {
                 EssentialsContract.PATH_TAGS, TAGS);
 
 
-
         // The content URI of the form "content://com.example.android.pets/pets/#" will map to the
         // integer code {@link #PET_ID}. This URI is used to provide access to ONE single row
         // of the pets table.
@@ -76,8 +75,9 @@ public class EssentialsContentProvider extends ContentProvider {
     }
 
 
-
-    /** Database helper object */
+    /**
+     * Database helper object
+     */
     private EssentialsDbHelper mDbHelper;
 
 
@@ -125,7 +125,7 @@ public class EssentialsContentProvider extends ContentProvider {
             case QUESTION_ID:
                 //Single row - extract ID from the URI and perform a query
                 selection = QuestionEntry.COLUMN_ID + "=?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
                 cursor = db.query(QuestionEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -152,17 +152,23 @@ public class EssentialsContentProvider extends ContentProvider {
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
 
-        // Insert the new pet with the given values
-        long id = db.insert(TagEntry.TABLE_NAME, null, values);
-        // If the ID is -1, then the insertion failed. Log an error and return null.
-        if (id == -1) {
-            return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case TAGS:
+                // Insert the new pet with the given values
+                long id = db.insert(TagEntry.TABLE_NAME, null, values);
+                Log.e ("WARNING: ", Long.toString(id));
+                // If the ID is -1, then the insertion failed. Log an error and return null.
+                if (id == -1) {
+                    return null;
+                }
+                // Notify all listeners that the data has changed for the pet content URI
+                getContext().getContentResolver().notifyChange(uri, null);
+                // Return the new URI with the ID (of the newly inserted row) appended at the end
+                return ContentUris.withAppendedId(uri, id);
         }
-        // Notify all listeners that the data has changed for the pet content URI
-        getContext().getContentResolver().notifyChange(uri, null);
-        // Return the new URI with the ID (of the newly inserted row) appended at the end
-        return ContentUris.withAppendedId(uri, id);
 
+        return null;
     }
 
 
