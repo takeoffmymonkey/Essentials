@@ -11,6 +11,8 @@ import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import static com.example.android.essentials.Activities.MainActivity.db;
+
 /**
  * Created by takeoff on 021 21 Jul 17.
  */
@@ -91,7 +93,6 @@ public class EssentialsContentProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
 
-        SQLiteDatabase database = mDbHelper.getReadableDatabase();
         Cursor cursor;
 
         // Figure out if the URI matcher can match the URI to a specific code
@@ -99,7 +100,7 @@ public class EssentialsContentProvider extends ContentProvider {
         switch (match) {
             case QUESTIONS:
                 //Multiple rows - perform a query
-                cursor = database.query(QuestionEntry.TABLE_NAME,
+                cursor = db.query(QuestionEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -111,7 +112,7 @@ public class EssentialsContentProvider extends ContentProvider {
                 //Single row - extract ID from the URI and perform a query
                 selection = QuestionEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-                cursor = database.query(QuestionEntry.TABLE_NAME,
+                cursor = db.query(QuestionEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,

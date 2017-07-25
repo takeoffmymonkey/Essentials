@@ -175,6 +175,9 @@ public class SubActivity extends AppCompatActivity {
             case android.R.id.home:
                 this.finish();
                 return true;
+            case R.id.action_sync:
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

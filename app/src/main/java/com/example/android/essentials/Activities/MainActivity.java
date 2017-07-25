@@ -9,6 +9,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
@@ -27,13 +28,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
 import com.example.android.essentials.SearchableActivity;
 
 import java.io.File;
 import java.util.ArrayList;
 
-import static android.R.attr.version;
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_ID;
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.COLUMN_QUESTION;
 import static com.example.android.essentials.EssentialsContract.QuestionEntry.CONTENT_URI;
@@ -54,10 +55,17 @@ public class MainActivity extends AppCompatActivity implements
 
     Cursor mCursor;
 
+    public static SQLiteDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        //Create db
+        EssentialsDbHelper dbHelper = new EssentialsDbHelper(this);
+        db = dbHelper.getReadableDatabase();
 
 
         //Get main path and files inside
@@ -125,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements
         tempList.setAdapter(tempAdapter);
 
 
-
     }
 
 
@@ -139,8 +146,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        //Can be replaced with getComponentName()
-        //if this searchable activity is the current activity
+        //Can be replaced with getComponentName() if this searchable activity is the current activity
         ComponentName componentName = new ComponentName(this, SearchableActivity.class);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
         searchView.setSubmitButtonEnabled(true);
@@ -161,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)),false);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex(COLUMN_QUESTION)), false);
                 return true;
             }
         });
@@ -180,9 +186,9 @@ public class MainActivity extends AppCompatActivity implements
             public boolean onQueryTextChange(String newText) {
                 final ContentResolver resolver = getContentResolver();
                 final String[] projection = {COLUMN_ID, COLUMN_QUESTION};
-                final String sa1 = "%"+newText+"%"; // contains an "A"
+                final String sa1 = "%" + newText + "%"; // contains an "A"
                 Cursor cursor = resolver.query(CONTENT_URI, projection, COLUMN_QUESTION + " LIKE ?",
-                        new String[] { sa1 }, null);
+                        new String[]{sa1}, null);
 
                 tempAdapter.changeCursor(cursor);
                 return false;
@@ -199,6 +205,9 @@ public class MainActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
+            case R.id.action_sync:
+                syncTags(mainPath);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -211,15 +220,22 @@ public class MainActivity extends AppCompatActivity implements
             Log.e("WARNING: ", "No sd card");
             return "Card not found";
         } else {//Card is mount
+            Log.e("WARNING: ", Environment.getExternalStorageDirectory().getPath() + "/Essentials");
             return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
         }
+    }
+
+
+    public static boolean syncTags(String currentPath) {
+
+
+        return true;
     }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // Define a projection that specifies the columns from the table we care about.
-
 
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,   // Parent activity context
