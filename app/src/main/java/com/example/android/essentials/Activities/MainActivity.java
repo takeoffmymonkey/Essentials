@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements
         mainPath = getMainPath();
         mainDir = new File(mainPath);
 
-        syncTags(mainPath);
+        syncTags("");
 
         //Save paths of all files in the current dir
         mainFiles = mainDir.listFiles();
@@ -228,10 +228,15 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public boolean syncTags(String currentPath) {
+    public boolean syncTags(String relativePath) {
 
-        File dir = new File(currentPath);
-        File tagsFile = new File(currentPath, "tags.txt");
+            Log.e("WARNING: ", relativePath);
+
+
+
+        String fullPath = mainPath + "/" + relativePath;
+        File dir = new File(fullPath);
+        File tagsFile = new File(fullPath, "tags.txt");
 
         //add tags from tags.txt to tags table
         if (tagsFile.exists()) {
@@ -243,7 +248,9 @@ public class MainActivity extends AppCompatActivity implements
                     //Separate fileTags name from tags and create path of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
-                    String tagPath = currentPath + "/" + name;
+                    String tagPath = relativePath + "/" + name;
+
+                    Log.e("WARNING: ", tagPath);
 
                     //Insert each tag into tags table and specify its fileTags name
                     String[] tags = separated[2].split(",");
@@ -252,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements
                         contentValues.put(TagEntry.COLUMN_PATH, tagPath);
                         contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
                         getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+
                     }
                 }
                 br.close();
@@ -265,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
             File[] files = dir.listFiles();
             for (File file : files) {
                 if (file.isDirectory()) {//This is a dir
-                    syncTags(currentPath + "/" + file.getName());
+                    syncTags(relativePath + "/" + file.getName());
                 } else {//This is a file
                     if (!file.getName().equalsIgnoreCase("tags")) {//This is a question file
 
