@@ -230,8 +230,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public boolean syncTags(String relativePath) {
 
-            Log.e("WARNING: ", relativePath);
-
+        Log.e("WARNING: ", relativePath);
 
 
         String fullPath = mainPath + "/" + relativePath;
@@ -248,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements
                     //Separate fileTags name from tags and create path of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
+                    name = name.replaceAll("\uFEFF", "");
                     String tagPath = relativePath + "/" + name;
 
                     Log.e("WARNING: ", tagPath);
@@ -259,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements
                         contentValues.put(TagEntry.COLUMN_PATH, tagPath);
                         contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
                         getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
-
                     }
                 }
                 br.close();
@@ -285,6 +284,12 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
+
+/*    public static String convertTableName(String path) {
+        String convertedName = path.;
+
+        return convertedName;
+    }*/
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
