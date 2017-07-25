@@ -75,7 +75,20 @@ public class MainActivity extends AppCompatActivity implements
         mainPath = getMainPath();
         mainDir = new File(mainPath);
 
-        syncTags("");
+        sync("");
+
+
+
+
+
+
+        //TESTING TABLES===========================================
+        testTagsTable();
+        testQuestionsTable("/CS/Technologies/Java/2 Язык");
+
+
+
+
 
         //Save paths of all files in the current dir
         mainFiles = mainDir.listFiles();
@@ -210,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_search:
                 return true;
             case R.id.action_sync:
-                syncTags(mainPath);
+                sync(mainPath);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -230,14 +243,38 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public boolean syncTags(String relativePath) {
+    public boolean sync(String relativePath) {
 
         Log.e("WARNING: ", relativePath);
-
 
         String fullPath = mainPath + "/" + relativePath;
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
+        String table = null;
+
+        //Go through all files in the dir
+        if (dir.exists()) {
+            //Create a table for the current folder
+            table = createQuestionsTable(relativePath);
+
+            //Add all its content to the table
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                ContentValues contentValues = new ContentValues();
+                if (file.isDirectory()) {//This is a dir
+                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                    contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
+                    db.insert(table, null, contentValues);
+                    sync(relativePath + "/" + file.getName());
+                } else {//This is a file
+                    if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
+                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
+                        db.insert(table, null, contentValues);
+                    }
+                }
+            }
+        }
 
         //add tags from tags.txt to tags table
         if (tagsFile.exists()) {
@@ -246,13 +283,23 @@ public class MainActivity extends AppCompatActivity implements
                 BufferedReader br = new BufferedReader(new FileReader(tagsFile));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    //Separate fileTags name from tags and create path of this fileTags
+                    //Separate name, question and tags in fileTags and create path of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
                     name = name.replaceAll("\uFEFF", "");
                     String tagPath = relativePath + "/" + name;
-
                     Log.e("WARNING: ", tagPath);
+
+                    //Insert question if there is one
+                    String question = separated[1].trim();
+                    if (!question.equals("") && !question.isEmpty()) {//We have a question here
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
+                        db.update(table,
+                                contentValues,
+                                QuestionEntry.COLUMN_NAME + "=?",
+                                new String[]{name});
+                    }
 
                     //Insert each tag into tags table and specify its fileTags name
                     String[] tags = separated[2].split(",");
@@ -266,24 +313,6 @@ public class MainActivity extends AppCompatActivity implements
                 br.close();
             } catch (IOException e) {
                 //You'll need to add proper error handling here
-            }
-        }
-
-        //Go through all files in the dir
-        if (dir.exists()) {
-            //Create a table for the current folder
-            createQuestionsTable(relativePath);
-
-            //Add all its content to the table
-            File[] files = dir.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {//This is a dir
-                    syncTags(relativePath + "/" + file.getName());
-                } else {//This is a file
-                    if (!file.getName().equalsIgnoreCase("tags")) {//This is a question file
-
-                    }
-                }
             }
         }
 
@@ -306,8 +335,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public static void createQuestionsTable(String relativePath) {
-        String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + pathToTableName(relativePath) + " ("
+    public static String createQuestionsTable(String relativePath) {
+        String table = pathToTableName(relativePath);
+        String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("
                 + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
                 + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
@@ -315,7 +345,8 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
                 + QuestionEntry.COLUMN_TIME + " INTEGER);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
-        Log.e("WARNING: ", "created table for path: " + relativePath);
+        Log.e("WARNING: ", "created table for path: " + relativePath + " with name: " + table);
+        return table;
     }
 
     @Override
@@ -340,5 +371,51 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         tempAdapter.swapCursor(null);
+    }
+
+
+
+    public static void testTagsTable() {
+        Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
+        Log.e("WARNING: ", "========================================================");
+        Log.e("WARNING: ", "TAGS TABLE");
+        Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c.moveToFirst();
+        for (int i = 0; i < c.getCount(); i++) {
+            Log.e("WARNING: ", "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e("WARNING: ", "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            c.moveToNext();
+            Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e("WARNING: ", "========================================================");
+        c.close();
+
+    }
+
+    public static void testQuestionsTable(String relativePath) {
+
+        Cursor c1 = db.query(pathToTableName(relativePath), null, null, null, null, null, null);
+        Log.e("WARNING: ", "========================================================");
+        Log.e("WARNING: ", "QUESTIONS TABLE");
+        Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e("WARNING: ", "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e("WARNING: ", "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e("WARNING: ", "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e("WARNING: ", "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e("WARNING: ", "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
+            Log.e("WARNING: ", "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e("WARNING: ", "========================================================");
+        c1.close();
     }
 }
