@@ -285,9 +285,10 @@ public class MainActivity extends AppCompatActivity implements
                 //add path of the queried file to search data
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
-                String path = cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH));
+                ArrayList<String> paths = new ArrayList<String>();
+                paths.add(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH)));
                 Bundle appData = new Bundle();
-                appData.putString("path", path);
+                appData.putStringArrayList("paths", paths);
                 searchView.setAppSearchData(appData);
                 return false;
             }

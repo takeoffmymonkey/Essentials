@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
@@ -20,6 +23,10 @@ public class SearchableActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         handleIntent();
+
+        //Enable back option
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
 
 
@@ -40,8 +47,8 @@ public class SearchableActivity extends AppCompatActivity {
 
             Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
             if (appData != null) {
-                String path = appData.getString("path");
-                tv.setText(path);
+                ArrayList<String> paths = appData.getStringArrayList("paths");
+                tv.setText(paths.get(0));
             } else {
                 tv.setText(query);
             }
@@ -53,7 +60,18 @@ public class SearchableActivity extends AppCompatActivity {
             TextView tv = (TextView) findViewById(R.id.search_query);
             tv.setText(query);
             Toast.makeText(this, data.toString(), Toast.LENGTH_SHORT).show();
-            //showResult(data);
         }
     }
+
+    /*Menu options*/
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 }
