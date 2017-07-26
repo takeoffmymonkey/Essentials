@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
@@ -45,7 +46,12 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    String mainPath;
+    public static final String TAG = "ESSENTIALS: ";
+
+    public static String mainPath;
+    String currentRelativePath;
+    String currentTableName;
+
     File mainDir;
     ListView mainList;
     File[] mainFiles;
@@ -53,11 +59,8 @@ public class MainActivity extends AppCompatActivity implements
     final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
 
     private static final int TAG_LOADER = 0;
-
     SimpleCursorAdapter tempAdapter;
-
     Cursor mCursor;
-
     public static SQLiteDatabase db;
 
     @Override
@@ -71,17 +74,27 @@ public class MainActivity extends AppCompatActivity implements
         db = dbHelper.getReadableDatabase();
 
 
-        //Get main path and files inside
+        //Get main path, set relative path and get currentTableName
+        // /storage/sdcard0/Essentials
         mainPath = getMainPath();
-        mainDir = new File(mainPath);
+        currentRelativePath = "";
+        currentTableName = relativePathToTableName(currentRelativePath);
 
-        sync("");
+
+        //Sync data
+        try {
+            sync(currentRelativePath);
+        } catch (SQLiteException e) {
+            Log.e(TAG, e.toString());
+        }
 
 
-        //For debuging
+        //For debugging
         testTagsTable();
-        testQuestionsTable("");
+        testQuestionsTable(currentRelativePath);
 
+
+        mainDir = new File(mainPath);
 
         //Save paths of all files in the current dir
         mainFiles = mainDir.listFiles();
@@ -204,10 +217,11 @@ public class MainActivity extends AppCompatActivity implements
         //Check if card is mount
         boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         if (!cardMount) {
-            Log.e("WARNING: ", "No sd card");
+            Log.e(TAG, "No sd card");
             return "Card not found";
         } else {//Card is mount
-            Log.e("WARNING: ", Environment.getExternalStorageDirectory().getPath() + "/Essentials");
+            Log.e(TAG, "Main path: " +
+                    Environment.getExternalStorageDirectory().getPath() + "/Essentials");
             return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
         }
     }
@@ -215,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public boolean sync(String relativePath) {
 
-        Log.e("WARNING: ", relativePath);
+        Log.e(TAG, relativePath);
 
         String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
@@ -258,11 +272,11 @@ public class MainActivity extends AppCompatActivity implements
                     String name = separated[0].trim();
                     name = name.replaceAll("\uFEFF", "").toLowerCase();
                     String tagPath = relativePath + "/" + name;
-                    Log.e("WARNING: ", tagPath);
+                    Log.e(TAG, tagPath);
 
                     //Insert question if there is one
                     String question = separated[1].trim();
-                    Log.e ("WARNING: ", "QUESTION: " + question);
+                    Log.e(TAG, "QUESTION: " + question);
                     if (!question.equals("") && !question.isEmpty()) {//We have a question here
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
@@ -270,8 +284,8 @@ public class MainActivity extends AppCompatActivity implements
                                 contentValues,
                                 QuestionEntry.COLUMN_NAME + "=?",
                                 new String[]{name});
-                        Log.e ("WARNING: ", "searching for name: " + name);
-                        Log.e ("WARNING: ", "changed rows: " + rows);
+                        Log.e(TAG, "searching for name: " + name);
+                        Log.e(TAG, "changed rows: " + rows);
                     }
 
                     //Insert each tag into tags table and specify its fileTags name
@@ -293,9 +307,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public static String pathToTableName(String relativePath) {
+    /*Converts relative path to name of the table with listing of current files*/
+    public static String relativePathToTableName(String relativePath) {
         String[] locations = relativePath.split("/");
-        Log.e("WARNING: ", Arrays.toString(locations));
+        Log.e(TAG, Arrays.toString(locations));
 
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
@@ -303,13 +318,13 @@ public class MainActivity extends AppCompatActivity implements
             sb.append("_");
         }
         sb.append("FILES");
-        Log.e("WARNING: ", sb.toString());
+        Log.e(TAG, sb.toString());
         return sb.toString();
     }
 
 
     public static String createQuestionsTable(String relativePath) {
-        String table = pathToTableName(relativePath);
+        String table = relativePathToTableName(relativePath);
         String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("
                 + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
@@ -318,50 +333,26 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
                 + QuestionEntry.COLUMN_TIME + " INTEGER);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
-        Log.e("WARNING: ", "created table for path: " + relativePath + " with name: " + table);
+        Log.e(TAG, "created table for path: " + relativePath + " with name: " + table);
         return table;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Define a projection that specifies the columns from the table we care about.
-
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,   // Parent activity context
-                TagEntry.CONTENT_URI,   // Provider content URI to query
-                null,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        tempAdapter.swapCursor(data);
-        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        tempAdapter.swapCursor(null);
     }
 
 
     public static void testTagsTable() {
         Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
-        Log.e("WARNING: ", "========================================================");
-        Log.e("WARNING: ", "TAGS TABLE");
-        Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "TAGS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         c.moveToFirst();
         for (int i = 0; i < c.getCount(); i++) {
-            Log.e("WARNING: ", "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
-            Log.e("WARNING: ", "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e(TAG, "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
+            Log.e(TAG, "--------------------------------------------------------");
             c.moveToNext();
-            Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
-        Log.e("WARNING: ", "========================================================");
+        Log.e(TAG, "========================================================");
         c.close();
 
     }
@@ -369,26 +360,26 @@ public class MainActivity extends AppCompatActivity implements
 
     public static void testQuestionsTable(String relativePath) {
 
-        Cursor c1 = db.query(pathToTableName(relativePath), null, null, null, null, null, null);
-        Log.e("WARNING: ", "========================================================");
-        Log.e("WARNING: ", "QUESTIONS TABLE");
-        Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "QUESTIONS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         c1.moveToFirst();
         for (int i = 0; i < c1.getCount(); i++) {
-            Log.e("WARNING: ", "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
-            Log.e("WARNING: ", "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
-            Log.e("WARNING: ", "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
-            Log.e("WARNING: ", "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
-            Log.e("WARNING: ", "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
-            Log.e("WARNING: ", "--------------------------------------------------------");
+            Log.e(TAG, "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
+            Log.e(TAG, "--------------------------------------------------------");
             c1.moveToNext();
-            Log.e("WARNING: ", "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
-        Log.e("WARNING: ", "========================================================");
+        Log.e(TAG, "========================================================");
         c1.close();
     }
 
@@ -415,4 +406,30 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Define a projection that specifies the columns from the table we care about.
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,   // Parent activity context
+                TagEntry.CONTENT_URI,   // Provider content URI to query
+                null,             // Columns to include in the resulting Cursor
+                null,                   // No selection clause
+                null,                   // No selection arguments
+                null);                  // Default sort order
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        tempAdapter.swapCursor(data);
+        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        tempAdapter.swapCursor(null);
+    }
 }

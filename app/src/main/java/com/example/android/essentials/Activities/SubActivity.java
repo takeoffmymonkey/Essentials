@@ -17,6 +17,7 @@ import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
+import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -199,7 +200,7 @@ public class SubActivity extends AppCompatActivity {
             subPathArray[i - 3] = tempPath[i];
         }
         String str = Arrays.toString(subPathArray);
-        Log.e("WARNING: ", "prepared nav data: " + str);
+        Log.e(TAG, "prepared nav data: " + str);
 
     }
 

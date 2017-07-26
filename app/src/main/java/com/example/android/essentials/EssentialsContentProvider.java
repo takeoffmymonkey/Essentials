@@ -14,6 +14,7 @@ import android.util.Log;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
+import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
@@ -154,7 +155,7 @@ public class EssentialsContentProvider extends ContentProvider {
             case TAGS:
                 // Insert the new pet with the given values
                 long id = db.insert(TagEntry.TABLE_NAME, null, values);
-                Log.e ("WARNING: ", Long.toString(id));
+                Log.e (TAG, Long.toString(id));
                 // If the ID is -1, then the insertion failed. Log an error and return null.
                 if (id == -1) {
                     return null;
