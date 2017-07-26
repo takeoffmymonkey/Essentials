@@ -145,20 +145,20 @@ public class MainActivity extends AppCompatActivity implements
     /*Create menu*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Create menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+        //Set up searchView menu item and adapter
         MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-
-
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        //Can be replaced with getComponentName() if this searchable activity is the current activity
         ComponentName componentName = new ComponentName(this, SearchableActivity.class);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
         searchView.setSubmitButtonEnabled(true);
-
         searchView.setSuggestionsAdapter(suggestionsAdapter);
 
+        //set OnSuggestionListener
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
             public boolean onSuggestionSelect(int position) {
@@ -171,32 +171,41 @@ public class MainActivity extends AppCompatActivity implements
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_SUGGESTION)), false);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex
+                        (TagEntry.COLUMN_SUGGESTION)), false);
                 return true;
             }
         });
 
-
+        //set OnQueryTextListener
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                //add path of the queried file to search data
+                CursorAdapter ca = searchView.getSuggestionsAdapter();
+                Cursor cursor = ca.getCursor();
+                String path = cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH));
                 Bundle appData = new Bundle();
-                appData.putString("path", "dasdadasdadasd"); // put extra data to Bundle
-                searchView.setAppSearchData(appData); // pass the search context data
+                appData.putString("path", path);
+                searchView.setAppSearchData(appData);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                //Update cursor on typing
                 final ContentResolver resolver = getContentResolver();
                 final String[] projection = {
                         TagEntry.COLUMN_ID,
                         TagEntry.COLUMN_SUGGESTION,
                         TagEntry.COLUMN_PATH};
                 final String sa1 = "%" + newText + "%";
-                Cursor cursor = resolver.query(TagEntry.CONTENT_URI, projection, TagEntry.COLUMN_SUGGESTION + " LIKE ?",
-                        new String[]{sa1}, null);
-
+                Cursor cursor = resolver.query(
+                        TagEntry.CONTENT_URI,
+                        projection,
+                        TagEntry.COLUMN_SUGGESTION + " LIKE ?",
+                        new String[]{sa1},
+                        null);
                 suggestionsAdapter.changeCursor(cursor);
                 return false;
             }
