@@ -1,6 +1,7 @@
 package com.example.android.essentials.Activities;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -23,35 +25,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
+import static com.example.android.essentials.Activities.MainActivity.db;
 
 public class SubActivity extends AppCompatActivity {
 
+    String mainPath;
     String subPath;
     String subRelativePath;
     String subActivityName;
     String subTableName; //CS_FILES
     ArrayList<String> subListOfDirs = new ArrayList<String>();
     ArrayList<String> subListOfFiles = new ArrayList<String>();
-    ;
     ListView subDirsList;
-
-
-    String[] subPathArray;
-
-    File subDir;
-
-    File[] subAllFiles;
-    ArrayList<String> subCategoriesNames = new ArrayList<String>();
-    ArrayList<String> subQuestionsNames = new ArrayList<String>();
-    final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
-    final ArrayList<String> subQuestionPaths = new ArrayList<String>();
-
     ExpandableListView subExpList;
     ExpandableListView subExpNav;
+    ArrayList<Question> questions = new ArrayList<Question>();
     ExpandableListAdapter subExpListAdapter;
     ExpandableNavAdapter subExpNavAdapter;
-
-    ArrayList<Question> questions = new ArrayList<Question>();
+    String[] subPathArray;
 
 
     @Override
@@ -59,9 +50,10 @@ public class SubActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
 
-        //Get and set full and relative paths
+        //Get and set main and current dir's full and relative paths
+        mainPath = MainActivity.getMainPath();
         subPath = getIntent().getStringExtra("subPath");
-        subRelativePath = subPath.substring(MainActivity.getMainPath().length() + 1);
+        subRelativePath = "/" + subPath.substring(mainPath.length() + 1);
         Log.e(TAG, "Full sub path: " + subPath);
         Log.e(TAG, "Relative sub path: " + subRelativePath);
 
@@ -75,83 +67,35 @@ public class SubActivity extends AppCompatActivity {
         //Create separate arrays for files and dirs in the current path
         MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
 
-
-        //Get dir file, get all its files and folders
-        subDir = new File(subPath);
-        subAllFiles = subDir.listFiles();
-
-
-        //Separate files from folders and store files' paths and names (not folders' yet)
-        ArrayList<File> foldersTemp = new ArrayList<File>();
-        for (File file :
-                subAllFiles) {
-            if (file.isDirectory()) { //file is a folder
-                foldersTemp.add(file);
-            } else { // file is a file... yep
-                //store its path and name (question)
-                String path = file.getAbsolutePath();
-                subQuestionPaths.add(path);
-                String question = path.substring(path.lastIndexOf("/") + 1);
-                question = question.substring(0, question.indexOf('.'));
-                subQuestionsNames.add(question);
-            }
-        }
-
-
-        //Now store folders paths and names if it is not named as %file%.files
-        for (int i = 0; i < foldersTemp.size(); i++) {
-            //Get folder name
-            String folderPath = foldersTemp.get(i).getAbsolutePath();
-            String folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
-            //Search for it in file names
-            boolean found = false;
-            for (int a = 0; a < subQuestionsNames.size(); a++) {
-                if (folderName.equals(subQuestionsNames.get(a) + ".files")) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {//name was not found
-                //store its path
-                subCategoriesPaths.add(folderPath);
-                //store its name as name of category
-                subCategoriesNames.add(folderName);
-            }
-        }
-
-
         //Make list for dirs and set array adapter
         subDirsList = (ListView) findViewById(R.id.sub_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
-                R.id.main_list_item_text, subCategoriesNames);
+                R.id.main_list_item_text, subListOfDirs);
         subDirsList.setAdapter(adapter);
 
         //Set clicklistener on list
         subDirsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 Intent intent = new Intent(SubActivity.this, SubActivity.class);
-                intent.putExtra("subPath", subCategoriesPaths.get((int) id));
+                intent.putExtra("subPath", mainPath +
+                        subRelativePath + "/" + subListOfDirs.get((int) id));
                 view.getContext().startActivity(intent);
 
             }
         });
 
-
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
-        prepareListData();
+        prepareQuestionsList();
         subExpListAdapter = new ExpandableListAdapter(this, questions);
         subExpList.setAdapter(subExpListAdapter);
-
 
         //Make expandable navigator
         subExpNav = (ExpandableListView) findViewById(R.id.sub_exp_navigate);
         prepareNavData();
         subExpNavAdapter = new ExpandableNavAdapter(this, subPathArray);
         subExpNav.setAdapter(subExpNavAdapter);
-
 
         //Set click listener on navigation exp list
         subExpNav.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -162,7 +106,6 @@ public class SubActivity extends AppCompatActivity {
                 return false;
             }
         });
-
 
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -196,10 +139,35 @@ public class SubActivity extends AppCompatActivity {
     }
 
 
-    /*Prepare questions for adapter*/
-    private void prepareListData() {
-        for (int i = 0; i < subQuestionsNames.size(); i++) {
-            questions.add(new Question(subQuestionsNames.get(i), subQuestionPaths.get(i)));
+    /*Prepare questions list for adapter*/
+    private void prepareQuestionsList() {
+        for (int i = 0; i < subListOfFiles.size(); i++) {
+            //Get path of the question
+            String name = subListOfFiles.get(i);
+            String path = mainPath + subRelativePath + "/" + name;
+            Log.e(TAG, "Path of question: " + path);
+
+            //Rename question if it has question text provided
+            String[] projection = {QuestionEntry.COLUMN_QUESTION};
+            String selection = QuestionEntry.COLUMN_NAME + "=?";
+            String[] selectionArgs = {name};
+            Cursor cursor = db.query(subTableName,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null, null, null);
+            if (cursor.getCount() == 1) { //Row is found
+                cursor.moveToFirst();
+                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
+                if (q != null) {//There is a question provided
+                    name = q;
+                    Log.e(TAG, "New name of question: " + name);
+                }
+            }
+            cursor.close();
+
+            //Add question object to the list of questions
+            questions.add(new Question(name, path));
         }
     }
 
@@ -213,7 +181,6 @@ public class SubActivity extends AppCompatActivity {
         }
         String str = Arrays.toString(subPathArray);
         Log.e(TAG, "prepared nav data: " + str);
-
     }
 
 

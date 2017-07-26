@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.e(TAG, Arrays.toString(locations));
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
-            sb.append(locations[i].replaceAll(" ", "_"));
+            sb.append(locations[i].toUpperCase().replaceAll(" ", "_"));
             sb.append("_");
         }
         sb.append("FILES");

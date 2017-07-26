@@ -6,6 +6,7 @@ package com.example.android.essentials.Adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -47,6 +50,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Get current question's path
         final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
+        Log.e (TAG, "going to open: " + "file://" + path);
 
         //For new view
         if (convertView == null) {
@@ -55,18 +59,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.item_sub_list, null);
         }
 
-
         //Make webview and load url
         WebView webView = (WebView) convertView.findViewById(R.id.sub_list_web_view);
         webView.loadUrl("file://" + path);
-
 
         //Text size and zoomable
         WebSettings webSettings = webView.getSettings();
         webSettings.setTextZoom(140);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
-
 
         return convertView;
     }
