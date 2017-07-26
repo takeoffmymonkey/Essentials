@@ -7,8 +7,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.widget.ExpandableListView;
 
+import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
@@ -26,6 +27,9 @@ public class SearchableActivity extends AppCompatActivity {
 
     ArrayList<String> paths = new ArrayList<>();
     ArrayList<Question> questions = new ArrayList<Question>();
+    ExpandableListView expList;
+    ExpandableListAdapter expListAdapter;
+    String mainPath;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,8 +38,13 @@ public class SearchableActivity extends AppCompatActivity {
 
         handleIntent();
 
-        prepareQuestionsList();
+        mainPath = MainActivity.getMainPath();
 
+        //Make expandable list and set adapter
+        expList = (ExpandableListView) findViewById(R.id.search_exp_list);
+        prepareQuestionsList();
+        expListAdapter = new ExpandableListAdapter(this, questions);
+        expList.setAdapter(expListAdapter);
 
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -51,17 +60,12 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     public void handleIntent() {
-        // Get the intent, verify the action and get the query
+        // Get the intent, verify the action and get the additional data (path)
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            TextView tv = (TextView) findViewById(R.id.search_query);
             Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
             if (appData != null) {
                 paths = appData.getStringArrayList("paths");
-                tv.setText(paths.get(0));
-            } else {
-                tv.setText(query);
             }
         }
     }
@@ -81,16 +85,18 @@ public class SearchableActivity extends AppCompatActivity {
     /*Prepare questions list for adapter*/
     private void prepareQuestionsList() {
         for (int i = 0; i < paths.size(); i++) {
-            //Get path of the question
-            String path = paths.get(i);
-            Log.e(TAG, "working with path: " + path);
+            //Get fileRelativePath of the question and create full path
+            String fileRelativePath = paths.get(i);
+            String fileFullPath = mainPath + fileRelativePath;
+            Log.e(TAG, "working with fileRelativePath: " + fileRelativePath);
+            Log.e(TAG, "working with fileFullPath: " + fileFullPath);
 
             //Get name of the file
-            String name = path.substring(path.lastIndexOf("/") + 1);
+            String name = fileRelativePath.substring(fileRelativePath.lastIndexOf("/") + 1);
             Log.e(TAG, "prepared name for question: " + name);
 
             //Get table of the file
-            String folderRelativePath = path.substring(0, path.lastIndexOf("/"));
+            String folderRelativePath = fileRelativePath.substring(0, fileRelativePath.lastIndexOf("/"));
             Log.e(TAG, "prepared folderRelativePath for question: " + folderRelativePath);
             String tableName = MainActivity.relativePathToTableName(folderRelativePath);
             Log.e(TAG, "prepared table name for question: " + tableName);
@@ -114,7 +120,7 @@ public class SearchableActivity extends AppCompatActivity {
             }
             cursor.close();
             //Add question object to the list of questions
-            questions.add(new Question(name, path));
+            questions.add(new Question(name, fileFullPath));
         }
     }
 }
