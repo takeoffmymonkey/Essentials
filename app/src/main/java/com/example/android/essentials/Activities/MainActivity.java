@@ -120,6 +120,138 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,
+                TagEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        suggestionsAdapter.swapCursor(data);
+        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        suggestionsAdapter.swapCursor(null);
+    }
+
+
+    /*Create TAG table with all tags and create all Question tables*/
+    public boolean sync(String relativePath) {
+
+        String fullPath = mainPath + relativePath;
+        File dir = new File(fullPath);
+        File tagsFile = new File(fullPath, "tags.txt");
+        String table = null;
+
+        //Go through all files in the dir
+        if (dir.exists()) {
+            //Create a table for the current folder
+            table = createQuestionsTable(relativePath);
+
+            //Add all its content to the table
+            File[] files = dir.listFiles();
+            for (File file : files) {
+                ContentValues contentValues = new ContentValues();
+                if (file.isDirectory()) {//This is a dir
+                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
+                    contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
+                    db.insert(table, null, contentValues);
+                    sync(relativePath + "/" + file.getName());
+                } else {//This is a file
+                    if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
+                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
+                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
+                        db.insert(table, null, contentValues);
+                    }
+                }
+            }
+        }
+
+        //add tags from tags.txt to tags table
+        if (tagsFile.exists()) {
+            try {
+                //Parse file by line
+                BufferedReader br = new BufferedReader(new FileReader(tagsFile));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    //Separate name, question and tags in fileTags and create path of this fileTags
+                    String[] separated = line.split(":");
+                    String name = separated[0].trim();
+                    name = name.replaceAll("\uFEFF", "").toLowerCase();
+                    String tagPath = relativePath + "/" + name;
+
+                    //Insert question if there is one
+                    String question = separated[1].trim();
+                    if (!question.equals("") && !question.isEmpty()) {//We have a question here
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
+                        int rows = db.update(table,
+                                contentValues,
+                                QuestionEntry.COLUMN_NAME + "=?",
+                                new String[]{name});
+                    }
+
+                    //Insert each tag into tags table and specify its fileTags name
+                    String[] tags = separated[2].split(",");
+                    for (String tag : tags) {
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                        contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                        getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                    }
+                }
+                br.close();
+            } catch (IOException e) {
+                Log.e(TAG, e.toString());
+            }
+        }
+
+        return true;
+    }
+
+
+    /*Convert relative path to name of the table with listing of current files*/
+    public static String relativePathToTableName(String relativePath) {
+        String[] locations = relativePath.split("/");
+        Log.e(TAG, Arrays.toString(locations));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < locations.length; i++) {
+            sb.append(locations[i].replaceAll(" ", "_"));
+            sb.append("_");
+        }
+        sb.append("FILES");
+        Log.e(TAG, sb.toString());
+        return sb.toString();
+    }
+
+
+    /*Create Questions table for the specified relative path*/
+    public static String createQuestionsTable(String relativePath) {
+        String table = relativePathToTableName(relativePath);
+        String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("
+                + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
+                + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
+                + QuestionEntry.COLUMN_QUESTION + " TEXT, "
+                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
+                + QuestionEntry.COLUMN_TIME + " INTEGER);";
+        db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
+        Log.e(TAG, "created table for path: " + relativePath + " with name: " + table);
+        return table;
+    }
+
+
     /*Create item_suggestions list and set adapter*/
     private void prepareSuggestions() {
         //Get cursor
@@ -212,144 +344,6 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         return true;
-    }
-
-
-    public boolean sync(String relativePath) {
-
-        Log.e(TAG, relativePath);
-
-        String fullPath = mainPath + relativePath;
-        File dir = new File(fullPath);
-        File tagsFile = new File(fullPath, "tags.txt");
-        String table = null;
-
-        //Go through all files in the dir
-        if (dir.exists()) {
-            //Create a table for the current folder
-            table = createQuestionsTable(relativePath);
-
-            //Add all its content to the table
-            File[] files = dir.listFiles();
-            for (File file : files) {
-                ContentValues contentValues = new ContentValues();
-                if (file.isDirectory()) {//This is a dir
-                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
-                    contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
-                    db.insert(table, null, contentValues);
-                    sync(relativePath + "/" + file.getName());
-                } else {//This is a file
-                    if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
-                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
-                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
-                        db.insert(table, null, contentValues);
-                    }
-                }
-            }
-        }
-
-        //add tags from tags.txt to tags table
-        if (tagsFile.exists()) {
-            try {
-                //Parse file by line
-                BufferedReader br = new BufferedReader(new FileReader(tagsFile));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    //Separate name, question and tags in fileTags and create path of this fileTags
-                    String[] separated = line.split(":");
-                    String name = separated[0].trim();
-                    name = name.replaceAll("\uFEFF", "").toLowerCase();
-                    String tagPath = relativePath + "/" + name;
-                    Log.e(TAG, tagPath);
-
-                    //Insert question if there is one
-                    String question = separated[1].trim();
-                    Log.e(TAG, "QUESTION: " + question);
-                    if (!question.equals("") && !question.isEmpty()) {//We have a question here
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                        int rows = db.update(table,
-                                contentValues,
-                                QuestionEntry.COLUMN_NAME + "=?",
-                                new String[]{name});
-                        Log.e(TAG, "searching for name: " + name);
-                        Log.e(TAG, "changed rows: " + rows);
-                    }
-
-                    //Insert each tag into tags table and specify its fileTags name
-                    String[] tags = separated[2].split(",");
-                    for (String tag : tags) {
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(TagEntry.COLUMN_PATH, tagPath);
-                        contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                        getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
-                    }
-                }
-                br.close();
-            } catch (IOException e) {
-                //You'll need to add proper error handling here
-            }
-        }
-
-        return true;
-    }
-
-
-    /*Converts relative path to name of the table with listing of current files*/
-    public static String relativePathToTableName(String relativePath) {
-        String[] locations = relativePath.split("/");
-        Log.e(TAG, Arrays.toString(locations));
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 1; i < locations.length; i++) {
-            sb.append(locations[i].replaceAll(" ", "_"));
-            sb.append("_");
-        }
-        sb.append("FILES");
-        Log.e(TAG, sb.toString());
-        return sb.toString();
-    }
-
-
-    public static String createQuestionsTable(String relativePath) {
-        String table = relativePathToTableName(relativePath);
-        String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("
-                + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
-                + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
-                + QuestionEntry.COLUMN_QUESTION + " TEXT, "
-                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
-                + QuestionEntry.COLUMN_TIME + " INTEGER);";
-        db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
-        Log.e(TAG, "created table for path: " + relativePath + " with name: " + table);
-        return table;
-    }
-
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Define a projection that specifies the columns from the table we care about.
-
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,   // Parent activity context
-                TagEntry.CONTENT_URI,   // Provider content URI to query
-                null,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
-    }
-
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        suggestionsAdapter.swapCursor(data);
-        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
-    }
-
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        suggestionsAdapter.swapCursor(null);
     }
 
 
