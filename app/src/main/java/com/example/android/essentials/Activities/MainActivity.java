@@ -33,7 +33,6 @@ import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.R;
-import com.example.android.essentials.SearchableActivity;
 
 import java.io.BufferedReader;
 import java.io.File;

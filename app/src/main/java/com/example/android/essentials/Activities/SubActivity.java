@@ -31,7 +31,6 @@ import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
-import com.example.android.essentials.SearchableActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -211,7 +210,7 @@ public class SubActivity extends AppCompatActivity implements
 
     /*Menu options*/
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) /**/{
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
