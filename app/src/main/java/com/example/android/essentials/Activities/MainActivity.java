@@ -51,9 +51,12 @@ public class MainActivity extends AppCompatActivity implements
     public static String mainPath;
     String currentRelativePath;
     String currentTableName;
+    ArrayList<String> listOfDirs;
+    ListView mainList;
+
 
     File mainDir;
-    ListView mainList;
+
     File[] mainFiles;
     ArrayList<String> mainCategories = new ArrayList<String>();
     final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
@@ -94,7 +97,31 @@ public class MainActivity extends AppCompatActivity implements
         testQuestionsTable(currentRelativePath);
 
 
-        mainDir = new File(mainPath);
+        //Make list of folders in the current dir and set adapter
+        listOfDirs = getListOfDirs(currentTableName);
+        mainList = (ListView) findViewById(R.id.main_list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
+                R.id.main_list_item_text, listOfDirs);
+        mainList.setAdapter(adapter);
+
+
+        //Set clicklistener on list
+        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Intent intent = new Intent(MainActivity.this, SubActivity.class);
+                intent.putExtra("subPath", mainCategoriesPaths.get((int) id));
+                view.getContext().startActivity(intent);
+
+            }
+        });
+
+        prepareSuggestions();
+
+
+
+/*        mainDir = new File(mainPath);
 
         //Save paths of all files in the current dir
         mainFiles = mainDir.listFiles();
@@ -115,22 +142,7 @@ public class MainActivity extends AppCompatActivity implements
         mainList = (ListView) findViewById(R.id.main_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
                 R.id.main_list_item_text, mainCategories);
-        mainList.setAdapter(adapter);
-
-
-        //Set clicklistener on list
-        mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Intent intent = new Intent(MainActivity.this, SubActivity.class);
-                intent.putExtra("subPath", mainCategoriesPaths.get((int) id));
-                view.getContext().startActivity(intent);
-
-            }
-        });
-
-        prepareSuggestions();
+        mainList.setAdapter(adapter);*/
 
 
     }
@@ -404,6 +416,36 @@ public class MainActivity extends AppCompatActivity implements
                 0
         );
 
+    }
+
+
+    public ArrayList<String> getListOfDirs(String currentTableName) {
+
+        //Get cursor with only folders
+        String[] projection = {QuestionEntry.COLUMN_NAME};
+        String selection = QuestionEntry.COLUMN_FOLDER + "=?";
+        String[] selectionArgs = {Integer.toString(1)};
+        Cursor dirsCursor = db.query(
+                currentTableName,
+                projection,
+                selection,
+                selectionArgs,
+                null, null, null);
+
+        //Create list of folders
+        int numberOfDirs = dirsCursor.getCount();
+        ArrayList<String> listOfDirs = new ArrayList<String>();
+        if (numberOfDirs > 0) {
+            dirsCursor.moveToFirst();
+            for (int i = 0; i < numberOfDirs; i++) {
+                listOfDirs.add(dirsCursor.getString(
+                        dirsCursor.getColumnIndex(QuestionEntry.COLUMN_NAME)).toUpperCase());
+                dirsCursor.moveToNext();
+            }
+        }
+        dirsCursor.close();
+
+        return listOfDirs;
     }
 
 
