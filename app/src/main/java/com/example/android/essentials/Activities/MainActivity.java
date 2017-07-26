@@ -27,7 +27,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
@@ -46,6 +45,8 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+
+    private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
     public static SQLiteDatabase db;
     public static String mainPath; // /storage/sdcard0/Essentials
@@ -53,9 +54,7 @@ public class MainActivity extends AppCompatActivity implements
     String currentTableName; //FILES
     ArrayList<String> listOfDirs;
     ListView mainList;
-
-
-    private static final int TAG_LOADER = 0;
+    Cursor suggestionsCursor;
     SimpleCursorAdapter suggestionsAdapter;
 
 
@@ -117,32 +116,6 @@ public class MainActivity extends AppCompatActivity implements
         //Create item_suggestions list and set adapder
         prepareSuggestions();
 
-    }
-
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,
-                TagEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-    }
-
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        suggestionsAdapter.swapCursor(data);
-        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
-    }
-
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        suggestionsAdapter.swapCursor(null);
     }
 
 
@@ -255,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements
     /*Create item_suggestions list and set adapter*/
     private void prepareSuggestions() {
         //Get cursor
-        Cursor suggestionsCursor = getContentResolver().query(
+        suggestionsCursor = getContentResolver().query(
                 TagEntry.CONTENT_URI,
                 null,
                 null,                   // Either null, or the word the user entered
@@ -404,6 +377,34 @@ public class MainActivity extends AppCompatActivity implements
         dirsCursor.close();
 
         return listOfDirs;
+    }
+
+
+    /*Instantiate and return a new Loader for the given ID*/
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) /**/{
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,
+                TagEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
+
+
+    /*Called when a previously created loader has finished its load*/
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //Refresh cursor
+        suggestionsAdapter.swapCursor(data);
+    }
+
+
+    /*Called when a previously created loader is being reset, and thus making its data unavailable*/
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        suggestionsAdapter.swapCursor(null);
     }
 
 
