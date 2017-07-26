@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements
     public static String mainPath; // /storage/sdcard0/Essentials
     String currentRelativePath; //""
     String currentTableName; //FILES
-    ArrayList<String> listOfDirs;
+    ArrayList<String> listOfDirs = new ArrayList<String>();
     ListView mainList;
     Cursor suggestionsCursor;
     SimpleCursorAdapter suggestionsAdapter;
@@ -63,17 +64,14 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         //Create db
         EssentialsDbHelper dbHelper = new EssentialsDbHelper(this);
         db = dbHelper.getReadableDatabase();
-
 
         //Get main path, set relative path and get currentTableName
         mainPath = getMainPath();
         currentRelativePath = "";
         currentTableName = relativePathToTableName(currentRelativePath);
-
 
         //Sync data
         try {
@@ -82,36 +80,29 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, e.toString());
         }
 
-
         //For debugging
         testTagsTable();
         testQuestionsTable(currentRelativePath);
 
-
         //Make list of folders in the current dir and set adapter
-        listOfDirs = getListOfDirs(currentTableName);
+        setListsOfFilesAndDirs(currentTableName, listOfDirs, null);
         mainList = (ListView) findViewById(R.id.main_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, listOfDirs);
         mainList.setAdapter(adapter);
 
-
         //Set clicklistener on list
         mainList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
                 intent.putExtra("subPath", mainPath + "/" + listOfDirs.get((int) id));
                 view.getContext().startActivity(intent);
-
             }
         });
 
-
         // Prepare the loader.  Either re-connect with an existing one, or start a new one.
         getLoaderManager().initLoader(TAG_LOADER, null, this);
-
 
         //Create item_suggestions list and set adapder
         prepareSuggestions();
@@ -121,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements
 
     /*Create TAG table with all tags and create all Question tables*/
     public boolean sync(String relativePath) {
-
         String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
@@ -196,7 +186,13 @@ public class MainActivity extends AppCompatActivity implements
 
     /*Convert relative path to name of the table with listing of current files*/
     public static String relativePathToTableName(String relativePath) {
+        Log.e(TAG, "relativePathToTableName received: " + relativePath);
+        //Path should start with /
+        if (!relativePath.startsWith("/")) {
+            relativePath = "/" + relativePath;
+        }
         String[] locations = relativePath.split("/");
+        Log.e(TAG, "relativePathToTableName made array: " + Arrays.toString(locations));
         Log.e(TAG, Arrays.toString(locations));
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
@@ -204,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements
             sb.append("_");
         }
         sb.append("FILES");
-        Log.e(TAG, sb.toString());
+        Log.e(TAG, "relativePathToTableName return: " + sb.toString());
         return sb.toString();
     }
 
@@ -350,39 +346,45 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /*Create array list of directories in the current folder*/
-    private ArrayList<String> getListOfDirs(String currentTableName) {
+    static void setListsOfFilesAndDirs(
+            String currentTableName,
+            ArrayList<String> listOfDirs,
+            @Nullable ArrayList<String> listOfFiles) {
 
-        //Get cursor with only folders
-        String[] projection = {QuestionEntry.COLUMN_NAME};
-        String selection = QuestionEntry.COLUMN_FOLDER + "=?";
-        String[] selectionArgs = {Integer.toString(1)};
-        Cursor dirsCursor = db.query(
+        //Create cursor based on whether only dirs are need or files too
+        String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
+        Cursor cursor = db.query(
                 currentTableName,
                 projection,
-                selection,
-                selectionArgs,
+                null,
+                null,
                 null, null, null);
 
-        //Create list of folders
-        int numberOfDirs = dirsCursor.getCount();
-        ArrayList<String> listOfDirs = new ArrayList<String>();
-        if (numberOfDirs > 0) {
-            dirsCursor.moveToFirst();
-            for (int i = 0; i < numberOfDirs; i++) {
-                listOfDirs.add(dirsCursor.getString(
-                        dirsCursor.getColumnIndex(QuestionEntry.COLUMN_NAME)).toUpperCase());
-                dirsCursor.moveToNext();
+        //Add files and folders to corresponding array lists
+        int numberOfRows = cursor.getCount();
+        if (numberOfRows > 0) {
+            cursor.moveToFirst();
+            for (int i = 0; i < numberOfRows; i++) {
+                int folder = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_FOLDER));
+                String name = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_NAME));
+                if (folder == 1) {//This is a folder
+                    Log.e(TAG, "!!name = " + name);
+                    Log.e(TAG, "!!listOfDirs = " + listOfDirs);
+                    listOfDirs.add(name.toUpperCase());
+                } else if (folder == 0 && listOfFiles != null && !name.equals("tags.txt")) {
+                    //this is file
+                    listOfFiles.add(name);
+                }
+                cursor.moveToNext();
             }
         }
-        dirsCursor.close();
-
-        return listOfDirs;
+        cursor.close();
     }
 
 
     /*Instantiate and return a new Loader for the given ID*/
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) /**/{
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         // This loader will execute the ContentProvider's query method on a background thread
         return new CursorLoader(this,
                 TagEntry.CONTENT_URI,

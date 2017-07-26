@@ -17,25 +17,35 @@ import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.example.android.essentials.Activities.MainActivity.TAG;
+
 public class SubActivity extends AppCompatActivity {
 
     String subPath;
-    String[] subPathArray;
     String subRelativePath;
-    File subDir;
     String subActivityName;
+    String subTableName; //CS_FILES
+    ArrayList<String> subListOfDirs = new ArrayList<String>();
+    ArrayList<String> subListOfFiles = new ArrayList<String>();
+    ;
+    ListView subDirsList;
+
+
+    String[] subPathArray;
+
+    File subDir;
+
     File[] subAllFiles;
     ArrayList<String> subCategoriesNames = new ArrayList<String>();
     ArrayList<String> subQuestionsNames = new ArrayList<String>();
     final ArrayList<String> subCategoriesPaths = new ArrayList<String>();
     final ArrayList<String> subQuestionPaths = new ArrayList<String>();
-    ListView subList;
+
     ExpandableListView subExpList;
     ExpandableListView subExpNav;
     ExpandableListAdapter subExpListAdapter;
@@ -49,18 +59,21 @@ public class SubActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
 
-
-        //Get subActivity path
+        //Get and set full and relative paths
         subPath = getIntent().getStringExtra("subPath");
-
+        subRelativePath = subPath.substring(MainActivity.getMainPath().length() + 1);
+        Log.e(TAG, "Full sub path: " + subPath);
+        Log.e(TAG, "Relative sub path: " + subRelativePath);
 
         //Set subActivity name
-        subActivityName = subPath.substring(subPath.lastIndexOf("/") + 1);
+        subActivityName = subRelativePath.substring(subRelativePath.lastIndexOf("/") + 1);
         setTitle(subActivityName);
 
+        //Get subTableName
+        subTableName = MainActivity.relativePathToTableName(subRelativePath);
 
-        //Get relative path
-        subRelativePath = subPath.substring(MainActivity.getMainPath().length() + 1);
+        //Create separate arrays for files and dirs in the current path
+        MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
 
 
         //Get dir file, get all its files and folders
@@ -107,15 +120,14 @@ public class SubActivity extends AppCompatActivity {
         }
 
 
-        //Make list and set array adapter
-        subList = (ListView) findViewById(R.id.sub_list);
+        //Make list for dirs and set array adapter
+        subDirsList = (ListView) findViewById(R.id.sub_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, subCategoriesNames);
-        subList.setAdapter(adapter);
-
+        subDirsList.setAdapter(adapter);
 
         //Set clicklistener on list
-        subList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        subDirsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
