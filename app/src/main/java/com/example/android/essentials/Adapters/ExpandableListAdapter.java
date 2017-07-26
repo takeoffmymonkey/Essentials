@@ -52,7 +52,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.sub_list_item, null);
+            convertView = inflater.inflate(R.layout.item_sub_list, null);
         }
 
 

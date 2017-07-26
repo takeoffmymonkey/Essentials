@@ -109,7 +109,7 @@ public class SubActivity extends AppCompatActivity {
 
         //Make list and set array adapter
         subList = (ListView) findViewById(R.id.sub_list);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, subCategoriesNames);
         subList.setAdapter(adapter);
 

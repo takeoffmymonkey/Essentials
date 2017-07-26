@@ -47,7 +47,7 @@ public class SearchableActivity extends AppCompatActivity {
             }
             //doMySearch(query);
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            // Handle a suggestions click (because the suggestions all use ACTION_VIEW)
+            // Handle a item_suggestions click (because the item_suggestions all use ACTION_VIEW)
             Uri data = intent.getData();
             String query = intent.getStringExtra(SearchManager.QUERY);
             TextView tv = (TextView) findViewById(R.id.search_query);

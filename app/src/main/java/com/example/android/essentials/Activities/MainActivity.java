@@ -47,24 +47,17 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = "ESSENTIALS: ";
-
-    public static String mainPath;
-    String currentRelativePath;
-    String currentTableName;
+    public static SQLiteDatabase db;
+    public static String mainPath; // /storage/sdcard0/Essentials
+    String currentRelativePath; //""
+    String currentTableName; //FILES
     ArrayList<String> listOfDirs;
     ListView mainList;
 
 
-    File mainDir;
-
-    File[] mainFiles;
-    ArrayList<String> mainCategories = new ArrayList<String>();
-    final ArrayList<String> mainCategoriesPaths = new ArrayList<String>();
-
     private static final int TAG_LOADER = 0;
-    SimpleCursorAdapter tempAdapter;
-    Cursor mCursor;
-    public static SQLiteDatabase db;
+    SimpleCursorAdapter suggestionsAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
         //Get main path, set relative path and get currentTableName
-        // /storage/sdcard0/Essentials
         mainPath = getMainPath();
         currentRelativePath = "";
         currentTableName = relativePathToTableName(currentRelativePath);
@@ -100,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
         //Make list of folders in the current dir and set adapter
         listOfDirs = getListOfDirs(currentTableName);
         mainList = (ListView) findViewById(R.id.main_list);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, listOfDirs);
         mainList.setAdapter(adapter);
 
@@ -111,39 +103,41 @@ public class MainActivity extends AppCompatActivity implements
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
-                intent.putExtra("subPath", mainCategoriesPaths.get((int) id));
+                intent.putExtra("subPath", mainPath + "/" + listOfDirs.get((int) id));
                 view.getContext().startActivity(intent);
 
             }
         });
 
+
+        // Prepare the loader.  Either re-connect with an existing one, or start a new one.
+        getLoaderManager().initLoader(TAG_LOADER, null, this);
+
+
+        //Create item_suggestions list and set adapder
         prepareSuggestions();
 
+    }
 
 
-/*        mainDir = new File(mainPath);
+    /*Create item_suggestions list and set adapter*/
+    private void prepareSuggestions() {
+        //Get cursor
+        Cursor suggestionsCursor = getContentResolver().query(
+                TagEntry.CONTENT_URI,
+                null,
+                null,                   // Either null, or the word the user entered
+                null,                    // Either empty, or the string the user entered
+                null);
 
-        //Save paths of all files in the current dir
-        mainFiles = mainDir.listFiles();
-        for (File file :
-                mainFiles) {
-            mainCategoriesPaths.add(file.getAbsolutePath());
-        }
-
-        //add category names to mainCategories mainList
-        for (int i = 0; i < mainFiles.length; i++) {
-            String category = mainCategoriesPaths.get(i).substring(mainCategoriesPaths.get(i)
-                    .lastIndexOf("/") + 1);
-            mainCategories.add(category);
-        }
-
-
-        //Make list and set array adapter
-        mainList = (ListView) findViewById(R.id.main_list);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.main_list_item,
-                R.id.main_list_item_text, mainCategories);
-        mainList.setAdapter(adapter);*/
-
+        //Create adapter
+        suggestionsAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.item_suggestions,
+                suggestionsCursor,
+                new String[]{TagEntry.COLUMN_SUGGESTION, TagEntry.COLUMN_PATH},
+                new int[]{R.id.item_suggestions_text1, R.id.item_suggestions_text2},
+                0
+        );
 
     }
 
@@ -163,9 +157,7 @@ public class MainActivity extends AppCompatActivity implements
         searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
         searchView.setSubmitButtonEnabled(true);
 
-        searchView.setSuggestionsAdapter(tempAdapter);
-/*        searchView.setQueryRefinementEnabled(true);
-        searchView.setIconifiedByDefault(false);*/
+        searchView.setSuggestionsAdapter(suggestionsAdapter);
 
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
@@ -197,45 +189,20 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public boolean onQueryTextChange(String newText) {
                 final ContentResolver resolver = getContentResolver();
-                final String[] projection = {TagEntry.COLUMN_ID, TagEntry.COLUMN_SUGGESTION};
+                final String[] projection = {
+                        TagEntry.COLUMN_ID,
+                        TagEntry.COLUMN_SUGGESTION,
+                        TagEntry.COLUMN_PATH};
                 final String sa1 = "%" + newText + "%";
                 Cursor cursor = resolver.query(TagEntry.CONTENT_URI, projection, TagEntry.COLUMN_SUGGESTION + " LIKE ?",
                         new String[]{sa1}, null);
 
-                tempAdapter.changeCursor(cursor);
+                suggestionsAdapter.changeCursor(cursor);
                 return false;
             }
         });
 
         return true;
-    }
-
-
-    /*Menu options*/
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_search:
-                return true;
-            case R.id.action_sync:
-                sync(mainPath);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    public static String getMainPath() {
-        //Check if card is mount
-        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-        if (!cardMount) {
-            Log.e(TAG, "No sd card");
-            return "Card not found";
-        } else {//Card is mount
-            Log.e(TAG, "Main path: " +
-                    Environment.getExternalStorageDirectory().getPath() + "/Essentials");
-            return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
-        }
     }
 
 
@@ -350,76 +317,64 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public static void testTagsTable() {
-        Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "TAGS TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c.moveToFirst();
-        for (int i = 0; i < c.getCount(); i++) {
-            Log.e(TAG, "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // Define a projection that specifies the columns from the table we care about.
+
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,   // Parent activity context
+                TagEntry.CONTENT_URI,   // Provider content URI to query
+                null,             // Columns to include in the resulting Cursor
+                null,                   // No selection clause
+                null,                   // No selection arguments
+                null);                  // Default sort order
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        suggestionsAdapter.swapCursor(data);
+        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        suggestionsAdapter.swapCursor(null);
+    }
+
+
+    /*Menu options*/
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                return true;
+            case R.id.action_sync:
+                sync(mainPath);
+                return true;
         }
-        Log.e(TAG, "========================================================");
-        c.close();
-
+        return super.onOptionsItemSelected(item);
     }
 
 
-    public static void testQuestionsTable(String relativePath) {
-
-        Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "QUESTIONS TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c1.moveToFirst();
-        for (int i = 0; i < c1.getCount(); i++) {
-            Log.e(TAG, "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c1.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    /*Return main path (/storage/sdcard0/Essentials) */
+    static String getMainPath() {
+        //Check if card is mount
+        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        if (!cardMount) {
+            Log.e(TAG, "No sd card");
+            return "Card not found";
+        } else {//Card is mount
+            Log.e(TAG, "Main path: " +
+                    Environment.getExternalStorageDirectory().getPath() + "/Essentials");
+            return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
         }
-        Log.e(TAG, "========================================================");
-        c1.close();
     }
 
 
-    public void prepareSuggestions() {
-        // Prepare the loader.  Either re-connect with an existing one,
-        // or start a new one.
-        getLoaderManager().initLoader(TAG_LOADER, null, this);
-
-        mCursor = getContentResolver().query(
-                TagEntry.CONTENT_URI,  // The content URI of the words table
-                null,
-                null,                   // Either null, or the word the user entered
-                null,                    // Either empty, or the string the user entered
-                null);
-
-        tempAdapter = new SimpleCursorAdapter(getApplicationContext(),
-                R.layout.main_list_item,
-                mCursor,
-                new String[]{TagEntry.COLUMN_SUGGESTION},
-                new int[]{R.id.main_list_item_text},
-                0
-        );
-
-    }
-
-
-    public ArrayList<String> getListOfDirs(String currentTableName) {
+    /*Create array list of directories in the current folder*/
+    private ArrayList<String> getListOfDirs(String currentTableName) {
 
         //Get cursor with only folders
         String[] projection = {QuestionEntry.COLUMN_NAME};
@@ -449,29 +404,50 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // Define a projection that specifies the columns from the table we care about.
+    /*FOR DEBUGGING PURPOSES: show the look of TAGS table*/
+    static void testTagsTable() {
+        Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "TAGS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c.moveToFirst();
+        for (int i = 0; i < c.getCount(); i++) {
+            Log.e(TAG, "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c.close();
 
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,   // Parent activity context
-                TagEntry.CONTENT_URI,   // Provider content URI to query
-                null,             // Columns to include in the resulting Cursor
-                null,                   // No selection clause
-                null,                   // No selection arguments
-                null);                  // Default sort order
     }
 
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        tempAdapter.swapCursor(data);
-        Toast.makeText(this, "fds", Toast.LENGTH_SHORT).show();
-    }
+    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative path*/
+    static void testQuestionsTable(String relativePath) {
 
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        tempAdapter.swapCursor(null);
+        Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "QUESTIONS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
     }
 }
