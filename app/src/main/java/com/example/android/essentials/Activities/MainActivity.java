@@ -55,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements
     String currentTableName; //FILES
     ArrayList<String> listOfDirs = new ArrayList<String>();
     ListView mainList;
-    Cursor suggestionsCursor;
-    SimpleCursorAdapter suggestionsAdapter;
+    static Cursor suggestionsCursor;
+    static SimpleCursorAdapter suggestionsAdapter;
 
 
     @Override
@@ -273,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
                 Cursor cursor = ca.getCursor();
                 cursor.moveToPosition(position);
                 searchView.setQuery(cursor.getString(cursor.getColumnIndex
-                        (TagEntry.COLUMN_SUGGESTION)), false);
+                        (TagEntry.COLUMN_SUGGESTION)), true);
                 return true;
             }
         });

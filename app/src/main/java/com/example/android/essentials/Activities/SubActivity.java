@@ -1,9 +1,20 @@
 package com.example.android.essentials.Activities;
 
+import android.app.LoaderManager;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,18 +28,23 @@ import android.widget.ListView;
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
+import com.example.android.essentials.SearchableActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.db;
+import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
+import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
 
-public class SubActivity extends AppCompatActivity {
+public class SubActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int TAG_LOADER = 0;
     String mainPath;
     String subPath;
     String subRelativePath;
@@ -110,14 +126,84 @@ public class SubActivity extends AppCompatActivity {
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // Prepare the loader.  Either re-connect with an existing one, or start a new one.
+        getLoaderManager().initLoader(TAG_LOADER, null, this);
+
+        //Create item_suggestions list and set adapder
+        prepareSuggestions();
+
     }
 
 
     /*Create menu*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Create menu
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+        //Set up searchView menu item and adapter
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        ComponentName componentName = new ComponentName(this, SearchableActivity.class);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setSuggestionsAdapter(suggestionsAdapter);
+
+        //set OnSuggestionListener
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                // Add clicked text to search box
+                CursorAdapter ca = searchView.getSuggestionsAdapter();
+                Cursor cursor = ca.getCursor();
+                cursor.moveToPosition(position);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex
+                        (TagEntry.COLUMN_SUGGESTION)), true);
+                return true;
+            }
+        });
+
+        //set OnQueryTextListener
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //add path of the queried file to search data
+                CursorAdapter ca = searchView.getSuggestionsAdapter();
+                Cursor cursor = ca.getCursor();
+                String path = cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH));
+                Bundle appData = new Bundle();
+                appData.putString("path", path);
+                searchView.setAppSearchData(appData);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Update cursor on typing
+                final ContentResolver resolver = getContentResolver();
+                final String[] projection = {
+                        TagEntry.COLUMN_ID,
+                        TagEntry.COLUMN_SUGGESTION,
+                        TagEntry.COLUMN_PATH};
+                final String sa1 = "%" + newText + "%";
+                Cursor cursor = resolver.query(
+                        TagEntry.CONTENT_URI,
+                        projection,
+                        TagEntry.COLUMN_SUGGESTION + " LIKE ?",
+                        new String[]{sa1},
+                        null);
+                suggestionsAdapter.changeCursor(cursor);
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -132,7 +218,7 @@ public class SubActivity extends AppCompatActivity {
                 this.finish();
                 return true;
             case R.id.action_sync:
-
+                // TODO: 026 26 Jul 17  sync properly
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -206,6 +292,54 @@ public class SubActivity extends AppCompatActivity {
 
         //Start intent
         v.getContext().startActivity(intent);
+    }
+
+    /*Instantiate and return a new Loader for the given ID*/
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,
+                TagEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
+
+
+    /*Called when a previously created loader has finished its load*/
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //Refresh cursor
+        suggestionsAdapter.swapCursor(data);
+    }
+
+
+    /*Called when a previously created loader is being reset, and thus making its data unavailable*/
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        suggestionsAdapter.swapCursor(null);
+    }
+
+    /*Create item_suggestions list and set adapter*/
+    private void prepareSuggestions() {
+        //Get cursor
+        suggestionsCursor = getContentResolver().query(
+                TagEntry.CONTENT_URI,
+                null,
+                null,                   // Either null, or the word the user entered
+                null,                    // Either empty, or the string the user entered
+                null);
+
+        //Create adapter
+        suggestionsAdapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.item_suggestions,
+                suggestionsCursor,
+                new String[]{TagEntry.COLUMN_SUGGESTION, TagEntry.COLUMN_PATH},
+                new int[]{R.id.item_suggestions_text1, R.id.item_suggestions_text2},
+                0
+        );
+
     }
 
 
