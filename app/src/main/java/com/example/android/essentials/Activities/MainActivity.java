@@ -127,13 +127,13 @@ public class MainActivity extends AppCompatActivity implements
             for (File file : files) {
                 ContentValues contentValues = new ContentValues();
                 if (file.isDirectory()) {//This is a dir
-                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
+                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                     contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
                     db.insert(table, null, contentValues);
                     sync(relativePath + "/" + file.getName());
                 } else {//This is a file
                     if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
-                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName().toLowerCase());
+                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
                         db.insert(table, null, contentValues);
                     }
@@ -151,15 +151,15 @@ public class MainActivity extends AppCompatActivity implements
                     //Separate name, question and tags in fileTags and create path of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
-                    name = name.replaceAll("\uFEFF", "").toLowerCase();
+                    name = name.replaceAll("\uFEFF", "");
                     String tagPath = relativePath + "/" + name;
 
                     //Insert question if there is one
                     String question = separated[1].trim();
-                    if (!question.equals("") && !question.isEmpty()) {//We have a question here
+                    if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                        int rows = db.update(table,
+                        db.update(table,
                                 contentValues,
                                 QuestionEntry.COLUMN_NAME + "=?",
                                 new String[]{name});
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.e(TAG, Arrays.toString(locations));
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
-            sb.append(locations[i].toUpperCase().replaceAll(" ", "_"));
+            sb.append(locations[i].replaceAll(" ", "_"));
             sb.append("_");
         }
         sb.append("FILES");
@@ -370,8 +370,8 @@ public class MainActivity extends AppCompatActivity implements
                 if (folder == 1) {//This is a folder
                     Log.e(TAG, "!!name = " + name);
                     Log.e(TAG, "!!listOfDirs = " + listOfDirs);
-                    listOfDirs.add(name.toUpperCase());
-                } else if (folder == 0 && listOfFiles != null && !name.equals("tags.txt")) {
+                    listOfDirs.add(name);
+                } else if (folder == 0 && listOfFiles != null && !name.equalsIgnoreCase("tags.txt")) {
                     //this is file
                     listOfFiles.add(name);
                 }
