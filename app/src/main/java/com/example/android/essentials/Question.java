@@ -1,10 +1,13 @@
 package com.example.android.essentials;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
+import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
  * Created by takeoff on 018 18 Jul 17.
@@ -13,15 +16,10 @@ import static com.example.android.essentials.Activities.MainActivity.TAG;
 public class Question {
 
     private String question;
-
     private String fileFullPath;
-
     private int level;
-
     private String fileName;
-
     private String relativeFolderPath;
-
     private String tableName;
 
     public Question(String question, String fileFullPath, int level) {
@@ -47,6 +45,12 @@ public class Question {
 
     public void setLevel(int level) {
         this.level = level;
+        //Update db
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(QuestionEntry.COLUMN_LEVEL, level);
+        String selection = QuestionEntry.COLUMN_NAME + "=?";
+        String[] selectionArgs = {fileName};
+        db.update(tableName, contentValues, selection, selectionArgs);
     }
 
     public int levelUp() {
