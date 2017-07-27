@@ -45,14 +45,34 @@ public class Question {
         return level;
     }
 
-    public void levelUp() {
-        int level = getLevel();
-        Log.e(TAG, "Leveled up");
+    public void setLevel(int level) {
+        this.level = level;
     }
 
-    public void levelDown() {
-        int level = getLevel();
+    public int levelUp() {
+        int currentLevel = getLevel();
+        int newLevel;
+        if (currentLevel < 4) {
+            newLevel = ++currentLevel;
+            setLevel(newLevel);
+        } else {
+            newLevel = currentLevel;
+        }
+        Log.e(TAG, "Leveled up");
+        return newLevel;
+    }
+
+    public int levelDown() {
+        int currentLevel = getLevel();
+        int newLevel;
+        if (currentLevel > 0) {
+            newLevel = --currentLevel;
+            setLevel(newLevel);
+        } else {
+            newLevel = currentLevel;
+        }
         Log.e(TAG, "Leveled down");
+        return newLevel;
     }
 
     private void setFileName() {

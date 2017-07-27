@@ -122,7 +122,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         headerTextView.setText(headerTitle);
 
         //Set level
-        TextView levelTextView = (TextView) convertView.findViewById(R.id.level_text);
+        final TextView levelTextView = (TextView) convertView.findViewById(R.id.level_text);
         int level = currentQuestion.getLevel();
         levelTextView.setText(Integer.toString(level));
 
@@ -132,13 +132,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         buttonLevelDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentQuestion.levelDown();
+                levelTextView.setText(Integer.toString(currentQuestion.levelDown()));
             }
         });
         buttonLevelUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentQuestion.levelUp();
+                levelTextView.setText(Integer.toString(currentQuestion.levelUp()));
             }
         });
 
