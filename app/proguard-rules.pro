@@ -1,5 +1,5 @@
 # Add project specific ProGuard rules here.
-# By default, the flags in this filePath are appended to flags specified
+# By default, the flags in this fileFullPath are appended to flags specified
 # in C:\AndroidSDK/tools/proguard/proguard-android.txt
 # You can edit the include path and order by changing the proguardFiles
 # directive in build.gradle.
@@ -21,5 +21,5 @@
 #-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
-# hide the original source filePath name.
+# hide the original source fileFullPath name.
 #-renamesourcefileattribute SourceFile

@@ -52,7 +52,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
         //Get current question's path
-        final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
+        final String path = ((Question) getChild(groupPosition, childPosition)).getFileFullPath();
         Log.e(TAG, "going to open: " + "file://" + path);
 
         //For new view

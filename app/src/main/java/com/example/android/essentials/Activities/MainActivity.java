@@ -550,4 +550,29 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    public static String getLastValueOfPath(String path) {
+        return path.substring(path.lastIndexOf("/") + 1);
+    }
+
+    public static String getRelativePathFromFull(String fullPath) {
+        String relativePath = fullPath.substring(getMainPath().length(), fullPath.length());
+        Log.e(TAG, "getRelativePathFromFull received: " + fullPath);
+        Log.e(TAG, "getRelativePathFromFull return: " + relativePath);
+        return relativePath;
+    }
+
+    public static String getRelativePathOfDirForFile(String fileFullPath) {
+        File file = new File(fileFullPath);
+        if (file.isFile()) {
+            String relativeFilePath = MainActivity.getRelativePathFromFull(fileFullPath);
+            String relativeDirPath = relativeFilePath.substring(0,
+                    relativeFilePath.lastIndexOf("/") + 1);
+            Log.e(TAG, "getRelativePathOfDirForFile received: " + fileFullPath);
+            Log.e(TAG, "getRelativePathOfDirForFile return: " + relativeDirPath);
+            return relativeDirPath;
+        } else {
+            return "No file found at specified path";
+        }
+    }
+
 }
