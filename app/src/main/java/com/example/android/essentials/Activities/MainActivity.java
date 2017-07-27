@@ -1,6 +1,8 @@
 package com.example.android.essentials.Activities;
 
 import android.app.LoaderManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -15,6 +17,8 @@ import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -45,7 +49,7 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-
+    private static int notificationId = 0;
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
     public static SQLiteDatabase db;
@@ -105,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements
 
         //Create item_suggestions list and set adapder
         prepareSuggestions();
+
+        notifyQestion();
 
     }
 
@@ -455,5 +461,37 @@ public class MainActivity extends AppCompatActivity implements
         }
         Log.e(TAG, "========================================================");
         c1.close();
+    }
+
+
+    void notifyQestion() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher_round)
+                        .setContentTitle("My notification My notification My notification My notification My notification My notification")
+                        .setContentText("Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!");
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, SearchableActivity.class);
+
+        /*The stack builder object will contain an artificial back stack for the started Activity.
+        This ensures that navigating backward from the Activity leads out of your application to
+        the Home screen.*/
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(SearchableActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // notificationId allows you to update the notification later on.
+        notificationManager.notify(notificationId, mBuilder.build());
+
     }
 }
