@@ -25,20 +25,27 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
             android:text="Current level:" />
 
         <Button
+            android:id="@+id/level_down"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:focusable="false"
             android:text="-" />
 
         <TextView
+            android:id="@+id/level_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0" />
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:text="0"
+            android:textStyle="bold" />
 
         <Button
+            android:id="@+id/level_up"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:focusable="false"

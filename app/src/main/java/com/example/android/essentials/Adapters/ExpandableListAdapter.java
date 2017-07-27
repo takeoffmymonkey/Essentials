@@ -13,9 +13,12 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.TextView;
+
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
+
 import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
@@ -50,7 +53,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Get current question's path
         final String path = ((Question) getChild(groupPosition, childPosition)).getFilePath();
-        Log.e (TAG, "going to open: " + "file://" + path);
+        Log.e(TAG, "going to open: " + "file://" + path);
 
         //For new view
         if (convertView == null) {
@@ -101,6 +104,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
 
+        //Question object
+        final Question currentQuestion = ((Question) getGroup(groupPosition));
+
         //If view is empty
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
@@ -108,14 +114,33 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.sub_list_group, null);
         }
 
-
         //Set title of header
-        String headerTitle = ((Question) getGroup(groupPosition)).getQuestion();
+        String headerTitle = currentQuestion.getQuestion();
         TextView headerTextView = (TextView) convertView
                 .findViewById(R.id.sub_list_header);
         headerTextView.setTypeface(null, Typeface.BOLD);
         headerTextView.setText(headerTitle);
 
+        //Set level
+        TextView levelTextView = (TextView) convertView.findViewById(R.id.level_text);
+        int level = currentQuestion.getLevel();
+        levelTextView.setText(Integer.toString(level));
+
+        //Set buttons and onclick listeners
+        Button buttonLevelDown = (Button) convertView.findViewById(R.id.level_down);
+        Button buttonLevelUp = (Button) convertView.findViewById(R.id.level_up);
+        buttonLevelDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentQuestion.levelDown();
+            }
+        });
+        buttonLevelUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                currentQuestion.levelUp();
+            }
+        });
 
         return convertView;
     }
