@@ -45,6 +45,8 @@
             android:authorities="com.example.android.essentials"
             android:exported="false" />
 
+
+        <receiver android:name=".NotificationPublisher" />
     </application>
 
 </manifest>
