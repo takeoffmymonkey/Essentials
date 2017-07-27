@@ -25,11 +25,13 @@ import static com.example.android.essentials.Activities.MainActivity.db;
 
 public class SearchableActivity extends AppCompatActivity {
 
-    ArrayList<String> paths = new ArrayList<>();
+    ArrayList<String> relativePaths = new ArrayList<>();
+    String relativePath = null;
     ArrayList<Question> questions = new ArrayList<Question>();
     ExpandableListView expList;
     ExpandableListAdapter expListAdapter;
     String mainPath;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,13 +62,16 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
     public void handleIntent() {
-        // Get the intent, verify the action and get the additional data (path)
+        // Get the intent, verify the action and get the additional data (relativePath)
         Intent intent = getIntent();
+        relativePath = intent.getStringExtra("relativePath");
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
             if (appData != null) {
-                paths = appData.getStringArrayList("paths");
+                relativePaths = appData.getStringArrayList("relativePaths");
             }
+        } else if (relativePath != null) {
+            relativePaths.add(relativePath);
         }
     }
 
@@ -84,9 +89,9 @@ public class SearchableActivity extends AppCompatActivity {
 
     /*Prepare questions list for adapter*/
     private void prepareQuestionsList() {
-        for (int i = 0; i < paths.size(); i++) {
-            //Get fileRelativePath of the question and create full path
-            String fileRelativePath = paths.get(i);
+        for (int i = 0; i < relativePaths.size(); i++) {
+            //Get fileRelativePath of the question and create full relativePath
+            String fileRelativePath = relativePaths.get(i);
             String fileFullPath = mainPath + fileRelativePath;
             Log.e(TAG, "working with fileRelativePath: " + fileRelativePath);
             Log.e(TAG, "working with fileFullPath: " + fileFullPath);

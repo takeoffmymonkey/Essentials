@@ -43,6 +43,7 @@ import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
 import com.example.android.essentials.R;
+import com.example.android.essentials.Schedule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements
         EssentialsDbHelper dbHelper = new EssentialsDbHelper(this);
         db = dbHelper.getReadableDatabase();
 
-        //Get main path, set relative path and get currentTableName
+        //Get main relativePath, set relative relativePath and get currentTableName
         mainPath = getMainPath();
         currentRelativePath = "";
         currentTableName = relativePathToTableName(currentRelativePath);
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements
                 BufferedReader br = new BufferedReader(new FileReader(tagsFile));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    //Separate name, question and tags in fileTags and create path of this fileTags
+                    //Separate name, question and tags in fileTags and create relativePath of this fileTags
                     String[] separated = line.split(":");
                     String name = separated[0].trim();
                     name = name.replaceAll("\uFEFF", "");
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*Convert relative path to name of the table with listing of current files*/
+    /*Convert relative relativePath to name of the table with listing of current files*/
     public static String relativePathToTableName(String relativePath) {
         Log.e(TAG, "relativePathToTableName received: " + relativePath);
         //Path should start with /
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*Create Questions table for the specified relative path*/
+    /*Create Questions table for the specified relative relativePath*/
     public static String createQuestionsTable(String relativePath) {
         String table = relativePathToTableName(relativePath);
         String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
                 + QuestionEntry.COLUMN_TIME + " INTEGER);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
-        Log.e(TAG, "created table for path: " + relativePath + " with name: " + table);
+        Log.e(TAG, "created table for relativePath: " + relativePath + " with name: " + table);
         return table;
     }
 
@@ -291,13 +292,13 @@ public class MainActivity extends AppCompatActivity implements
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //add path of the queried file to search data
+                //add relativePath of the queried file to search data
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 ArrayList<String> paths = new ArrayList<String>();
                 paths.add(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH)));
                 Bundle appData = new Bundle();
-                appData.putStringArrayList("paths", paths);
+                appData.putStringArrayList("relativePaths", paths);
                 searchView.setAppSearchData(appData);
                 return false;
             }
@@ -337,14 +338,16 @@ public class MainActivity extends AppCompatActivity implements
                 sync(mainPath);
                 return true;
             case R.id.action_5:
-                scheduleNotification(getNotification("5 second delay"), 5000);
+                scheduleNotification(getNotification("Какие принципы языка Java ты знаешь?",
+                        "/CS/Technologies/Java/2 Язык/0 Принципы.mht"),
+                        Schedule.LEVEL_TEST);
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-    /*Return main path (/storage/sdcard0/Essentials) */
+    /*Return main relativePath (/storage/sdcard0/Essentials) */
     static String getMainPath() {
         //Check if card is mount
         boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
@@ -352,7 +355,7 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, "No sd card");
             return "Card not found";
         } else {//Card is mount
-            Log.e(TAG, "Main path: " +
+            Log.e(TAG, "Main relativePath: " +
                     Environment.getExternalStorageDirectory().getPath() + "/Essentials");
             return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
         }
@@ -445,7 +448,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative path*/
+    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative relativePath*/
     static void testQuestionsTable(String relativePath) {
 
         Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
@@ -472,28 +475,30 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void scheduleNotification(Notification notification, int delay) {
-
+    private void scheduleNotification(Notification notification, long delay) {
         Intent notificationIntent = new Intent(this, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
 
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private Notification getNotification(String question) {
+    private Notification getNotification(String question, String relativePath) {
         Notification.Builder builder = new Notification.Builder(this);
-        builder.setContentTitle("Scheduled Notification");
-        builder.setContentText("Hello");
+        builder.setContentTitle(question);
+        builder.setContentText(relativePath);
         builder.setSmallIcon(R.drawable.ic_launcher_round);
         builder.setAutoCancel(true);
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, SearchableActivity.class);
+        resultIntent.putExtra("relativePath", relativePath);
         /*The stack builder object will contain an artificial back stack for the started Activity.
         This ensures that navigating backward from the Activity leads out of your application to
         the Home screen.*/

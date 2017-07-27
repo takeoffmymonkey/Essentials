@@ -65,12 +65,12 @@ public class SubActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
 
-        //Get and set main and current dir's full and relative paths
+        //Get and set main and current dir's full and relative relativePaths
         mainPath = MainActivity.getMainPath();
         subPath = getIntent().getStringExtra("subPath");
         subRelativePath = "/" + subPath.substring(mainPath.length() + 1);
-        Log.e(TAG, "Full sub path: " + subPath);
-        Log.e(TAG, "Relative sub path: " + subRelativePath);
+        Log.e(TAG, "Full sub relativePath: " + subPath);
+        Log.e(TAG, "Relative sub relativePath: " + subRelativePath);
 
         //Set subActivity name
         subActivityName = subRelativePath.substring(subRelativePath.lastIndexOf("/") + 1);
@@ -79,7 +79,7 @@ public class SubActivity extends AppCompatActivity implements
         //Get subTableName
         subTableName = MainActivity.relativePathToTableName(subRelativePath);
 
-        //Create separate arrays for files and dirs in the current path
+        //Create separate arrays for files and dirs in the current relativePath
         MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
 
         //Make list for dirs and set array adapter
@@ -173,13 +173,13 @@ public class SubActivity extends AppCompatActivity implements
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //add path of the queried file to search data
+                //add relativePath of the queried file to search data
                 CursorAdapter ca = searchView.getSuggestionsAdapter();
                 Cursor cursor = ca.getCursor();
                 ArrayList<String> paths = new ArrayList<String>();
                 paths.add(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH)));
                 Bundle appData = new Bundle();
-                appData.putStringArrayList("paths", paths);
+                appData.putStringArrayList("relativePaths", paths);
                 searchView.setAppSearchData(appData);
                 return false;
             }
@@ -228,7 +228,7 @@ public class SubActivity extends AppCompatActivity implements
     /*Prepare questions list for adapter*/
     private void prepareQuestionsList() {
         for (int i = 0; i < subListOfFiles.size(); i++) {
-            //Get path of the question
+            //Get relativePath of the question
             String name = subListOfFiles.get(i);
             String path = mainPath + subRelativePath + "/" + name;
             Log.e(TAG, "Path of question: " + path);
@@ -282,7 +282,7 @@ public class SubActivity extends AppCompatActivity implements
             intent = new Intent(SubActivity.this, MainActivity.class);
         } else { //sub activity selected
             id += 3;
-            for (int i = 0; i < id; i++) {//Form new path
+            for (int i = 0; i < id; i++) {//Form new relativePath
                 tempSubPath += "/" + tempSubPathArray[i + 1];
             }
             intent = new Intent(SubActivity.this, SubActivity.class);
