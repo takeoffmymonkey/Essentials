@@ -485,15 +485,64 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private Notification getNotification(String content) {
+    private Notification getNotification(String question) {
         Notification.Builder builder = new Notification.Builder(this);
         builder.setContentTitle("Scheduled Notification");
-        builder.setContentText(content);
+        builder.setContentText("Hello");
         builder.setSmallIcon(R.drawable.ic_launcher_round);
+        builder.setAutoCancel(true);
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, SearchableActivity.class);
+        /*The stack builder object will contain an artificial back stack for the started Activity.
+        This ensures that navigating backward from the Activity leads out of your application to
+        the Home screen.*/
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(SearchableActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        builder.setContentIntent(resultPendingIntent);
+
         return builder.build();
     }
 
 
+    void notifyQuestion() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher_round)
+                        .setContentTitle("My notification My notification My notification My notification My notification My notification")
+                        .setContentText("Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!");
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, SearchableActivity.class);
+
+        /*The stack builder object will contain an artificial back stack for the started Activity.
+        This ensures that navigating backward from the Activity leads out of your application to
+        the Home screen.*/
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(SearchableActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // notificationId allows you to update the notification later on.
+        notificationManager.notify(notificationId, mBuilder.build());
+
+    }
 
 
 }
