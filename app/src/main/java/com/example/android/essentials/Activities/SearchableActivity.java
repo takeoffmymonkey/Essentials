@@ -106,8 +106,9 @@ public class SearchableActivity extends AppCompatActivity {
             String tableName = MainActivity.relativePathToTableName(folderRelativePath);
             Log.e(TAG, "prepared table name for question: " + tableName);
 
-            //Rename question if it has question text provided
-            String[] projection = {QuestionEntry.COLUMN_QUESTION};
+            //Rename question if it has question text provided, add level
+            int level = 0;
+            String[] projection = {QuestionEntry.COLUMN_QUESTION, QuestionEntry.COLUMN_LEVEL};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
             Cursor cursor = db.query(tableName,
@@ -118,14 +119,16 @@ public class SearchableActivity extends AppCompatActivity {
             if (cursor.getCount() == 1) { //Row is found
                 cursor.moveToFirst();
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
+                level = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_LEVEL));
                 if (q != null) {//There is a question provided
                     name = q;
                     Log.e(TAG, "New name of question: " + name);
                 }
+
             }
             cursor.close();
             //Add question object to the list of questions
-            questions.add(new Question(name, fileFullPath));
+            questions.add(new Question(name, fileFullPath, level));
         }
     }
 }

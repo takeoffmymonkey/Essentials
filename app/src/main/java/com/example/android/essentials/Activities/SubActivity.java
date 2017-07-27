@@ -210,7 +210,7 @@ public class SubActivity extends AppCompatActivity implements
 
     /*Menu options*/
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) /**/{
+    public boolean onOptionsItemSelected(MenuItem item) /**/ {
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
@@ -234,7 +234,8 @@ public class SubActivity extends AppCompatActivity implements
             Log.e(TAG, "Path of question: " + path);
 
             //Rename question if it has question text provided
-            String[] projection = {QuestionEntry.COLUMN_QUESTION};
+            int level = 0;
+            String[] projection = {QuestionEntry.COLUMN_QUESTION, QuestionEntry.COLUMN_LEVEL};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
             Cursor cursor = db.query(subTableName,
@@ -249,11 +250,13 @@ public class SubActivity extends AppCompatActivity implements
                     name = q;
                     Log.e(TAG, "New name of question: " + name);
                 }
+                //Set level
+                level = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_LEVEL));
             }
             cursor.close();
 
             //Add question object to the list of questions
-            questions.add(new Question(name, path));
+            questions.add(new Question(name, path, level));
         }
     }
 
