@@ -513,6 +513,7 @@ public class MainActivity extends AppCompatActivity implements
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
         builder.setContentIntent(resultPendingIntent);
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);
 
         return builder.build();
     }
