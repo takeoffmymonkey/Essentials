@@ -43,7 +43,6 @@ import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
 import com.example.android.essentials.R;
-import com.example.android.essentials.Schedule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -478,44 +477,44 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static void scheduleNotification(Notification notification, long delay) {
+        //Set notification intent and put resulting notification in
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+
+        //Set time delay and alarm + pending intent
+        long futureInMillis = SystemClock.elapsedRealtime() + delay;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     public static Notification getNotification(String question, String relativePath) {
-        Notification.Builder builder = new Notification.Builder(context);
-        builder.setContentTitle(question);
-        builder.setContentText(relativePath);
-        builder.setSmallIcon(R.drawable.ic_launcher_round);
-        builder.setAutoCancel(true);
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, SearchableActivity.class);
         resultIntent.putExtra("relativePath", relativePath);
-        /*The stack builder object will contain an artificial back stack for the started Activity.
-        This ensures that navigating backward from the Activity leads out of your application to
-        the Home screen.*/
+
+        //Make artificial back stack to go back to Home screen on back passed
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        // Adds the back stack for the Intent (but not the Intent itself)
         stackBuilder.addParentStack(SearchableActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-        builder.setContentIntent(resultPendingIntent);
+
+        //Build notification
+        Notification.Builder builder = new Notification.Builder(context);
+        builder.setContentTitle(question);
+        builder.setContentText(relativePath);
+        builder.setSmallIcon(R.drawable.ic_launcher_round);
+        builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
+        builder.setContentIntent(resultPendingIntent);
 
         return builder.build();
     }

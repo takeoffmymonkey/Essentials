@@ -14,13 +14,17 @@ public class NotificationPublisher extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id";
     public static String NOTIFICATION = "notification";
 
+    @Override
     public void onReceive(Context context, Intent intent) {
-
+        //Create notification manager
         NotificationManager notificationManager =
-                (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        //Get resulting notification
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
+
+        //Trigger resulting notification
         notificationManager.notify(id, notification);
 
     }
