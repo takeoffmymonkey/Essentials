@@ -50,6 +50,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -492,6 +493,10 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static Notification getNotification(String question, String relativePath) {
+        //Create notification manager
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, SearchableActivity.class);
@@ -501,9 +506,12 @@ public class MainActivity extends AppCompatActivity implements
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(SearchableActivity.class);
         stackBuilder.addNextIntent(resultIntent);
+
+        int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
-                        0,
+                        m,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
