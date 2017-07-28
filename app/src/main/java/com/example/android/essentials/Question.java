@@ -62,6 +62,7 @@ public class Question {
         } else {
             newLevel = currentLevel;
         }
+        setQuestionNotification();
         Log.e(TAG, "Leveled up");
         return newLevel;
     }
@@ -75,6 +76,7 @@ public class Question {
         } else {
             newLevel = currentLevel;
         }
+        setQuestionNotification();
         Log.e(TAG, "Leveled down");
         return newLevel;
     }
@@ -94,5 +96,43 @@ public class Question {
         Log.e(TAG, "Set table name of the question: " + tableName);
     }
 
+    private void setQuestionNotification() {
+        //set delay
+        int level = getLevel();
+        long delay;
+        switch (level) {
+            case 0: {
+                delay = Schedule.LEVEL_0;
+                break;
+            }
+            case 1: {
+                delay = Schedule.LEVEL_1;
+                break;
+            }
+            case 2: {
+                delay = Schedule.LEVEL_2;
+                break;
+            }
+            case 3: {
+                delay = Schedule.LEVEL_3;
+                break;
+            }
+            case 4: {
+                delay = Schedule.LEVEL_4;
+                break;
+            }
+            default: {
+                delay = Schedule.LEVEL_0;
+                break;
+            }
+        }
+
+        //Create notification
+        MainActivity.scheduleNotification(MainActivity.getNotification(getQuestion(),
+                getFileFullPath()),
+                delay);
+
+        Log.e(TAG, "Set notification time: " + delay + " For question: " + getQuestion());
+    }
 
 }

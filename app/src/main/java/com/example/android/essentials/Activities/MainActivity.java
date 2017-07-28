@@ -56,6 +56,8 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
+
+    private static Context context;
     private static int notificationId = 0;
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
@@ -73,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Update context
+        MainActivity.context = getApplicationContext();
 
         //Create db
         EssentialsDbHelper dbHelper = new EssentialsDbHelper(this);
@@ -338,9 +343,6 @@ public class MainActivity extends AppCompatActivity implements
                 sync(mainPath);
                 return true;
             case R.id.action_5:
-                scheduleNotification(getNotification("Какие принципы языка Java ты знаешь?",
-                        "/CS/Technologies/Java/2 Язык/0 Принципы.mht"),
-                        Schedule.LEVEL_TEST);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -475,34 +477,34 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void scheduleNotification(Notification notification, long delay) {
-        Intent notificationIntent = new Intent(this, NotificationPublisher.class);
+    public static void scheduleNotification(Notification notification, long delay) {
+        Intent notificationIntent = new Intent(context, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent,
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
     }
 
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    private Notification getNotification(String question, String relativePath) {
-        Notification.Builder builder = new Notification.Builder(this);
+    public static Notification getNotification(String question, String relativePath) {
+        Notification.Builder builder = new Notification.Builder(context);
         builder.setContentTitle(question);
         builder.setContentText(relativePath);
         builder.setSmallIcon(R.drawable.ic_launcher_round);
         builder.setAutoCancel(true);
 
         // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this, SearchableActivity.class);
+        Intent resultIntent = new Intent(context, SearchableActivity.class);
         resultIntent.putExtra("relativePath", relativePath);
         /*The stack builder object will contain an artificial back stack for the started Activity.
         This ensures that navigating backward from the Activity leads out of your application to
         the Home screen.*/
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         // Adds the back stack for the Intent (but not the Intent itself)
         stackBuilder.addParentStack(SearchableActivity.class);
         // Adds the Intent that starts the Activity to the top of the stack
