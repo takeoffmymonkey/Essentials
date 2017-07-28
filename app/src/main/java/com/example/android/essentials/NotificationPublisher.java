@@ -20,11 +20,10 @@ public class NotificationPublisher extends BroadcastReceiver {
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        //Get resulting notification
+        //Get resulting notification from received intent
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
 
-        //
 
         //Trigger resulting notification
         notificationManager.notify(id, notification);

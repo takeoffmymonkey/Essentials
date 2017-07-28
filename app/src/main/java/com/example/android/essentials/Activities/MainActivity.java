@@ -478,9 +478,10 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static void scheduleNotification(Notification notification, long delay) {
-        //Set notification intent and put resulting notification in
+        //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, 1);
+        int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, m);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
 
         //Set time delay and alarm + pending intent
@@ -493,11 +494,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static Notification getNotification(String question, String relativePath) {
-        //Create notification manager
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, SearchableActivity.class);
         resultIntent.putExtra("relativePath", relativePath);
@@ -511,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements
 
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
-                        m,
+                        0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
 
@@ -528,41 +524,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    void notifyQuestion() {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher_round)
-                        .setContentTitle("My notification My notification My notification My notification My notification My notification")
-                        .setContentText("Hello World! Hello World! Hello World! Hello World! Hello World! Hello World! Hello World!");
-        // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this, SearchableActivity.class);
-
-        /*The stack builder object will contain an artificial back stack for the started Activity.
-        This ensures that navigating backward from the Activity leads out of your application to
-        the Home screen.*/
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(SearchableActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        // notificationId allows you to update the notification later on.
-        notificationManager.notify(notificationId, mBuilder.build());
-
-    }
-
-
     public static String getLastValueOfPath(String path) {
         return path.substring(path.lastIndexOf("/") + 1);
     }
+
 
     public static String getRelativePathFromFull(String fullPath) {
         String relativePath = fullPath.substring(getMainPath().length(), fullPath.length());
@@ -570,6 +535,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.e(TAG, "getRelativePathFromFull return: " + relativePath);
         return relativePath;
     }
+
 
     public static String getRelativePathOfDirForFile(String fileFullPath) {
         File file = new File(fileFullPath);
