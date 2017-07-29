@@ -4,7 +4,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
+
 /**
  * Created by takeoff on 021 21 Jul 17.
  */
@@ -31,6 +33,15 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
                 + TagEntry.COLUMN_SUGGESTION + " TEXT NOT NULL);";
         db.execSQL(SQL_CREATE_TAGS_TABLE);
 
+
+        //Create NOTIFICATIONS table
+        String SQL_CREATE_NOTIFICATIONS_TABLE = "CREATE TABLE " + NotificationsEntry.TABLE_NAME + " ("
+                + NotificationsEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + NotificationsEntry.COLUMN_QUESTION + " TEXT NOT NULL UNIQUE, "
+                + NotificationsEntry.COLUMN_RELATIVE_PATH + " TEXT NOT NULL UNIQUE, "
+                + NotificationsEntry.COLUMN_LEVEL + " INTEGER, "
+                + NotificationsEntry.COLUMN_TIME_EDITED + " INTEGER);";
+        db.execSQL(SQL_CREATE_NOTIFICATIONS_TABLE);
 
     }
 

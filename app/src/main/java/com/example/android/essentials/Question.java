@@ -1,11 +1,11 @@
 package com.example.android.essentials;
 
 import android.content.ContentValues;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
+import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
@@ -15,9 +15,7 @@ import static com.example.android.essentials.Activities.MainActivity.db;
  * Created by takeoff on 018 18 Jul 17.
  */
 
-public class Question implements Parcelable {
-
-    private int mData;
+public class Question {
 
     private String question;
     private String fileFullPath;
@@ -49,13 +47,66 @@ public class Question implements Parcelable {
 
     public void setLevel(int level) {
         this.level = level;
-        //Update db
+
+        //Update Questions table
         ContentValues contentValues = new ContentValues();
         contentValues.put(QuestionEntry.COLUMN_LEVEL, level);
         String selection = QuestionEntry.COLUMN_NAME + "=?";
         String[] selectionArgs = {getFileName()};
         db.update(tableName, contentValues, selection, selectionArgs);
+
+        //Update Notifications table
+        //Check if question exist
+        Boolean questionExists = false;
+        String[] projection2 = {NotificationsEntry.COLUMN_QUESTION};
+        String selection2 = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs2 = {getQuestion()};
+        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection2, selection2, selectionArgs2,
+                null, null, null);
+        if (c.getCount() == 1) {//Question exists
+            questionExists = true;
+        }
+        c.close();
+
+        //Choose action to perform
+        if (questionExists && level == 0) {
+            deleteNotification();
+        } else if (!questionExists && level > 0) {
+            addNotification();
+        } else {
+            updateNotification(level);
+        }
+
     }
+
+    private void addNotification() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NotificationsEntry.COLUMN_QUESTION, getQuestion());
+        contentValues.put(NotificationsEntry.COLUMN_RELATIVE_PATH,
+                MainActivity.getRelativePathFromFull(getFileFullPath()));
+        contentValues.put(NotificationsEntry.COLUMN_LEVEL, 1);
+        contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
+        long r = db.insert(NotificationsEntry.TABLE_NAME, null, contentValues);
+        Log.e(TAG, "adding to notification table response: " + r);
+    }
+
+    private void deleteNotification() {
+        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs = {getQuestion()};
+        long r = db.delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
+        Log.e(TAG, "deleting from notification table response: " + r);
+    }
+
+    private void updateNotification(int level) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NotificationsEntry.COLUMN_LEVEL, level);
+        contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
+        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs = {getQuestion()};
+        long r = db.update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        Log.e(TAG, "updating notification table response: " + r);
+    }
+
 
     public String getFileName() {
         return fileName;
@@ -66,6 +117,8 @@ public class Question implements Parcelable {
     }
 
     public int levelUp() {
+
+
         int currentLevel = getLevel();
         int newLevel;
         if (currentLevel < 4) {
@@ -147,32 +200,5 @@ public class Question implements Parcelable {
         Log.e(TAG, "Set notification time: " + delay + " For question: " + getQuestion());
     }
 
-    // 99.9% of the time you can just ignore this
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    // write your object's data to the passed-in Parcel
-    @Override
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mData);
-    }
-
-
-    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-    public static final Parcelable.Creator<Question> CREATOR = new Parcelable.Creator<Question>() {
-        public Question createFromParcel(Parcel in) {
-            return new Question(in);
-        }
-
-        public Question[] newArray(int size) {
-            return new Question[size];
-        }
-    };
-
-    // example constructor that takes a Parcel and gives you an object populated with it's values
-    private Question(Parcel in) {
-        mData = in.readInt();
-    }
 }

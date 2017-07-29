@@ -227,8 +227,7 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
                 + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
                 + QuestionEntry.COLUMN_QUESTION + " TEXT, "
-                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0, "
-                + QuestionEntry.COLUMN_TIME + " INTEGER);";
+                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
         Log.e(TAG, "created table for relativePath: " + relativePath + " with name: " + table);
         return table;
@@ -466,14 +465,12 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, "--------------------------------------------------------");
             Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
             Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "TIME: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_TIME)));
-            Log.e(TAG, "--------------------------------------------------------");
             c1.moveToNext();
             Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
         Log.e(TAG, "========================================================");
         c1.close();
-    }
+    }/**/
 
 
     public static void scheduleNotification(Question question, Notification notification, long delay) {
@@ -496,16 +493,16 @@ public class MainActivity extends AppCompatActivity implements
         notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, question.getLevel());
 
         //Set time delay and alarm + pending intent
-        long futureInMillis = SystemClock.elapsedRealtime() + delay;
+        long futureInMillis = System.currentTimeMillis() + delay;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notification.hashCode(), notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_UPDATE_CURRENT);
         Log.e(TAG, "2 scheduleNotification: 5 created pendingIntent from PendingIntent" +
                 ".getBroadcast(c, t, notificationIntent): " + pendingIntent.toString());
         Log.e(TAG, "2 scheduleNotification: 5.1 t: " + notification.hashCode());
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
         //alarm will first be canceled.
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        alarmManager.set(AlarmManager.RTC, futureInMillis, pendingIntent);
         Log.e(TAG, "2 scheduleNotification: 6 created alarmManager with pendingIntent: " + alarmManager.toString());
     }
 
@@ -527,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         resultIntent.hashCode(),
-                        PendingIntent.FLAG_CANCEL_CURRENT
+                        PendingIntent.FLAG_UPDATE_CURRENT
                 );
         Log.e(TAG, "1 getNotification: 4 created resultPendingIntent from stackbuilder: " + resultPendingIntent.toString());
         Log.e(TAG, "1 getNotification: 4.1 with request code: " + resultIntent.hashCode());
@@ -577,8 +574,4 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
 }

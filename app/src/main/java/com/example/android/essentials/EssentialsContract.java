@@ -47,7 +47,16 @@ public final class EssentialsContract {
         public final static String COLUMN_FOLDER = "FOLDER";
         public final static String COLUMN_QUESTION = "QUESTION";
         public final static String COLUMN_LEVEL = "LEVEL";
-        public final static String COLUMN_TIME = "TIME";
+
+    }
+
+    public static final class NotificationsEntry implements BaseColumns {
+        public final static String TABLE_NAME = "NOTIFICATIONS";
+        public final static String COLUMN_ID = BaseColumns._ID;
+        public final static String COLUMN_QUESTION = "QUESTION";
+        public final static String COLUMN_RELATIVE_PATH = "RELATIVE_PATH";
+        public final static String COLUMN_LEVEL = "LEVEL";
+        public final static String COLUMN_TIME_EDITED = "TIME_EDITED";
 
     }
 

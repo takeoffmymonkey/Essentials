@@ -38,8 +38,7 @@ public class NotificationPublisher extends BroadcastReceiver {
 
         //Get resulting notification from received intent
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 3 created notification from received intent (by NOTIFICATION): "
-                + notification.toString());
+
 
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
         Log.e(TAG, "3 NotificationPublisher.onReceive: 3 created id from received intent (by NOTIFICATION_ID): "
@@ -49,7 +48,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         String questionFileName = intent.getStringExtra(QUESTION_FILE);
         String questionTableName = intent.getStringExtra(QUESTION_TABLE);
         int exLevel = intent.getIntExtra(QUESTION_LEVEL, 0);
-        int currentLevel = 0;
+        int currentLevel;
         String[] projection = {QuestionEntry.COLUMN_LEVEL};
         String selection = QuestionEntry.COLUMN_NAME + "=?";
         String[] selectionArgs = {questionFileName};
