@@ -225,8 +225,7 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
                 + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
-                + QuestionEntry.COLUMN_QUESTION + " TEXT, "
-                + QuestionEntry.COLUMN_LEVEL + " INTEGER DEFAULT 0);";
+                + QuestionEntry.COLUMN_QUESTION + " TEXT);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
         Log.e(TAG, "created table for relativePath: " + relativePath + " with name: " + table);
         return table;

@@ -19,15 +19,13 @@ public class Question {
 
     private String question;
     private String fileFullPath;
-    private int level;
     private String fileName;
     private String relativeFolderPath;
     private String tableName;
 
-    public Question(String question, String fileFullPath, int level) {
+    public Question(String question, String fileFullPath) {
         this.question = question;
         this.fileFullPath = fileFullPath;
-        this.level = level;
         setFileName();
         setRelativeFolderPath();
         setTableName(relativeFolderPath);
@@ -42,11 +40,23 @@ public class Question {
     }
 
     public int getLevel() {
+        int level = 0;
+
+        String[] projection = {NotificationsEntry.COLUMN_LEVEL};
+        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs = {getQuestion()};
+        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                null, null, null);
+        if (c.getCount() == 1) {//Question exists
+            c.moveToFirst();
+            level = c.getInt(c.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
+        }
+        c.close();
+
         return level;
     }
 
     public void setLevel(int level) {
-        this.level = level;
 
         //Update Questions table
         ContentValues contentValues = new ContentValues();
@@ -109,7 +119,7 @@ public class Question {
     }
 
 
-    public String getFileName() {
+    String getFileName() {
         return fileName;
     }
 
