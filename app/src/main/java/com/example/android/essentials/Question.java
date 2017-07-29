@@ -53,8 +53,16 @@ public class Question implements Parcelable {
         ContentValues contentValues = new ContentValues();
         contentValues.put(QuestionEntry.COLUMN_LEVEL, level);
         String selection = QuestionEntry.COLUMN_NAME + "=?";
-        String[] selectionArgs = {fileName};
+        String[] selectionArgs = {getFileName()};
         db.update(tableName, contentValues, selection, selectionArgs);
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getTableName() {
+        return tableName;
     }
 
     public int levelUp() {

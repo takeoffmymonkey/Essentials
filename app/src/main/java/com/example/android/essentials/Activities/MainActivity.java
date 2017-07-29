@@ -491,9 +491,9 @@ public class MainActivity extends AppCompatActivity implements
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         Log.e(TAG, "2 scheduleNotification: 4 put to notificationIntent extra: "
                 + NotificationPublisher.NOTIFICATION.toString() + " with value: " + notification.toString());
-        notificationIntent.putExtra("question", question);
-        notificationIntent.putExtra("level", question.getLevel());
-
+        notificationIntent.putExtra(NotificationPublisher.QUESTION_FILE, question.getFileName());
+        notificationIntent.putExtra(NotificationPublisher.QUESTION_TABLE, question.getTableName());
+        notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, question.getLevel());
 
         //Set time delay and alarm + pending intent
         long futureInMillis = SystemClock.elapsedRealtime() + delay;

@@ -5,9 +5,13 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.util.Log;
 
+import com.example.android.essentials.EssentialsContract.QuestionEntry;
+
 import static com.example.android.essentials.Activities.MainActivity.TAG;
+import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
  * Created by takeoff on 027 27 Jul 17.
@@ -16,6 +20,9 @@ import static com.example.android.essentials.Activities.MainActivity.TAG;
 public class NotificationPublisher extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id";
     public static String NOTIFICATION = "notification";
+    public static String QUESTION_TABLE = "question-table";
+    public static String QUESTION_FILE = "question-file";
+    public static String QUESTION_LEVEL = "question-level";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -39,19 +46,29 @@ public class NotificationPublisher extends BroadcastReceiver {
                 + id);
 
         //Check if level is still actual
-        Question question = intent.getParcelableExtra("question");
-        int currentLevel = question.getLevel();
-        int exLevel = intent.getIntExtra("level", 0);
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 4 currentLevel: " + currentLevel +
-                " exLevel: " + exLevel);
-
-        if (currentLevel == exLevel) {
-            //Trigger resulting notification
-            notificationManager.notify(id, notification);
-            Log.e(TAG, "3 NotificationPublisher.onReceive: 5 triggered notificationManager.notify for id: "
-                    + id + " and notification: " + notification);
+        String questionFileName = intent.getStringExtra(QUESTION_FILE);
+        String questionTableName = intent.getStringExtra(QUESTION_TABLE);
+        int exLevel = intent.getIntExtra(QUESTION_LEVEL, 0);
+        int currentLevel = 0;
+        String[] projection = {QuestionEntry.COLUMN_LEVEL};
+        String selection = QuestionEntry.COLUMN_NAME + "=?";
+        String[] selectionArgs = {questionFileName};
+        Cursor cursor = db.query(questionTableName,
+                projection,
+                selection,
+                selectionArgs,
+                null, null, null);
+        if (cursor.getCount() == 1) { //Row is found
+            cursor.moveToFirst();
+            currentLevel = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_LEVEL));
+            Log.e(TAG, "3 NotificationPublisher.onReceive: 4 currentLevel: " + currentLevel +
+                    " exLevel: " + exLevel);
+            if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
+                notificationManager.notify(id, notification);
+                Log.e(TAG, "3 NotificationPublisher.onReceive: 5 triggered notificationManager.notify for id: "
+                        + id + " and notification: " + notification);
+            }
         }
-
-
+        cursor.close();
     }
 }
