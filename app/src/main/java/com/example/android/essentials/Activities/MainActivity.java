@@ -3,7 +3,6 @@ package com.example.android.essentials.Activities;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -50,7 +49,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -478,18 +476,35 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static void scheduleNotification(Notification notification, long delay) {
+        Log.e(TAG, "2 scheduleNotification: 1 received notification: " + notification.toString());
+
         //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
-        int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        Log.e(TAG, "2 scheduleNotification: 2 created notificationIntent with direction " +
+                "to NotificationPublisher: "
+                + notificationIntent.toString());
+
+        int m = (int) (Math.random() * Math.random() * 1000);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, m);
+        Log.e(TAG, "2 scheduleNotification: 3 put to notificationIntent extra: "
+                + NotificationPublisher.NOTIFICATION_ID.toString() + " with value: " + m);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+        Log.e(TAG, "2 scheduleNotification: 4 put to notificationIntent extra: "
+                + NotificationPublisher.NOTIFICATION.toString() + " with value: " + notification.toString());
 
         //Set time delay and alarm + pending intent
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, notificationIntent,
+        int t = (int) (Math.random() * Math.random() * 1000);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, t, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+        Log.e(TAG, "2 scheduleNotification: 5 created pendingIntent from PendingIntent" +
+                ".getBroadcast(c, t, notificationIntent): " + pendingIntent.toString());
+        Log.e(TAG, "2 scheduleNotification: 5.1 t: " + t);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        //If there is already an alarm scheduled for the same IntentSender, that previous
+        //alarm will first be canceled.
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, futureInMillis, pendingIntent);
+        Log.e(TAG, "2 scheduleNotification: 6 created alarmManager with pendingIntent: " + alarmManager.toString());
     }
 
 
@@ -498,28 +513,34 @@ public class MainActivity extends AppCompatActivity implements
         Intent resultIntent = new Intent(context, SearchableActivity.class);
         resultIntent.putExtra("relativePath", relativePath);
 
+        Log.e(TAG, "1 getNotification: 1 created intent: " + resultIntent.toString());
+
         //Make artificial back stack to go back to Home screen on back passed
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        Log.e(TAG, "1 getNotification: 2 created stackbuilder: " + stackBuilder.toString());
         stackBuilder.addParentStack(SearchableActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-
-        int m = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        Log.e(TAG, "1 getNotification: 3 added intent to stackbuilder");
 
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
+        Log.e(TAG, "1 getNotification: 4 created resultPendingIntent from stackbuilder: " + resultPendingIntent.toString());
 
         //Build notification
-        Notification.Builder builder = new Notification.Builder(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        Log.e(TAG, "1 getNotification: 5 created builder of notification: " + builder.toString());
         builder.setContentTitle(question);
         builder.setContentText(relativePath);
         builder.setSmallIcon(R.drawable.ic_launcher_round);
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
         builder.setContentIntent(resultPendingIntent);
-
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
+        Log.e(TAG, "1 getNotification: 6 setContentIntent(resultPendingIntent) to builder: "
+                + builder.toString());
         return builder.build();
     }
 
