@@ -76,14 +76,15 @@ public class Question {
         } else {
             updateNotification(level);
         }
+        MainActivity.testNotificationTable();
 
     }
 
     private void addNotification() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(NotificationsEntry.COLUMN_QUESTION, getQuestion());
-        contentValues.put(NotificationsEntry.COLUMN_RELATIVE_PATH,
-                MainActivity.getRelativePathFromFull(getFileFullPath()));
+        String relativePath = MainActivity.getRelativePathFromFull(getFileFullPath());
+        contentValues.put(NotificationsEntry.COLUMN_RELATIVE_PATH, relativePath);
         contentValues.put(NotificationsEntry.COLUMN_LEVEL, 1);
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         long r = db.insert(NotificationsEntry.TABLE_NAME, null, contentValues);

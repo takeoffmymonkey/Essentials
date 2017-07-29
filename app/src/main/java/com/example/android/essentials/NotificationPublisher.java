@@ -27,22 +27,15 @@ public class NotificationPublisher extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 1 received intent: "
-                + intent.toString());
-
         //Create notification manager
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 2 created notificationManager: "
-                + notificationManager.toString());
 
         //Get resulting notification from received intent
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
 
 
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 3 created id from received intent (by NOTIFICATION_ID): "
-                + id);
 
         //Check if level is still actual
         String questionFileName = intent.getStringExtra(QUESTION_FILE);
@@ -60,12 +53,8 @@ public class NotificationPublisher extends BroadcastReceiver {
         if (cursor.getCount() == 1) { //Row is found
             cursor.moveToFirst();
             currentLevel = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_LEVEL));
-            Log.e(TAG, "3 NotificationPublisher.onReceive: 4 currentLevel: " + currentLevel +
-                    " exLevel: " + exLevel);
             if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
                 notificationManager.notify(id, notification);
-                Log.e(TAG, "3 NotificationPublisher.onReceive: 5 triggered notificationManager.notify for id: "
-                        + id + " and notification: " + notification);
             }
         }
         cursor.close();

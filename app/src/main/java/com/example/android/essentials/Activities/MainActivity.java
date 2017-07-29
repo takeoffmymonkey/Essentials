@@ -18,7 +18,6 @@ import android.database.sqlite.SQLiteException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
@@ -37,6 +36,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
@@ -470,24 +470,41 @@ public class MainActivity extends AppCompatActivity implements
         }
         Log.e(TAG, "========================================================");
         c1.close();
-    }/**/
+    }
 
+
+    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative relativePath*/
+    public static void testNotificationTable() {
+
+        Cursor c1 = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "NOTIFICATION TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_ID)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_QUESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "RELATIVE_PATH: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_RELATIVE_PATH)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "TIME_EDITED: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_TIME_EDITED)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_LEVEL)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
+    }
 
     public static void scheduleNotification(Question question, Notification notification, long delay) {
-        Log.e(TAG, "2 scheduleNotification: 1 received notification: " + notification.toString());
 
         //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
-        Log.e(TAG, "2 scheduleNotification: 2 created notificationIntent with direction " +
-                "to NotificationPublisher: "
-                + notificationIntent.toString());
-
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, notification.hashCode());
-        Log.e(TAG, "2 scheduleNotification: 3 put to notificationIntent extra: "
-                + NotificationPublisher.NOTIFICATION_ID.toString() + " with value: " + notification.hashCode());
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        Log.e(TAG, "2 scheduleNotification: 4 put to notificationIntent extra: "
-                + NotificationPublisher.NOTIFICATION.toString() + " with value: " + notification.toString());
         notificationIntent.putExtra(NotificationPublisher.QUESTION_FILE, question.getFileName());
         notificationIntent.putExtra(NotificationPublisher.QUESTION_TABLE, question.getTableName());
         notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, question.getLevel());
@@ -496,14 +513,10 @@ public class MainActivity extends AppCompatActivity implements
         long futureInMillis = System.currentTimeMillis() + delay;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notification.hashCode(), notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
-        Log.e(TAG, "2 scheduleNotification: 5 created pendingIntent from PendingIntent" +
-                ".getBroadcast(c, t, notificationIntent): " + pendingIntent.toString());
-        Log.e(TAG, "2 scheduleNotification: 5.1 t: " + notification.hashCode());
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
         //alarm will first be canceled.
         alarmManager.set(AlarmManager.RTC, futureInMillis, pendingIntent);
-        Log.e(TAG, "2 scheduleNotification: 6 created alarmManager with pendingIntent: " + alarmManager.toString());
     }
 
 
@@ -512,27 +525,19 @@ public class MainActivity extends AppCompatActivity implements
         Intent resultIntent = new Intent(context, SearchableActivity.class);
         resultIntent.putExtra("relativePath", relativePath);
 
-        Log.e(TAG, "1 getNotification: 1 created intent: " + resultIntent.toString());
-
         //Make artificial back stack to go back to Home screen on back passed
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        Log.e(TAG, "1 getNotification: 2 created stackbuilder: " + stackBuilder.toString());
         stackBuilder.addParentStack(SearchableActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-        Log.e(TAG, "1 getNotification: 3 added intent to stackbuilder");
 
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         resultIntent.hashCode(),
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-        Log.e(TAG, "1 getNotification: 4 created resultPendingIntent from stackbuilder: " + resultPendingIntent.toString());
-        Log.e(TAG, "1 getNotification: 4.1 with request code: " + resultIntent.hashCode());
-
 
         //Build notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        Log.e(TAG, "1 getNotification: 5 created builder of notification: " + builder.toString());
         builder.setContentTitle(question);
         builder.setContentText(relativePath);
         builder.setSmallIcon(R.drawable.ic_launcher_round);
@@ -540,8 +545,7 @@ public class MainActivity extends AppCompatActivity implements
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
         builder.setContentIntent(resultPendingIntent);
         builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
-        Log.e(TAG, "1 getNotification: 6 setContentIntent(resultPendingIntent) to builder: "
-                + builder.toString());
+
         return builder.build();
     }
 

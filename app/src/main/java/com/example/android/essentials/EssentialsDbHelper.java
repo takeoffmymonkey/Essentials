@@ -3,9 +3,12 @@ package com.example.android.essentials;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by takeoff on 021 21 Jul 17.
