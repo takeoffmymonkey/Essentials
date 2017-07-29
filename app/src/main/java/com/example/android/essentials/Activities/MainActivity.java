@@ -41,7 +41,6 @@ import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
-import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
 import java.io.BufferedReader;
@@ -499,15 +498,14 @@ public class MainActivity extends AppCompatActivity implements
         c1.close();
     }
 
-    public static void scheduleNotification(Question question, Notification notification, long delay) {
+    public static void scheduleNotification(String question, int level, Notification notification, long delay) {
 
         //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, notification.hashCode());
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        notificationIntent.putExtra(NotificationPublisher.QUESTION_FILE, question.getFileName());
-        notificationIntent.putExtra(NotificationPublisher.QUESTION_TABLE, question.getTableName());
-        notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, question.getLevel());
+        notificationIntent.putExtra(NotificationPublisher.QUESTION, question);
+        notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, level);
 
         //Set time delay and alarm + pending intent
         long futureInMillis = System.currentTimeMillis() + delay;

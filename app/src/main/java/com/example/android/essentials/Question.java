@@ -194,8 +194,10 @@ public class Question {
         }
 
         //Create notification
-        MainActivity.scheduleNotification(this, MainActivity.getNotification(getQuestion(),
-                MainActivity.getRelativePathFromFull(getFileFullPath())),
+        MainActivity.scheduleNotification(getQuestion(),
+                getLevel(),
+                MainActivity.getNotification(getQuestion(), MainActivity.getRelativePathFromFull
+                        (getFileFullPath())),
                 delay);
 
         Log.e(TAG, "Set notification time: " + delay + " For question: " + getQuestion());

@@ -6,11 +6,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.util.Log;
 
+import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
@@ -20,8 +19,7 @@ import static com.example.android.essentials.Activities.MainActivity.db;
 public class NotificationPublisher extends BroadcastReceiver {
     public static String NOTIFICATION_ID = "notification-id";
     public static String NOTIFICATION = "notification";
-    public static String QUESTION_TABLE = "question-table";
-    public static String QUESTION_FILE = "question-file";
+    public static String QUESTION = "question";
     public static String QUESTION_LEVEL = "question-level";
 
     @Override
@@ -38,21 +36,20 @@ public class NotificationPublisher extends BroadcastReceiver {
         int id = intent.getIntExtra(NOTIFICATION_ID, 0);
 
         //Check if level is still actual
-        String questionFileName = intent.getStringExtra(QUESTION_FILE);
-        String questionTableName = intent.getStringExtra(QUESTION_TABLE);
         int exLevel = intent.getIntExtra(QUESTION_LEVEL, 0);
+        String question = intent.getStringExtra(QUESTION);
         int currentLevel;
-        String[] projection = {QuestionEntry.COLUMN_LEVEL};
-        String selection = QuestionEntry.COLUMN_NAME + "=?";
-        String[] selectionArgs = {questionFileName};
-        Cursor cursor = db.query(questionTableName,
+        String[] projection = {NotificationsEntry.COLUMN_LEVEL};
+        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs = {question};
+        Cursor cursor = db.query(NotificationsEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
                 null, null, null);
         if (cursor.getCount() == 1) { //Row is found
             cursor.moveToFirst();
-            currentLevel = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_LEVEL));
+            currentLevel = cursor.getInt(cursor.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
             if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
                 notificationManager.notify(id, notification);
             }
