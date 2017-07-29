@@ -41,6 +41,7 @@ import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
+import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
 import java.io.BufferedReader;
@@ -475,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    public static void scheduleNotification(Notification notification, long delay) {
+    public static void scheduleNotification(Question question, Notification notification, long delay) {
         Log.e(TAG, "2 scheduleNotification: 1 received notification: " + notification.toString());
 
         //Create intent and add resulting notification in it
@@ -484,22 +485,23 @@ public class MainActivity extends AppCompatActivity implements
                 "to NotificationPublisher: "
                 + notificationIntent.toString());
 
-        int m = (int) (Math.random() * Math.random() * 1000);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, m);
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, notification.hashCode());
         Log.e(TAG, "2 scheduleNotification: 3 put to notificationIntent extra: "
-                + NotificationPublisher.NOTIFICATION_ID.toString() + " with value: " + m);
+                + NotificationPublisher.NOTIFICATION_ID.toString() + " with value: " + notification.hashCode());
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         Log.e(TAG, "2 scheduleNotification: 4 put to notificationIntent extra: "
                 + NotificationPublisher.NOTIFICATION.toString() + " with value: " + notification.toString());
+        notificationIntent.putExtra("question", question);
+        notificationIntent.putExtra("level", question.getLevel());
+
 
         //Set time delay and alarm + pending intent
         long futureInMillis = SystemClock.elapsedRealtime() + delay;
-        int t = (int) (Math.random() * Math.random() * 1000);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, t, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notification.hashCode(), notificationIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
         Log.e(TAG, "2 scheduleNotification: 5 created pendingIntent from PendingIntent" +
                 ".getBroadcast(c, t, notificationIntent): " + pendingIntent.toString());
-        Log.e(TAG, "2 scheduleNotification: 5.1 t: " + t);
+        Log.e(TAG, "2 scheduleNotification: 5.1 t: " + notification.hashCode());
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
         //alarm will first be canceled.
@@ -524,10 +526,12 @@ public class MainActivity extends AppCompatActivity implements
 
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
+                        resultIntent.hashCode(),
+                        PendingIntent.FLAG_CANCEL_CURRENT
                 );
         Log.e(TAG, "1 getNotification: 4 created resultPendingIntent from stackbuilder: " + resultPendingIntent.toString());
+        Log.e(TAG, "1 getNotification: 4.1 with request code: " + resultIntent.hashCode());
+
 
         //Build notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -572,4 +576,9 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

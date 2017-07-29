@@ -38,11 +38,20 @@ public class NotificationPublisher extends BroadcastReceiver {
         Log.e(TAG, "3 NotificationPublisher.onReceive: 3 created id from received intent (by NOTIFICATION_ID): "
                 + id);
 
+        //Check if level is still actual
+        Question question = intent.getParcelableExtra("question");
+        int currentLevel = question.getLevel();
+        int exLevel = intent.getIntExtra("level", 0);
+        Log.e(TAG, "3 NotificationPublisher.onReceive: 4 currentLevel: " + currentLevel +
+                " exLevel: " + exLevel);
 
-        //Trigger resulting notification
-        notificationManager.notify(id, notification);
-        Log.e(TAG, "3 NotificationPublisher.onReceive: 4 triggered notificationManager.notify for id: "
-                + id + " and notification: " + notification);
+        if (currentLevel == exLevel) {
+            //Trigger resulting notification
+            notificationManager.notify(id, notification);
+            Log.e(TAG, "3 NotificationPublisher.onReceive: 5 triggered notificationManager.notify for id: "
+                    + id + " and notification: " + notification);
+        }
+
 
     }
 }

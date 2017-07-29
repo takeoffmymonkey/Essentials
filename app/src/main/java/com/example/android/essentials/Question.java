@@ -1,6 +1,8 @@
 package com.example.android.essentials;
 
 import android.content.ContentValues;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
@@ -13,7 +15,9 @@ import static com.example.android.essentials.Activities.MainActivity.db;
  * Created by takeoff on 018 18 Jul 17.
  */
 
-public class Question {
+public class Question implements Parcelable {
+
+    private int mData;
 
     private String question;
     private String fileFullPath;
@@ -128,11 +132,39 @@ public class Question {
         }
 
         //Create notification
-        MainActivity.scheduleNotification(MainActivity.getNotification(getQuestion(),
+        MainActivity.scheduleNotification(this, MainActivity.getNotification(getQuestion(),
                 MainActivity.getRelativePathFromFull(getFileFullPath())),
                 delay);
 
         Log.e(TAG, "Set notification time: " + delay + " For question: " + getQuestion());
     }
 
+    // 99.9% of the time you can just ignore this
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    // write your object's data to the passed-in Parcel
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(mData);
+    }
+
+
+    // this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
+    public static final Parcelable.Creator<Question> CREATOR = new Parcelable.Creator<Question>() {
+        public Question createFromParcel(Parcel in) {
+            return new Question(in);
+        }
+
+        public Question[] newArray(int size) {
+            return new Question[size];
+        }
+    };
+
+    // example constructor that takes a Parcel and gives you an object populated with it's values
+    private Question(Parcel in) {
+        mData = in.readInt();
+    }
 }
