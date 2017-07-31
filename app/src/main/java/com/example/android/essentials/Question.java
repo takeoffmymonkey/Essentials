@@ -8,6 +8,8 @@ import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.db;
 
@@ -87,7 +89,7 @@ public class Question {
         } else {
             updateNotification(level);
         }
-        MainActivity.testNotificationTable();
+        //MainActivity.testNotificationTable();
 
     }
 
@@ -200,7 +202,8 @@ public class Question {
                         (getFileFullPath())),
                 delay);
 
-        Log.e(TAG, "Set notification time: " + delay + " For question: " + getQuestion());
+        Log.e(TAG, "Set notification time with delay of seconds: "
+                + TimeUnit.MILLISECONDS.toSeconds(delay) + " For question: " + getQuestion());
     }
 
 

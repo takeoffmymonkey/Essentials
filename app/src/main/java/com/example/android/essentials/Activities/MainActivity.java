@@ -50,6 +50,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -511,13 +513,15 @@ public class MainActivity extends AppCompatActivity implements
 
         //Set time delay and alarm + pending intent
         long futureInMillis = System.currentTimeMillis() + delay;
-        Log.e(TAG, "setting alarm for id: " + id + " at: " + futureInMillis);
+        Log.e(TAG, "setting alarm for id: " + id + " at: " + new Date(futureInMillis));
+        Log.e (TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
         //alarm will first be canceled.
-        alarmManager.set(AlarmManager.RTC, futureInMillis, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC, futureInMillis, pendingIntent);
+
     }
 
 
@@ -585,6 +589,8 @@ public class MainActivity extends AppCompatActivity implements
         int level;
         long timeEdited;
 
+        Log.e (TAG, "rescheduleNotifications()" + new Date(System.currentTimeMillis()));
+
         //Parse table
         Cursor c = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
         int rows = c.getCount();
@@ -608,12 +614,12 @@ public class MainActivity extends AppCompatActivity implements
                 } else { // alarm is not expired yet
                     long newDelay = timeToAlarm - currentTime;
                     Log.e(TAG, "rescheduling active notification with id: " + id +
-                            " with updated delay: " + newDelay);
+                            " with updated new delay of seconds: "
+                            + TimeUnit.MILLISECONDS.toSeconds(newDelay));
                     MainActivity.scheduleNotification(id, question, level,
                             MainActivity.getNotification(question, relativePath),
                             newDelay);
                 }
-
                 c.moveToNext();
             }
         }

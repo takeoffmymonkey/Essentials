@@ -8,10 +8,10 @@ package com.example.android.essentials;
 
 public class Schedule {
 
-    static final long LEVEL_1 = 5000;
+    static final long LEVEL_1 = 20000;
     static final long LEVEL_2 = 30000;
     static final long LEVEL_3 = 60000;
-    static final long LEVEL_4 = 120000;
+    static final long LEVEL_4 = 180000;
     static final long LEVEL_0 = 0;
 
 
