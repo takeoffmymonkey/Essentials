@@ -191,33 +191,7 @@ public class Question {
     private void setQuestionNotification() {
         //set delay
         int level = getLevel();
-        long delay;
-        switch (level) {
-            case 0: {
-                delay = Schedule.LEVEL_0;
-                break;
-            }
-            case 1: {
-                delay = Schedule.LEVEL_1;
-                break;
-            }
-            case 2: {
-                delay = Schedule.LEVEL_2;
-                break;
-            }
-            case 3: {
-                delay = Schedule.LEVEL_3;
-                break;
-            }
-            case 4: {
-                delay = Schedule.LEVEL_4;
-                break;
-            }
-            default: {
-                delay = Schedule.LEVEL_0;
-                break;
-            }
-        }
+        long delay = Schedule.getDelayByLevel(level);
 
         //Create notification
         MainActivity.scheduleNotification(getNotificationId(), getQuestion(),

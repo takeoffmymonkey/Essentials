@@ -9,11 +9,45 @@ package com.example.android.essentials;
 public class Schedule {
 
     static final long LEVEL_1 = 5000;
-    static final long LEVEL_2 = 10000;
-    static final long LEVEL_3 = 20000;
-    static final long LEVEL_4 = 30000;
+    static final long LEVEL_2 = 30000;
+    static final long LEVEL_3 = 60000;
+    static final long LEVEL_4 = 120000;
     static final long LEVEL_0 = 0;
-/*
+
+
+    public static long getDelayByLevel(int level) {
+
+        long delay;
+        switch (level) {
+            case 0: {
+                delay = Schedule.LEVEL_0;
+                break;
+            }
+            case 1: {
+                delay = Schedule.LEVEL_1;
+                break;
+            }
+            case 2: {
+                delay = Schedule.LEVEL_2;
+                break;
+            }
+            case 3: {
+                delay = Schedule.LEVEL_3;
+                break;
+            }
+            case 4: {
+                delay = Schedule.LEVEL_4;
+                break;
+            }
+            default: {
+                delay = Schedule.LEVEL_0;
+                break;
+            }
+        }
+        return delay;
+    }
+
+    /*
 static final long LEVEL_0 = 0;
 static final long LEVEL_1 = TimeUnit.MINUTES.toMillis(20);
     static final long LEVEL_2 = TimeUnit.HOURS.toMillis(24);

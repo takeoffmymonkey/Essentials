@@ -3,7 +3,6 @@ package com.example.android.essentials.Activities;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -43,6 +42,7 @@ import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
 import com.example.android.essentials.R;
+import com.example.android.essentials.Schedule;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -340,7 +340,7 @@ public class MainActivity extends AppCompatActivity implements
                 sync(mainPath);
                 return true;
             case R.id.action_restart_notifications:
-                cancelAllNotification();
+                rescheduleNotifications();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -499,7 +499,8 @@ public class MainActivity extends AppCompatActivity implements
         c1.close();
     }
 
-    public static void scheduleNotification(long id, String question, int level, Notification notification, long delay) {
+    public static void scheduleNotification(long id, String question, int level,
+                                            Notification notification, long delay) {
 
         //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
@@ -510,7 +511,8 @@ public class MainActivity extends AppCompatActivity implements
 
         //Set time delay and alarm + pending intent
         long futureInMillis = System.currentTimeMillis() + delay;
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, notification.hashCode(), notificationIntent,
+        Log.e(TAG, "setting alarm for id: " + id + " at: " + futureInMillis);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
@@ -576,11 +578,45 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    public static void rescheduleNotifications() {
+        int id;
+        String question;
+        String relativePath;
+        int level;
+        long timeEdited;
 
-    public static void cancelAllNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
+        //Parse table
+        Cursor c = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
+        int rows = c.getCount();
+        if (rows > 0) {//Should be at least 1 row
+            c.moveToFirst();
+            for (int i = 0; i < rows; i++) {
+                id = c.getInt(c.getColumnIndex(NotificationsEntry.COLUMN_ID));
+                question = c.getString(c.getColumnIndex(NotificationsEntry.COLUMN_QUESTION));
+                relativePath = c.getString(c.getColumnIndex(NotificationsEntry.COLUMN_RELATIVE_PATH));
+                timeEdited = c.getLong(c.getColumnIndex(NotificationsEntry.COLUMN_TIME_EDITED));
+                level = c.getInt(c.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
+                long timeToAlarm = timeEdited + Schedule.getDelayByLevel(level);
+                long currentTime = System.currentTimeMillis();
+
+                //check if alarm is expired
+                if (currentTime > timeToAlarm) {//alarm is expired, need to notify immediately
+                    //Create notification
+                    Log.e(TAG, "rescheduling with 1 sec delay expired notification with id: " + id);
+                    MainActivity.scheduleNotification(id, question, level,
+                            MainActivity.getNotification(question, relativePath), 1000);
+                } else { // alarm is not expired yet
+                    long newDelay = timeToAlarm - currentTime;
+                    Log.e(TAG, "rescheduling active notification with id: " + id +
+                            " with updated delay: " + newDelay);
+                    MainActivity.scheduleNotification(id, question, level,
+                            MainActivity.getNotification(question, relativePath),
+                            newDelay);
+                }
+
+                c.moveToNext();
+            }
+        }
+        c.close();
     }
-
 }
