@@ -3,6 +3,7 @@ package com.example.android.essentials.Activities;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -338,7 +339,8 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_sync:
                 sync(mainPath);
                 return true;
-            case R.id.action_5:
+            case R.id.action_restart_notifications:
+                cancelAllNotification();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -497,11 +499,11 @@ public class MainActivity extends AppCompatActivity implements
         c1.close();
     }
 
-    public static void scheduleNotification(String question, int level, Notification notification, long delay) {
+    public static void scheduleNotification(long id, String question, int level, Notification notification, long delay) {
 
         //Create intent and add resulting notification in it
         Intent notificationIntent = new Intent(context, NotificationPublisher.class);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, notification.hashCode());
+        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, id);
         notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
         notificationIntent.putExtra(NotificationPublisher.QUESTION, question);
         notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, level);
@@ -574,5 +576,11 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
+    public static void cancelAllNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+    }
 
 }

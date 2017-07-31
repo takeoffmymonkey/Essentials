@@ -22,6 +22,7 @@ public class Question {
     private String fileName;
     private String relativeFolderPath;
     private String tableName;
+    private long notificationId;
 
     public Question(String question, String fileFullPath) {
         this.question = question;
@@ -98,7 +99,22 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_LEVEL, 1);
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         long r = db.insert(NotificationsEntry.TABLE_NAME, null, contentValues);
-        Log.e(TAG, "adding to notification table response: " + r);
+        Log.e(TAG, "adding to notification table response (id): " + r);
+    }
+
+    private long getNotificationId() {
+        long notificationId = -1;
+        String[] projection = {NotificationsEntry.COLUMN_ID};
+        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
+        String[] selectionArgs = {getQuestion()};
+        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+                null, null, null);
+        if (c.getCount() == 1) {//Question exists
+            c.moveToFirst();
+            notificationId = c.getLong(c.getColumnIndex(NotificationsEntry.COLUMN_ID));
+        }
+        c.close();
+        return notificationId;
     }
 
     private void deleteNotification() {
@@ -119,7 +135,7 @@ public class Question {
     }
 
 
-    String getFileName() {
+    private String getFileName() {
         return fileName;
     }
 
@@ -204,7 +220,7 @@ public class Question {
         }
 
         //Create notification
-        MainActivity.scheduleNotification(getQuestion(),
+        MainActivity.scheduleNotification(getNotificationId(), getQuestion(),
                 getLevel(),
                 MainActivity.getNotification(getQuestion(), MainActivity.getRelativePathFromFull
                         (getFileFullPath())),

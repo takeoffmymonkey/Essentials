@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
+import static com.example.android.essentials.Activities.MainActivity.cancelAllNotification;
 import static com.example.android.essentials.Activities.MainActivity.db;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
@@ -220,6 +221,9 @@ public class SubActivity extends AppCompatActivity implements
             case R.id.action_sync:
                 // TODO: 026 26 Jul 17  sync properly
                 return true;
+            case R.id.action_restart_notifications:
+                cancelAllNotification();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -294,6 +298,7 @@ public class SubActivity extends AppCompatActivity implements
         //Start intent
         v.getContext().startActivity(intent);
     }
+
 
     /*Instantiate and return a new Loader for the given ID*/
     @Override

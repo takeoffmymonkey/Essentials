@@ -16,8 +16,8 @@
         app:showAsAction="never" />
 
 
-    <item android:id="@+id/action_5"
-        android:title="@string/app_name"
+    <item android:id="@+id/action_restart_notifications"
+        android:title="@string/restart_notifications"
         app:showAsAction="never" />
 
 </menu>
