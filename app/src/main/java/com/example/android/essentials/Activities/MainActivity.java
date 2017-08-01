@@ -3,7 +3,6 @@ package com.example.android.essentials.Activities;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -404,6 +403,8 @@ public class MainActivity extends AppCompatActivity implements
                 0
         );
 
+        suggestionsCursor.close();
+
     }
 
 
@@ -551,6 +552,12 @@ public class MainActivity extends AppCompatActivity implements
         cursor.close();
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
+    }
 
     /*Instantiate and return a new Loader for the given ID*/
     @Override
