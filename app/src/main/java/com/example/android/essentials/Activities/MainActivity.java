@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements
     static Cursor suggestionsCursor;
     static SimpleCursorAdapter suggestionsAdapter;
 
-    public static NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /*Create TAG table with all tags and create all Question tables*/
-    public boolean sync(String relativePath) {
+    public static boolean sync(String relativePath) {
         Log.e(TAG, "request for sync");
         String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
@@ -335,7 +334,9 @@ public class MainActivity extends AppCompatActivity implements
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(TagEntry.COLUMN_PATH, tagPath);
                             contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                            getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                            db.insert(TagEntry.TABLE_NAME, null, contentValues);
+
+                            //getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
                         }
                     }
                     br.close();
@@ -489,6 +490,7 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.action_sync:
                 sync(currentRelativePath);
+                recreate();
                 return true;
             case R.id.action_restart_notifications:
                 rescheduleNotifications();

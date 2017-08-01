@@ -218,7 +218,8 @@ public class SubActivity extends AppCompatActivity implements
                 this.finish();
                 return true;
             case R.id.action_sync:
-                // TODO: 026 26 Jul 17  sync properly
+                MainActivity.sync(subRelativePath);
+                recreate();
                 return true;
             case R.id.action_restart_notifications:
                 MainActivity.rescheduleNotifications();
