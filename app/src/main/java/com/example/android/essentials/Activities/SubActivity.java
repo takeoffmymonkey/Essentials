@@ -238,7 +238,7 @@ public class SubActivity extends AppCompatActivity implements
 
             //Rename question if it has question text provided
             int level = 0;
-            String[] projection = {QuestionEntry.COLUMN_QUESTION, QuestionEntry.COLUMN_LEVEL};
+            String[] projection = {QuestionEntry.COLUMN_QUESTION};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
             Cursor cursor = db.query(subTableName,

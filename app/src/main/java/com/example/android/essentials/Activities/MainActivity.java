@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private static Context context;
-    private static int notificationId = 0;
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
     public static SQLiteDatabase db;
@@ -92,11 +91,8 @@ public class MainActivity extends AppCompatActivity implements
         currentTableName = relativePathToTableName(currentRelativePath);
 
         //Sync data
-        try {
-            sync(currentRelativePath);
-        } catch (SQLiteException e) {
-            Log.e(TAG, e.toString());
-        }
+        sync(currentRelativePath);
+
 
         //For debugging
         testTagsTable();
@@ -134,75 +130,221 @@ public class MainActivity extends AppCompatActivity implements
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
         String table = null;
+        boolean resyncing = false;
 
         //Go through all files in the dir
         if (dir.exists()) {
-            //Create a table for the current folder
-            table = createQuestionsTable(relativePath);
-
-            //Add all its content to the table
-            File[] files = dir.listFiles();
-            for (File file : files) {
-                ContentValues contentValues = new ContentValues();
-                if (file.isDirectory()) {//This is a dir
-                    contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
-                    contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
-                    db.insert(table, null, contentValues);
-                    sync(relativePath + "/" + file.getName());
-                } else {//This is a file
-                    if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
-                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
-                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
-                        db.insert(table, null, contentValues);
-                    }
-                }
-            }
-        }
-
-        //add tags from tags.txt to tags table
-        if (tagsFile.exists()) {
-            try {
-                //Parse file by line
-                BufferedReader br = new BufferedReader(new FileReader(tagsFile));
-                String line;
-                while ((line = br.readLine()) != null) {
-                    //Separate name, question and tags in fileTags and create relativePath of this fileTags
-                    String[] separated = line.split(":");
-                    String name = separated[0].trim();
-                    name = name.replaceAll("\uFEFF", "");
-                    String tagPath = relativePath + "/" + name;
-
-                    //Insert question if there is one
-                    String question = separated[1].trim();
-                    if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                        db.update(table,
-                                contentValues,
-                                QuestionEntry.COLUMN_NAME + "=?",
-                                new String[]{name});
-                    }
-
-                    //Insert each tag into tags table and specify its fileTags name
-                    String[] tags = separated[2].split(",");
-                    for (String tag : tags) {
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(TagEntry.COLUMN_PATH, tagPath);
-                        contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                        getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
-                    }
-                }
-                br.close();
-            } catch (IOException e) {
+            try {//Create a table for the current folder
+                table = createQuestionsTable(relativePath);
+            } catch (SQLiteException e) { //Table already exists
                 Log.e(TAG, e.toString());
+                table = relativePathToTableName(relativePath);
+                resyncing = true;
+            }
+
+            //We are in fresh syncing mode
+            if (!resyncing) {
+                //Add all its content to the table
+                File[] files = dir.listFiles();
+                for (File file : files) {
+                    ContentValues contentValues = new ContentValues();
+                    if (file.isDirectory()) {//This is a dir
+                        contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
+                        db.insert(table, null, contentValues);
+                        sync(relativePath + "/" + file.getName());
+                    } else {//This is a file
+                        if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
+                            contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
+                            contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
+                            db.insert(table, null, contentValues);
+                        }
+                    }
+                }
+            } else {//We are in resyncing mode
+                //Get new file listing and separate files from dirs
+                File[] newFiles = dir.listFiles();
+                ArrayList<File> newDirsList = new ArrayList<File>();
+                ArrayList<File> newFilesList = new ArrayList<File>();
+                for (File file : newFiles) {
+                    if (file.isDirectory()) {//It's a dir
+                        newDirsList.add(file);
+                    } else if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")) {//A file
+                        newFilesList.add(file);
+                    }
+                }
+
+                //Get old file listing and separate files from dirs
+                String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
+                Cursor c = db.query(table, projection, null, null, null, null, null);
+                int rows = c.getCount();
+                ArrayList<String> oldDirsList = new ArrayList<>();
+                ArrayList<String> oldFilesList = new ArrayList<>();
+                if (rows > 0) {
+                    c.moveToFirst();
+                    for (int i = 0; i < rows; i++) {
+                        int folder = c.getInt(c.getColumnIndex(QuestionEntry.COLUMN_FOLDER));
+                        String name = c.getString(c.getColumnIndex(QuestionEntry.COLUMN_NAME));
+                        if (folder == 1) {//This is a folder
+                            oldDirsList.add(name);
+                        } else {//It's a file
+                            oldFilesList.add(name);
+                        }
+                        c.moveToNext();
+                    }
+                }
+                c.close();
+
+                //Now compare old and new files
+                //Check if dir is in list
+                for (File file : newDirsList) {
+                    boolean found = false;
+                    String search = file.getName();
+                    for (int i = 0; i < oldDirsList.size(); i++) {
+                        if (search.equalsIgnoreCase(oldDirsList.get(i))) {
+                            found = true;
+                            Log.e(TAG, "sync(): found same dir in oldDirs: " + search);
+                            //Remove it from old list
+                            oldDirsList.remove(i);
+                            break;
+                        }
+                    }
+                    if (!found) {//Dir wasn't found
+                        Log.e(TAG, "sync(): couldn't find same dir in oldDirs: " + search);
+                        //Add new row to the table
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(QuestionEntry.COLUMN_NAME, search);
+                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
+                        long r = db.insert(table, null, contentValues);
+                        Log.e(TAG, "sync(): adding new row: " + r);
+                    }
+                }
+                //Same for files: check if dir is in list
+                for (File file : newFilesList) {
+                    boolean found = false;
+                    String search = file.getName();
+                    for (int i = 0; i < oldFilesList.size(); i++) {
+                        if (search.equalsIgnoreCase(oldFilesList.get(i))) {
+                            found = true;
+                            Log.e(TAG, "sync(): found same file in oldFiles: " + search);
+                            //Remove it from old list
+                            oldFilesList.remove(i);
+                            break;
+                        }
+                    }
+                    if (!found) {//File wasn't found
+                        Log.e(TAG, "sync(): couldn't find same file in oldFiles: " + search);
+                        //Add new row to the table
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(QuestionEntry.COLUMN_NAME, search);
+                        contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
+                        long r = db.insert(table, null, contentValues);
+                        Log.e(TAG, "sync(): adding new row: " + r);
+                    }
+                }
+
+                //Now we have 2 lists of old dirs and old files, remove all references of it
+                //Delete dirs references
+                for (String oldDir : oldDirsList) {
+                    //Remove from the table
+                    String selection = QuestionEntry.COLUMN_NAME + "=?";
+                    String[] selectionArgs = {oldDir};
+                    long r = db.delete(table, selection, selectionArgs);
+                    Log.e(TAG, "sync(): deleting dir from question table: " + r);
+                    //Remove from tags table
+                    String dirRelativePath = relativePath + "/" + oldDir;
+                    String selection2 = TagEntry.COLUMN_PATH + "=?";
+                    String[] selectionArgs2 = {dirRelativePath};
+                    long r2 = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                    Log.e(TAG, "sync(): deleting dir from tags table: " + r2);
+                }
+                //Delete files references
+                for (String oldFile : oldFilesList) {
+                    //Remove from the table
+                    String selection = QuestionEntry.COLUMN_NAME + "=?";
+                    String[] selectionArgs = {oldFile};
+                    long r = db.delete(table, selection, selectionArgs);
+                    Log.e(TAG, "sync(): deleting file from question table: " + r);
+                    //Remove from tags table
+                    String fileRelativePath = relativePath + "/" + oldFile;
+                    String selection2 = TagEntry.COLUMN_PATH + "=?";
+                    String[] selectionArgs2 = {fileRelativePath};
+                    long r2 = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                    Log.e(TAG, "sync(): deleting file from tags table: " + r2);
+                    //Remove from notifications table
+                    String selection3 = NotificationsEntry.COLUMN_RELATIVE_PATH + "=?";
+                    long r3 = db.delete(TagEntry.TABLE_NAME, selection3, selectionArgs2);
+                    Log.e(TAG, "sync(): deleting file from notification table: " + r3);
+                }
+            }
+
+            //add tags from tags.txt to tags table
+            if (tagsFile.exists()) {
+                try {
+                    //Parse file by line
+                    BufferedReader br = new BufferedReader(new FileReader(tagsFile));
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        //Separate name, question and tags in fileTags and create relativePath of this fileTags
+                        String[] separated = line.split(":");
+                        String name = separated[0].trim();
+                        name = name.replaceAll("\uFEFF", "");
+                        String tagPath = relativePath + "/" + name;
+
+                        //Insert question if there is one
+                        String question = separated[1].trim();
+                        if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
+                            db.update(table,
+                                    contentValues,
+                                    QuestionEntry.COLUMN_NAME + "=?",
+                                    new String[]{name});
+                        }
+
+                        //Check if current path is already in the table
+                        String[] projection = {TagEntry.COLUMN_ID};
+                        String selection = TagEntry.COLUMN_PATH + "=?";
+                        String[] selectionArgs = {tagPath};
+                        Cursor c = db.query(TagEntry.TABLE_NAME,
+                                projection,
+                                selection,
+                                selectionArgs,
+                                null, null, null);
+                        int rows = c.getCount();
+                        if (rows > 0) { //There are rows with such path
+                            c.moveToFirst();
+                            for (int i = 0; i < rows; i++) {//Delete all rows
+                                int id = c.getInt(c.getColumnIndex(TagEntry.COLUMN_ID));
+                                String selection2 = NotificationsEntry.COLUMN_ID + "=?";
+                                String[] selectionArgs2 = {Integer.toString(id)};
+                                long r = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                                Log.e(TAG, "deleting previous tag for path: " + tagPath + " response: " + r);
+                            }
+                        }
+                        c.close();
+
+                        //Insert each tag into tags table and specify its fileTags name
+                        String[] tags = separated[2].split(",");
+                        for (String tag : tags) {
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                            contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                            getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                        }
+                    }
+                    br.close();
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
             }
         }
-
         return true;
     }
 
 
     /*Convert relative relativePath to name of the table with listing of current files*/
+
     public static String relativePathToTableName(String relativePath) {
         Log.e(TAG, "relativePathToTableName received: " + relativePath);
         //Path should start with /
@@ -466,8 +608,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
             Log.e(TAG, "--------------------------------------------------------");
             Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_LEVEL)));
             Log.e(TAG, "--------------------------------------------------------");
             c1.moveToNext();
             Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

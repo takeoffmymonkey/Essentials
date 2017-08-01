@@ -107,7 +107,7 @@ public class SearchableActivity extends AppCompatActivity {
             Log.e(TAG, "prepared table name for question: " + tableName);
 
             //Rename question if it has question text provided, add level
-            String[] projection = {QuestionEntry.COLUMN_QUESTION, QuestionEntry.COLUMN_LEVEL};
+            String[] projection = {QuestionEntry.COLUMN_QUESTION};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
             Cursor cursor = db.query(tableName,
