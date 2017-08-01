@@ -2,22 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:gravity="center">
 
 
-    <ImageView
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_folder_black_36dp"/>
+        android:layout_gravity="center">
 
-    <TextView
-        android:id="@+id/sub_dirs_text"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="Essentials"
-        android:textStyle="bold"
-        android:textColor="@color/colorBlack"
-        android:gravity="center"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_folder_black_36dp" />
+
+        <TextView
+            android:id="@+id/sub_dirs_text"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:gravity="center"
+            android:text="Essentials"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
 
 </LinearLayout>
