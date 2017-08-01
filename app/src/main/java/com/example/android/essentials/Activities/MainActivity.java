@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /*Create TAG table with all tags and create all Question tables*/
     public boolean sync(String relativePath) {
+        Log.e(TAG, "request for sync");
         String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
@@ -133,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements
         boolean resyncing = false;
 
         //Go through all files in the dir
+        Log.e(TAG, "dir.exists(): " + dir.exists());
         if (dir.exists()) {
             try {//Create a table for the current folder
                 table = createQuestionsTable(relativePath);
@@ -162,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             } else {//We are in resyncing mode
+                Log.e(TAG, "we are resyncing");
                 //Get new file listing and separate files from dirs
                 File[] newFiles = dir.listFiles();
                 ArrayList<File> newDirsList = new ArrayList<File>();
@@ -169,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements
                 for (File file : newFiles) {
                     if (file.isDirectory()) {//It's a dir
                         newDirsList.add(file);
+                        sync(relativePath + "/" + file.getName());
                     } else if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")) {//A file
                         newFilesList.add(file);
                     }
@@ -273,7 +277,7 @@ public class MainActivity extends AppCompatActivity implements
                     Log.e(TAG, "sync(): deleting file from tags table: " + r2);
                     //Remove from notifications table
                     String selection3 = NotificationsEntry.COLUMN_RELATIVE_PATH + "=?";
-                    long r3 = db.delete(TagEntry.TABLE_NAME, selection3, selectionArgs2);
+                    long r3 = db.delete(NotificationsEntry.TABLE_NAME, selection3, selectionArgs2);
                     Log.e(TAG, "sync(): deleting file from notification table: " + r3);
                 }
             }
@@ -302,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements
                                     new String[]{name});
                         }
 
-                        //Check if current path is already in the table
+                        //Check if current path is already in the tags table
                         String[] projection = {TagEntry.COLUMN_ID};
                         String selection = TagEntry.COLUMN_PATH + "=?";
                         String[] selectionArgs = {tagPath};
@@ -320,6 +324,7 @@ public class MainActivity extends AppCompatActivity implements
                                 String[] selectionArgs2 = {Integer.toString(id)};
                                 long r = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                                 Log.e(TAG, "deleting previous tag for path: " + tagPath + " response: " + r);
+                                c.moveToNext();
                             }
                         }
                         c.close();
@@ -483,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_search:
                 return true;
             case R.id.action_sync:
-                sync(mainPath);
+                sync(currentRelativePath);
                 return true;
             case R.id.action_restart_notifications:
                 rescheduleNotifications();
