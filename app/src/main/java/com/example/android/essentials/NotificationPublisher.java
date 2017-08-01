@@ -28,16 +28,17 @@ public class NotificationPublisher extends BroadcastReceiver {
     public static String QUESTION = "question";
     public static String QUESTION_LEVEL = "question-level";
 
+    public NotificationManager notificationManager;
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
         //Create notification manager
-        NotificationManager notificationManager =
+        notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         //Get resulting notification from received intent
         Notification notification = intent.getParcelableExtra(NOTIFICATION);
-
 
         long id = intent.getLongExtra(NOTIFICATION_ID, 0);
 
@@ -68,7 +69,7 @@ public class NotificationPublisher extends BroadcastReceiver {
 
 
     //Recreate same notification with updated time
-    private void refreshAlarm(int id, String question, int level) {
+    public static void refreshAlarm(int id, String question, int level) {
         String relativePath = null;
 
         //Get path
@@ -103,7 +104,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection2 = NotificationsEntry.COLUMN_ID + "=?";
         String[] selectionArgs2 = {Integer.toString(id)};
-        long r = db.update(NotificationsEntry.TABLE_NAME, contentValues, selection2, selectionArgs2);
+        db.update(NotificationsEntry.TABLE_NAME, contentValues, selection2, selectionArgs2);
         Log.e(TAG, "NotificationPublisher.refreshAlarm(): " +
                 "Setting new last time edited to: " + new Date(System.currentTimeMillis()));
 

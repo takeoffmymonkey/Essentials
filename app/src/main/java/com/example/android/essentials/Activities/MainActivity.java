@@ -3,6 +3,7 @@ package com.example.android.essentials.Activities;
 import android.app.AlarmManager;
 import android.app.LoaderManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements
     static Cursor suggestionsCursor;
     static SimpleCursorAdapter suggestionsAdapter;
 
+    public static NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -513,14 +515,15 @@ public class MainActivity extends AppCompatActivity implements
 
         //Set time delay and alarm + pending intent
         long futureInMillis = System.currentTimeMillis() + delay;
-        Log.e(TAG, "setting alarm for id: " + id + " at: " + new Date(futureInMillis));
-        Log.e (TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, notificationIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         //If there is already an alarm scheduled for the same IntentSender, that previous
         //alarm will first be canceled.
-        alarmManager.setExact(AlarmManager.RTC, futureInMillis, pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent);
+
+        Log.e(TAG, "scheduleNotification(): setting alarm for id: " + id + " at: " + new Date(futureInMillis));
+        Log.e(TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
 
     }
 
@@ -550,6 +553,7 @@ public class MainActivity extends AppCompatActivity implements
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
         builder.setContentIntent(resultPendingIntent);
         builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
+        builder.setPriority(2);
 
         return builder.build();
     }
@@ -589,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements
         int level;
         long timeEdited;
 
-        Log.e (TAG, "rescheduleNotifications()" + new Date(System.currentTimeMillis()));
+        Log.e(TAG, "rescheduleNotifications()" + new Date(System.currentTimeMillis()));
 
         //Parse table
         Cursor c = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
@@ -609,8 +613,9 @@ public class MainActivity extends AppCompatActivity implements
                 if (currentTime > timeToAlarm) {//alarm is expired, need to notify immediately
                     //Create notification
                     Log.e(TAG, "rescheduling with 1 sec delay expired notification with id: " + id);
+
                     MainActivity.scheduleNotification(id, question, level,
-                            MainActivity.getNotification(question, relativePath), 1000);
+                            MainActivity.getNotification(question, relativePath), 5000);
                 } else { // alarm is not expired yet
                     long newDelay = timeToAlarm - currentTime;
                     Log.e(TAG, "rescheduling active notification with id: " + id +
