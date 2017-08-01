@@ -2,6 +2,6 @@
     <string name="app_name">Essentials</string>
     <string name="action_search">Search</string>
     <string name="action_search_hint">Search for topic or question</string>
-    <string name="action_sync">Sync tags and folders</string>
+    <string name="action_sync">Re-sync tags and folders</string>
     <string name="restart_notifications">Restart notifications</string>
 </resources>

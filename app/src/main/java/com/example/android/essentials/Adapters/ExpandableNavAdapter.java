@@ -102,14 +102,14 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.sub_list_group, null);
+            convertView = inflater.inflate(R.layout.sub_nav_list_group, null);
         }
 
 
         //Set title of header
         String headerTitle = (String) getGroup(groupPosition);
         TextView headerTextView = (TextView) convertView
-                .findViewById(R.id.sub_list_header);
+                .findViewById(R.id.sub_nav_list_header);
         headerTextView.setTypeface(null, Typeface.BOLD);
         headerTextView.setText(headerTitle);
 
