@@ -128,6 +128,8 @@ public class SubActivity extends AppCompatActivity implements
         subExpDirs = (ExpandableListView) findViewById(R.id.sub_exp_dirs);
         subExpDirsAdapter = new ExpandableDirsAdapter(this, subListOfDirs);
         subExpDirs.setAdapter(subExpDirsAdapter);
+        for (int i = 0; i < subExpDirsAdapter.getGroupCount(); i++)
+            subExpDirs.expandGroup(i);
 
         //Set click listener on navigation exp list
         subExpDirs.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
