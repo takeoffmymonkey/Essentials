@@ -312,10 +312,6 @@ public class SubActivity extends AppCompatActivity implements
                 null);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     /*Called when a previously created loader has finished its load*/
     @Override

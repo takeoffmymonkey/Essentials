@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements
                 File[] files = dir.listFiles();
                 for (File file : files) {
                     ContentValues contentValues = new ContentValues();
-                    if (file.isDirectory()) {//This is a dir
+                    if (file.isDirectory() && !file.getName().endsWith(".files")) {//This is a dir
                         contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
                         db.insert(table, null, contentValues);
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements
                 ArrayList<File> newDirsList = new ArrayList<File>();
                 ArrayList<File> newFilesList = new ArrayList<File>();
                 for (File file : newFiles) {
-                    if (file.isDirectory()) {//It's a dir
+                    if (file.isDirectory() && !file.getName().endsWith(".files")) {//It's a dir
                         newDirsList.add(file);
                         sync(relativePath + "/" + file.getName());
                     } else if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")) {//A file
@@ -293,49 +293,52 @@ public class MainActivity extends AppCompatActivity implements
                         name = name.replaceAll("\uFEFF", "");
                         String tagPath = relativePath + "/" + name;
 
-                        //Insert question if there is one
-                        String question = separated[1].trim();
-                        if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                            db.update(table,
-                                    contentValues,
-                                    QuestionEntry.COLUMN_NAME + "=?",
-                                    new String[]{name});
-                        }
-
-                        //Check if current path is already in the tags table
-                        String[] projection = {TagEntry.COLUMN_ID};
-                        String selection = TagEntry.COLUMN_PATH + "=?";
-                        String[] selectionArgs = {tagPath};
-                        Cursor c = db.query(TagEntry.TABLE_NAME,
-                                projection,
-                                selection,
-                                selectionArgs,
-                                null, null, null);
-                        int rows = c.getCount();
-                        if (rows > 0) { //There are rows with such path
-                            c.moveToFirst();
-                            for (int i = 0; i < rows; i++) {//Delete all rows
-                                int id = c.getInt(c.getColumnIndex(TagEntry.COLUMN_ID));
-                                String selection2 = NotificationsEntry.COLUMN_ID + "=?";
-                                String[] selectionArgs2 = {Integer.toString(id)};
-                                long r = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
-                                Log.e(TAG, "deleting previous tag for path: " + tagPath + " response: " + r);
-                                c.moveToNext();
+                        //Check if file exists
+                        File file = new File(tagPath);
+                        if (file.exists()) {
+                            //Insert question if there is one
+                            String question = separated[1].trim();
+                            if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
+                                db.update(table,
+                                        contentValues,
+                                        QuestionEntry.COLUMN_NAME + "=?",
+                                        new String[]{name});
                             }
-                        }
-                        c.close();
 
-                        //Insert each tag into tags table and specify its fileTags name
-                        String[] tags = separated[2].split(",");
-                        for (String tag : tags) {
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(TagEntry.COLUMN_PATH, tagPath);
-                            contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                            db.insert(TagEntry.TABLE_NAME, null, contentValues);
+                            //Check if current path is already in the tags table
+                            String[] projection = {TagEntry.COLUMN_ID};
+                            String selection = TagEntry.COLUMN_PATH + "=?";
+                            String[] selectionArgs = {tagPath};
+                            Cursor c = db.query(TagEntry.TABLE_NAME,
+                                    projection,
+                                    selection,
+                                    selectionArgs,
+                                    null, null, null);
+                            int rows = c.getCount();
+                            if (rows > 0) { //There are rows with such path
+                                c.moveToFirst();
+                                for (int i = 0; i < rows; i++) {//Delete all rows
+                                    int id = c.getInt(c.getColumnIndex(TagEntry.COLUMN_ID));
+                                    String selection2 = NotificationsEntry.COLUMN_ID + "=?";
+                                    String[] selectionArgs2 = {Integer.toString(id)};
+                                    long r = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                                    Log.e(TAG, "deleting previous tag for path: " + tagPath + " response: " + r);
+                                    c.moveToNext();
+                                }
+                            }
+                            c.close();
 
-                            //getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                            //Insert each tag into tags table and specify its fileTags name
+                            String[] tags = separated[2].split(",");
+                            for (String tag : tags) {
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                                contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                                db.insert(TagEntry.TABLE_NAME, null, contentValues);
+                                //getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
+                            }
                         }
                     }
                     br.close();
@@ -552,13 +555,6 @@ public class MainActivity extends AppCompatActivity implements
         cursor.close();
     }
 
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        suggestionsAdapter.getCursor().close();
-        db.close();
-    }
 
     /*Instantiate and return a new Loader for the given ID*/
     @Override

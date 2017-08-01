@@ -61,12 +61,6 @@ public class Question {
 
     public void setLevel(int level) {
 
-        //Update Questions table
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(QuestionEntry.COLUMN_LEVEL, level);
-        String selection = QuestionEntry.COLUMN_NAME + "=?";
-        String[] selectionArgs = {getFileName()};
-        db.update(tableName, contentValues, selection, selectionArgs);
 
         //Update Notifications table
         //Check if question exist
