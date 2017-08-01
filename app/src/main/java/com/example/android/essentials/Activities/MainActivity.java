@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
@@ -91,14 +92,26 @@ public class MainActivity extends AppCompatActivity implements
         //Sync data
         //sync(currentRelativePath);
 
-
         //For debugging
         testTagsTable();
         testQuestionsTable(currentRelativePath);
 
+
+        //Empty
+        Button resync = (Button) findViewById(R.id.resync);
+        View emptyView = findViewById(R.id.main_empty_view);
+        resync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sync(currentRelativePath);
+                recreate();
+            }
+        });
+
         //Make list of folders in the current dir and set adapter
         setListsOfFilesAndDirs(currentTableName, listOfDirs, null);
         mainList = (ListView) findViewById(R.id.main_list);
+        mainList.setEmptyView(emptyView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, listOfDirs);
         mainList.setAdapter(adapter);
