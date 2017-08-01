@@ -49,14 +49,14 @@ public class ExpandableDirsAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_sub_nav, null);
+            convertView = inflater.inflate(R.layout.item_sub_dirs, null);
         }
 
 
         //Get current question's path
         final String dir = (String) getChild(groupPosition, childPosition);
 
-        TextView textView = (TextView) convertView.findViewById(R.id.sub_nav_text);
+        TextView textView = (TextView) convertView.findViewById(R.id.sub_dirs_text);
         textView.setText(dir);
         textView.setTextSize(18);
 
@@ -72,7 +72,7 @@ public class ExpandableDirsAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getGroup(int groupPosition) {
-        return "Directories";
+        return "Directories list:";
     }
 
 

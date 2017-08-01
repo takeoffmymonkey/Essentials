@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements
         currentTableName = relativePathToTableName(currentRelativePath);
 
         //Sync data
-        sync(currentRelativePath);
+        //sync(currentRelativePath);
 
 
         //For debugging
