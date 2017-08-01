@@ -294,7 +294,8 @@ public class MainActivity extends AppCompatActivity implements
                         String tagPath = relativePath + "/" + name;
 
                         //Check if file exists
-                        File file = new File(tagPath);
+                        File file = new File(mainPath + tagPath);
+                        Log.e(TAG, "file: " + file.getAbsolutePath() + " exists: " + file.exists());
                         if (file.exists()) {
                             //Insert question if there is one
                             String question = separated[1].trim();
