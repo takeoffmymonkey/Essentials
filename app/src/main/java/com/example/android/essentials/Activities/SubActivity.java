@@ -20,11 +20,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 
+import com.example.android.essentials.Adapters.ExpandableDirsAdapter;
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
@@ -54,9 +53,11 @@ public class SubActivity extends AppCompatActivity implements
     ListView subDirsList;
     ExpandableListView subExpList;
     ExpandableListView subExpNav;
+    ExpandableListView subExpDirs;
     ArrayList<Question> questions = new ArrayList<Question>();
     ExpandableListAdapter subExpListAdapter;
     ExpandableNavAdapter subExpNavAdapter;
+    ExpandableDirsAdapter subExpDirsAdapter;
     String[] subPathArray;
 
 
@@ -82,7 +83,7 @@ public class SubActivity extends AppCompatActivity implements
         //Create separate arrays for files and dirs in the current relativePath
         MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
 
-        //Make list for dirs and set array adapter
+/*        //Make list for dirs and set array adapter
         subDirsList = (ListView) findViewById(R.id.sub_list);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
                 R.id.main_list_item_text, subListOfDirs);
@@ -98,7 +99,8 @@ public class SubActivity extends AppCompatActivity implements
                 view.getContext().startActivity(intent);
 
             }
-        });
+        });*/
+
 
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
@@ -121,6 +123,25 @@ public class SubActivity extends AppCompatActivity implements
                 return false;
             }
         });
+
+        //Make expandable dirs list
+        subExpDirs = (ExpandableListView) findViewById(R.id.sub_exp_dirs);
+        subExpDirsAdapter = new ExpandableDirsAdapter(this, subListOfDirs);
+        subExpDirs.setAdapter(subExpDirsAdapter);
+
+        //Set click listener on navigation exp list
+        subExpDirs.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v,
+                                        int groupPosition, int childPosition, long id) {
+                Intent intent = new Intent(SubActivity.this, SubActivity.class);
+                intent.putExtra("subPath", mainPath +
+                        subRelativePath + "/" + subListOfDirs.get((int) id));
+                v.getContext().startActivity(intent);
+                return false;
+            }
+        });
+
 
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

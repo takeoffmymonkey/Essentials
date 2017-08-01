@@ -15,12 +15,13 @@
     </ExpandableListView>
 
 
-    <ListView
-        android:id="@+id/sub_list"
+    <ExpandableListView
+        android:id="@+id/sub_exp_dirs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </ListView>
+    </ExpandableListView>
+
 
     <ExpandableListView
         android:id="@+id/sub_exp_list"
