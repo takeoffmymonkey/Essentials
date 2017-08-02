@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.Activities.MyApplication;
@@ -67,8 +66,6 @@ public class NotificationPublisher extends BroadcastReceiver {
             currentLevel = cursor.getInt(cursor.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
             if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
                 notificationManager.notify((int) id, notification);
-                Log.e(TAG, "NotificationPublisher.onReceive(): firing notification at: " +
-                        new Date(System.currentTimeMillis()));
                 refreshAlarm((int) id, question, currentLevel);
             }
         }
@@ -104,18 +101,11 @@ public class NotificationPublisher extends BroadcastReceiver {
         MainActivity.scheduleNotification(id, question, level,
                 MainActivity.getNotification(question, relativePath), delay);
 
-        Log.e(TAG, "NotificationPublisher.refreshAlarm(): " +
-                "Re-creating notification with delay of seconds: "
-                + TimeUnit.MILLISECONDS.toSeconds(delay));
-
         //Update time
         ContentValues contentValues = new ContentValues();
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection2 = NotificationsEntry.COLUMN_ID + "=?";
         String[] selectionArgs2 = {Integer.toString(id)};
         db.update(NotificationsEntry.TABLE_NAME, contentValues, selection2, selectionArgs2);
-        Log.e(TAG, "NotificationPublisher.refreshAlarm(): " +
-                "Setting new last time edited to: " + new Date(System.currentTimeMillis()));
-
     }
 }

@@ -16,7 +16,6 @@ import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,10 +36,8 @@ import com.example.android.essentials.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
-import static com.example.android.essentials.Activities.MainActivity.testSettingsTable;
 
 public class SubActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -80,8 +77,6 @@ public class SubActivity extends AppCompatActivity implements
         mainPath = MainActivity.getMainPath();
         subPath = getIntent().getStringExtra("subPath");
         subRelativePath = "/" + subPath.substring(mainPath.length() + 1);
-        Log.e(TAG, "Full sub relativePath: " + subPath);
-        Log.e(TAG, "Relative sub relativePath: " + subRelativePath);
 
         //Set subActivity name
         subActivityName = subRelativePath.substring(subRelativePath.lastIndexOf("/") + 1);
@@ -261,7 +256,6 @@ public class SubActivity extends AppCompatActivity implements
             //Get relativePath of the question
             String name = subListOfFiles.get(i);
             String path = mainPath + subRelativePath + "/" + name;
-            Log.e(TAG, "Path of question: " + path);
 
             //Rename question if it has question text provided
             int level = 0;
@@ -278,7 +272,6 @@ public class SubActivity extends AppCompatActivity implements
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
                 if (q != null) {//There is a question provided
                     name = q;
-                    Log.e(TAG, "New name of question: " + name);
                 }
             }
             cursor.close();
@@ -297,7 +290,6 @@ public class SubActivity extends AppCompatActivity implements
             subPathArray[i - 3] = tempPath[i];
         }
         String str = Arrays.toString(subPathArray);
-        Log.e(TAG, "prepared nav data: " + str);
     }
 
 

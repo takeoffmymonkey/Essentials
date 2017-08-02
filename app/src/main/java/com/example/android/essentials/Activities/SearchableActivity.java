@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
@@ -18,8 +17,6 @@ import com.example.android.essentials.R;
 
 import java.io.File;
 import java.util.ArrayList;
-
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
@@ -112,18 +109,13 @@ public class SearchableActivity extends AppCompatActivity {
             //Get fileRelativePath of the question and create full relativePath
             String fileRelativePath = relativePaths.get(i);
             String fileFullPath = mainPath + fileRelativePath;
-            Log.e(TAG, "working with fileRelativePath: " + fileRelativePath);
-            Log.e(TAG, "working with fileFullPath: " + fileFullPath);
 
             //Get name of the file
             String name = fileRelativePath.substring(fileRelativePath.lastIndexOf("/") + 1);
-            Log.e(TAG, "prepared name for question: " + name);
 
             //Get table of the file
             String folderRelativePath = fileRelativePath.substring(0, fileRelativePath.lastIndexOf("/"));
-            Log.e(TAG, "prepared folderRelativePath for question: " + folderRelativePath);
             String tableName = MainActivity.relativePathToTableName(folderRelativePath);
-            Log.e(TAG, "prepared table name for question: " + tableName);
 
             //Rename question if it has question text provided, add level
             String[] projection = {QuestionEntry.COLUMN_QUESTION};
@@ -139,7 +131,6 @@ public class SearchableActivity extends AppCompatActivity {
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
                 if (q != null) {//There is a question provided
                     name = q;
-                    Log.e(TAG, "New name of question: " + name);
                 }
 
             }

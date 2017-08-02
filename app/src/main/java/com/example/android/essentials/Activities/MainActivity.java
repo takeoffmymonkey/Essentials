@@ -49,9 +49,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -133,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements
 
     /*Create TAG table with all tags and create all Question tables*/
     public static boolean sync(String relativePath) {
-        Log.e(TAG, "request for sync");
         String fullPath = mainPath + relativePath;
         File dir = new File(fullPath);
         File tagsFile = new File(fullPath, "tags.txt");
@@ -141,12 +137,10 @@ public class MainActivity extends AppCompatActivity implements
         boolean resyncing = false;
 
         //Go through all files in the dir
-        Log.e(TAG, "dir.exists(): " + dir.exists());
         if (dir.exists()) {
             try {//Create a table for the current folder
                 table = createQuestionsTable(relativePath);
             } catch (SQLiteException e) { //Table already exists
-                Log.e(TAG, e.toString());
                 table = relativePathToTableName(relativePath);
                 resyncing = true;
             }
@@ -171,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
             } else {//We are in resyncing mode
-                Log.e(TAG, "we are resyncing");
                 //Get new file listing and separate files from dirs
                 File[] newFiles = dir.listFiles();
                 ArrayList<File> newDirsList = new ArrayList<File>();
@@ -214,20 +207,17 @@ public class MainActivity extends AppCompatActivity implements
                     for (int i = 0; i < oldDirsList.size(); i++) {
                         if (search.equalsIgnoreCase(oldDirsList.get(i))) {
                             found = true;
-                            Log.e(TAG, "sync(): found same dir in oldDirs: " + search);
                             //Remove it from old list
                             oldDirsList.remove(i);
                             break;
                         }
                     }
                     if (!found) {//Dir wasn't found
-                        Log.e(TAG, "sync(): couldn't find same dir in oldDirs: " + search);
                         //Add new row to the table
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_NAME, search);
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
-                        long r = db.insert(table, null, contentValues);
-                        Log.e(TAG, "sync(): adding new row: " + r);
+                        db.insert(table, null, contentValues);
                     }
                 }
                 //Same for files: check if dir is in list
@@ -237,20 +227,17 @@ public class MainActivity extends AppCompatActivity implements
                     for (int i = 0; i < oldFilesList.size(); i++) {
                         if (search.equalsIgnoreCase(oldFilesList.get(i))) {
                             found = true;
-                            Log.e(TAG, "sync(): found same file in oldFiles: " + search);
                             //Remove it from old list
                             oldFilesList.remove(i);
                             break;
                         }
                     }
                     if (!found) {//File wasn't found
-                        Log.e(TAG, "sync(): couldn't find same file in oldFiles: " + search);
                         //Add new row to the table
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_NAME, search);
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
-                        long r = db.insert(table, null, contentValues);
-                        Log.e(TAG, "sync(): adding new row: " + r);
+                        db.insert(table, null, contentValues);
                     }
                 }
 
@@ -260,32 +247,27 @@ public class MainActivity extends AppCompatActivity implements
                     //Remove from the table
                     String selection = QuestionEntry.COLUMN_NAME + "=?";
                     String[] selectionArgs = {oldDir};
-                    long r = db.delete(table, selection, selectionArgs);
-                    Log.e(TAG, "sync(): deleting dir from question table: " + r);
+                    db.delete(table, selection, selectionArgs);
                     //Remove from tags table
                     String dirRelativePath = relativePath + "/" + oldDir;
                     String selection2 = TagEntry.COLUMN_PATH + "=?";
                     String[] selectionArgs2 = {dirRelativePath};
-                    long r2 = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
-                    Log.e(TAG, "sync(): deleting dir from tags table: " + r2);
+                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                 }
                 //Delete files references
                 for (String oldFile : oldFilesList) {
                     //Remove from the table
                     String selection = QuestionEntry.COLUMN_NAME + "=?";
                     String[] selectionArgs = {oldFile};
-                    long r = db.delete(table, selection, selectionArgs);
-                    Log.e(TAG, "sync(): deleting file from question table: " + r);
+                    db.delete(table, selection, selectionArgs);
                     //Remove from tags table
                     String fileRelativePath = relativePath + "/" + oldFile;
                     String selection2 = TagEntry.COLUMN_PATH + "=?";
                     String[] selectionArgs2 = {fileRelativePath};
-                    long r2 = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
-                    Log.e(TAG, "sync(): deleting file from tags table: " + r2);
+                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                     //Remove from notifications table
                     String selection3 = NotificationsEntry.COLUMN_RELATIVE_PATH + "=?";
-                    long r3 = db.delete(NotificationsEntry.TABLE_NAME, selection3, selectionArgs2);
-                    Log.e(TAG, "sync(): deleting file from notification table: " + r3);
+                    db.delete(NotificationsEntry.TABLE_NAME, selection3, selectionArgs2);
                 }
             }
 
@@ -304,7 +286,6 @@ public class MainActivity extends AppCompatActivity implements
 
                         //Check if file exists
                         File file = new File(mainPath + tagPath);
-                        Log.e(TAG, "file: " + file.getAbsolutePath() + " exists: " + file.exists());
                         if (file.exists()) {
                             //Insert question if there is one
                             String question = separated[1].trim();
@@ -333,8 +314,7 @@ public class MainActivity extends AppCompatActivity implements
                                     int id = c.getInt(c.getColumnIndex(TagEntry.COLUMN_ID));
                                     String selection2 = NotificationsEntry.COLUMN_ID + "=?";
                                     String[] selectionArgs2 = {Integer.toString(id)};
-                                    long r = db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
-                                    Log.e(TAG, "deleting previous tag for path: " + tagPath + " response: " + r);
+                                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                                     c.moveToNext();
                                 }
                             }
@@ -364,21 +344,17 @@ public class MainActivity extends AppCompatActivity implements
     /*Convert relative relativePath to name of the table with listing of current files*/
 
     public static String relativePathToTableName(String relativePath) {
-        Log.e(TAG, "relativePathToTableName received: " + relativePath);
         //Path should start with /
         if (!relativePath.startsWith("/")) {
             relativePath = "/" + relativePath;
         }
         String[] locations = relativePath.split("/");
-        Log.e(TAG, "relativePathToTableName made array: " + Arrays.toString(locations));
-        Log.e(TAG, Arrays.toString(locations));
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
             sb.append(locations[i].replaceAll(" ", "_"));
             sb.append("_");
         }
         sb.append("FILES");
-        Log.e(TAG, "relativePathToTableName return: " + sb.toString());
         return sb.toString();
     }
 
@@ -392,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
                 + QuestionEntry.COLUMN_QUESTION + " TEXT);";
         db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
-        Log.e(TAG, "created table for relativePath: " + relativePath + " with name: " + table);
         return table;
     }
 
@@ -531,11 +506,8 @@ public class MainActivity extends AppCompatActivity implements
         //Check if card is mount
         boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
         if (!cardMount) {
-            Log.e(TAG, "No sd card");
             return "Card not found";
         } else {//Card is mount
-            Log.e(TAG, "Main relativePath: " +
-                    Environment.getExternalStorageDirectory().getPath() + "/Essentials");
             return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
         }
     }
@@ -565,8 +537,6 @@ public class MainActivity extends AppCompatActivity implements
                 int folder = cursor.getInt(cursor.getColumnIndex(QuestionEntry.COLUMN_FOLDER));
                 String name = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_NAME));
                 if (folder == 1) {//This is a folder
-                    Log.e(TAG, "!!name = " + name);
-                    Log.e(TAG, "!!listOfDirs = " + listOfDirs);
                     listOfDirs.add(name);
                 } else if (folder == 0 && listOfFiles != null && !name.equalsIgnoreCase("tags.txt")) {
                     //this is file
@@ -720,9 +690,6 @@ public class MainActivity extends AppCompatActivity implements
             //If there is already an alarm scheduled for the same IntentSender, that previous
             //alarm will first be canceled.
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent);
-
-            Log.e(TAG, "scheduleNotification(): setting alarm for id: " + id + " at: " + new Date(futureInMillis));
-            Log.e(TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
         } else {
             Log.e(TAG, "scheduleNotification: context is null!");
         }
@@ -778,8 +745,6 @@ public class MainActivity extends AppCompatActivity implements
 
     public static String getRelativePathFromFull(String fullPath) {
         String relativePath = fullPath.substring(getMainPath().length(), fullPath.length());
-        Log.e(TAG, "getRelativePathFromFull received: " + fullPath);
-        Log.e(TAG, "getRelativePathFromFull return: " + relativePath);
         return relativePath;
     }
 
@@ -790,8 +755,6 @@ public class MainActivity extends AppCompatActivity implements
             String relativeFilePath = MainActivity.getRelativePathFromFull(fileFullPath);
             String relativeDirPath = relativeFilePath.substring(0,
                     relativeFilePath.lastIndexOf("/") + 1);
-            Log.e(TAG, "getRelativePathOfDirForFile received: " + fileFullPath);
-            Log.e(TAG, "getRelativePathOfDirForFile return: " + relativeDirPath);
             return relativeDirPath;
         } else {
             return "No file found at specified path";
@@ -805,8 +768,6 @@ public class MainActivity extends AppCompatActivity implements
         String relativePath;
         int level;
         long timeEdited;
-
-        Log.e(TAG, "rescheduleNotifications()" + new Date(System.currentTimeMillis()));
 
         //Parse table
         Cursor c = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
@@ -825,15 +786,10 @@ public class MainActivity extends AppCompatActivity implements
                 //check if alarm is expired
                 if (currentTime > timeToAlarm) {//alarm is expired, need to notify immediately
                     //Create notification
-                    Log.e(TAG, "rescheduling with 1 sec delay expired notification with id: " + id);
-
                     MainActivity.scheduleNotification(id, question, level,
                             MainActivity.getNotification(question, relativePath), 5000);
                 } else { // alarm is not expired yet
                     long newDelay = timeToAlarm - currentTime;
-                    Log.e(TAG, "rescheduling active notification with id: " + id +
-                            " with updated new delay of seconds: "
-                            + TimeUnit.MILLISECONDS.toSeconds(newDelay));
                     MainActivity.scheduleNotification(id, question, level,
                             MainActivity.getNotification(question, relativePath),
                             newDelay);

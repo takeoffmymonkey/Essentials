@@ -8,8 +8,6 @@ import android.util.Log;
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 
-import java.util.concurrent.TimeUnit;
-
 import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 /**
@@ -171,17 +169,14 @@ public class Question {
 
     private void setFileName() {
         fileName = MainActivity.getLastValueOfPath(fileFullPath);
-        Log.e(TAG, "Set file name of the question: " + fileName);
     }
 
     private void setRelativeFolderPath() {
         relativeFolderPath = MainActivity.getRelativePathOfDirForFile(fileFullPath);
-        Log.e(TAG, "Set relative folder path of the question: " + relativeFolderPath);
     }
 
     private void setTableName(String relativeFolderPath) {
         tableName = MainActivity.relativePathToTableName(relativeFolderPath);
-        Log.e(TAG, "Set table name of the question: " + tableName);
     }
 
     private void setQuestionNotification() {
@@ -195,10 +190,5 @@ public class Question {
                 MainActivity.getNotification(getQuestion(), MainActivity.getRelativePathFromFull
                         (getFileFullPath())),
                 delay);
-
-        Log.e(TAG, "Set notification time with delay of seconds: "
-                + TimeUnit.MILLISECONDS.toSeconds(delay) + " For question: " + getQuestion());
     }
-
-
 }
