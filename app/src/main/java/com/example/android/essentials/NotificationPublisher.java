@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
+import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 
 import java.util.Date;
@@ -37,7 +38,7 @@ public class NotificationPublisher extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
 
-        dbHelper = new EssentialsDbHelper(MainActivity.context);
+        dbHelper = new EssentialsDbHelper(MyApplication.getAppContext());
         db = dbHelper.getReadableDatabase();
 
         //Create notification manager

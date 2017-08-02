@@ -15,11 +15,9 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.MenuItemCompat;
@@ -73,14 +71,13 @@ public class MainActivity extends AppCompatActivity implements
     static SimpleCursorAdapter suggestionsAdapter;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         //Update context
-        MainActivity.context = getApplicationContext();
+
 
         //Create db
         dbHelper = new EssentialsDbHelper(this);
@@ -673,56 +670,68 @@ public class MainActivity extends AppCompatActivity implements
     public static void scheduleNotification(long id, String question, int level,
                                             Notification notification, long delay) {
 
-        //Create intent and add resulting notification in it
-        Intent notificationIntent = new Intent(context, NotificationPublisher.class);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, id);
-        notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
-        notificationIntent.putExtra(NotificationPublisher.QUESTION, question);
-        notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, level);
+        Context context = MyApplication.getAppContext();
 
-        //Set time delay and alarm + pending intent
-        long futureInMillis = System.currentTimeMillis() + delay;
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        //If there is already an alarm scheduled for the same IntentSender, that previous
-        //alarm will first be canceled.
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent);
+        if (context != null) {
+            //Create intent and add resulting notification in it
+            Intent notificationIntent = new Intent(context, NotificationPublisher.class);
+            notificationIntent.putExtra(NotificationPublisher.NOTIFICATION_ID, id);
+            notificationIntent.putExtra(NotificationPublisher.NOTIFICATION, notification);
+            notificationIntent.putExtra(NotificationPublisher.QUESTION, question);
+            notificationIntent.putExtra(NotificationPublisher.QUESTION_LEVEL, level);
 
-        Log.e(TAG, "scheduleNotification(): setting alarm for id: " + id + " at: " + new Date(futureInMillis));
-        Log.e(TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
+            //Set time delay and alarm + pending intent
+            long futureInMillis = System.currentTimeMillis() + delay;
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, (int) id, notificationIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            //If there is already an alarm scheduled for the same IntentSender, that previous
+            //alarm will first be canceled.
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, futureInMillis, pendingIntent);
 
+            Log.e(TAG, "scheduleNotification(): setting alarm for id: " + id + " at: " + new Date(futureInMillis));
+            Log.e(TAG, "which is now with delay of seconds: " + TimeUnit.MILLISECONDS.toSeconds(delay));
+        } else {
+            Log.e(TAG, "scheduleNotification: context is null!");
+        }
     }
 
 
     public static Notification getNotification(String question, String relativePath) {
         // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(context, SearchableActivity.class);
-        resultIntent.putExtra("relativePath", relativePath);
+        Context context = MyApplication.getAppContext();
 
-        //Make artificial back stack to go back to Home screen on back passed
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addParentStack(SearchableActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
+        if (context != null) {
+            Intent resultIntent = new Intent(MyApplication.getAppContext(), SearchableActivity.class);
+            resultIntent.putExtra("relativePath", relativePath);
 
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        resultIntent.hashCode(),
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+            //Make artificial back stack to go back to Home screen on back passed
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addParentStack(SearchableActivity.class);
+            stackBuilder.addNextIntent(resultIntent);
 
-        //Build notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setContentTitle(question);
-        builder.setContentText(relativePath);
-        builder.setSmallIcon(R.drawable.ic_launcher_round);
-        builder.setAutoCancel(true);
-        builder.setDefaults(Notification.DEFAULT_VIBRATE);
-        builder.setContentIntent(resultPendingIntent);
-        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
-        builder.setPriority(2);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            resultIntent.hashCode(),
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
 
-        return builder.build();
+            //Build notification
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+            builder.setContentTitle(question);
+            builder.setContentText(relativePath);
+            builder.setSmallIcon(R.drawable.ic_launcher_round);
+            builder.setAutoCancel(true);
+            builder.setDefaults(Notification.DEFAULT_VIBRATE);
+            builder.setContentIntent(resultPendingIntent);
+            builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
+            builder.setPriority(2);
+
+            return builder.build();
+        } else {
+            Log.e(TAG, "getNotification(): context is null!");
+            return null;
+        }
     }
 
 
@@ -803,4 +812,5 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
         db.close();
     }
+
 }
