@@ -16,6 +16,7 @@ import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
@@ -44,18 +45,20 @@ public class SearchableActivity extends AppCompatActivity {
         dbHelper = new EssentialsDbHelper(this);
         db = dbHelper.getReadableDatabase();
 
-        handleIntent();
-
         mainPath = MainActivity.getMainPath();
 
-        //Make expandable list and set adapter
-        expList = (ExpandableListView) findViewById(R.id.search_exp_list);
-        prepareQuestionsList();
-        expListAdapter = new ExpandableListAdapter(this, questions);
-        expList.setAdapter(expListAdapter);
+        if (handleIntent()) {
 
-        //Enable back option
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+            //Make expandable list and set adapter
+            expList = (ExpandableListView) findViewById(R.id.search_exp_list);
+            prepareQuestionsList();
+            expListAdapter = new ExpandableListAdapter(this, questions);
+            expList.setAdapter(expListAdapter);
+
+            //Enable back option
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
     }
 
@@ -67,7 +70,8 @@ public class SearchableActivity extends AppCompatActivity {
 
     }
 
-    public void handleIntent() {
+    public boolean handleIntent() {
+        boolean isFile = true;
         // Get the intent, verify the action and get the additional data (relativePath)
         Intent intent = getIntent();
         relativePath = intent.getStringExtra("relativePath");
@@ -75,10 +79,19 @@ public class SearchableActivity extends AppCompatActivity {
             Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
             if (appData != null) {
                 relativePaths = appData.getStringArrayList("relativePaths");
+                //Check if this is a folder
+                String fullPath = mainPath + relativePaths.get(0);
+                if ((new File(fullPath)).isDirectory()) {
+                    isFile = false;
+                    Intent intent2 = new Intent(MyApplication.getAppContext(), SubActivity.class);
+                    intent2.putExtra("subPath", fullPath);
+                    startActivity(intent2);
+                }
             }
         } else if (relativePath != null) {
             relativePaths.add(relativePath);
         }
+        return isFile;
     }
 
     /*Menu options*/
