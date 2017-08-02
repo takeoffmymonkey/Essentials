@@ -11,7 +11,6 @@ import android.widget.ExpandableListView;
 
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
-import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -30,7 +29,6 @@ public class SearchableActivity extends AppCompatActivity {
     ExpandableListView expList;
     ExpandableListAdapter expListAdapter;
     String mainPath;
-    private EssentialsDbHelper dbHelper;
     private static SQLiteDatabase db;
 
 
@@ -39,8 +37,7 @@ public class SearchableActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        dbHelper = new EssentialsDbHelper(this);
-        db = dbHelper.getReadableDatabase();
+        db = MyApplication.getDB();
 
         mainPath = MainActivity.getMainPath();
 
@@ -136,13 +133,12 @@ public class SearchableActivity extends AppCompatActivity {
             }
             cursor.close();
             //Add question object to the list of questions
-            questions.add(new Question(name, fileFullPath, db));
+            questions.add(new Question(name, fileFullPath));
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        db.close();
     }
 }

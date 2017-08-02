@@ -29,7 +29,6 @@ import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
-import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -59,7 +58,6 @@ public class SubActivity extends AppCompatActivity implements
     ExpandableNavAdapter subExpNavAdapter;
     ExpandableDirsAdapter subExpDirsAdapter;
     String[] subPathArray;
-    private EssentialsDbHelper dbHelper;
     private static SQLiteDatabase db;
 
 
@@ -70,8 +68,7 @@ public class SubActivity extends AppCompatActivity implements
 
 
         //Create db
-        dbHelper = new EssentialsDbHelper(this);
-        db = dbHelper.getReadableDatabase();
+        db = MyApplication.getDB();
 
         //Get and set main and current dir's full and relative relativePaths
         mainPath = MainActivity.getMainPath();
@@ -225,14 +222,14 @@ public class SubActivity extends AppCompatActivity implements
             case R.id.action_search:
                 return true;
             case R.id.action_notification_mode:
-                int currentMode = Settings.getMode(db);
+                int currentMode = Settings.getMode();
                 MainActivity.testSettingsTable();
                 if (currentMode < 2) {
-                    Settings.setMode(currentMode + 1, db);
+                    Settings.setMode(currentMode + 1);
                     MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
                     MainActivity.testSettingsTable();
-                    Settings.setMode(0, db);
+                    Settings.setMode(0);
                 }
                 return true;
             case android.R.id.home:
@@ -277,7 +274,7 @@ public class SubActivity extends AppCompatActivity implements
             cursor.close();
 
             //Add question object to the list of questions
-            questions.add(new Question(name, path, db));
+            questions.add(new Question(name, path));
         }
     }
 
@@ -370,8 +367,6 @@ public class SubActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        suggestionsCursor.close();
-        db.close();
     }
 
 }

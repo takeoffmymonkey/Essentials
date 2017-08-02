@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
+import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
@@ -23,13 +24,13 @@ public class Question {
     private String tableName;
     private static SQLiteDatabase db;
 
-    public Question(String question, String fileFullPath, SQLiteDatabase db) {
+    public Question(String question, String fileFullPath) {
         this.question = question;
         this.fileFullPath = fileFullPath;
         setFileName();
         setRelativeFolderPath();
         setTableName(relativeFolderPath);
-        this.db = db;
+        db = MyApplication.getDB();
     }
 
     public String getQuestion() {

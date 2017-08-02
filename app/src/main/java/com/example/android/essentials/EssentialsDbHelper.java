@@ -19,8 +19,7 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "essentials";
     private static final int DATABASE_VERSION = 1;
-    private EssentialsDbHelper dbHelper;
-    private static SQLiteDatabase db;
+
 
     public EssentialsDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

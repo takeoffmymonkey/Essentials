@@ -39,7 +39,6 @@ import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
-import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
 import com.example.android.essentials.R;
 import com.example.android.essentials.Schedule;
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
-    private EssentialsDbHelper dbHelper;
     private static SQLiteDatabase db;
     public static String mainPath; // /storage/sdcard0/Essentials
     String currentRelativePath; //""
@@ -74,8 +72,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         //Create db
-        dbHelper = new EssentialsDbHelper(this);
-        db = dbHelper.getReadableDatabase();
+        db = MyApplication.getDB();
 
         //Get main relativePath, set relative relativePath and get currentTableName
         mainPath = getMainPath();
@@ -483,14 +480,14 @@ public class MainActivity extends AppCompatActivity implements
                 recreate();
                 return true;
             case R.id.action_notification_mode:
-                int currentMode = Settings.getMode(db);
+                int currentMode = Settings.getMode();
                 MainActivity.testSettingsTable();
                 if (currentMode < 2) {
-                    Settings.setMode(currentMode + 1, db);
+                    Settings.setMode(currentMode + 1);
                     MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
                     MainActivity.testSettingsTable();
-                    Settings.setMode(0, db);
+                    Settings.setMode(0);
                 }
                 return true;
             case R.id.action_restart_notifications:
@@ -579,7 +576,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /*FOR DEBUGGING PURPOSES*/
     public static void testTagsTable() {
-        Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor c = MyApplication.getDB().query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
         Log.e(TAG, "TAGS TABLE");
         Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -601,7 +598,7 @@ public class MainActivity extends AppCompatActivity implements
     /*FOR DEBUGGING PURPOSES*/
     public static void testQuestionsTable(String relativePath) {
 
-        Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
+        Cursor c1 = MyApplication.getDB().query(relativePathToTableName(relativePath), null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
         Log.e(TAG, "QUESTIONS TABLE");
         Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -624,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements
     /*FOR DEBUGGING PURPOSES*/
     public static void testNotificationTable() {
 
-        Cursor c1 = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor c1 = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
         Log.e(TAG, "NOTIFICATION TABLE");
         Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -651,7 +648,7 @@ public class MainActivity extends AppCompatActivity implements
     /*FOR DEBUGGING PURPOSES*/
     public static void testSettingsTable() {
 
-        Cursor c1 = db.query(Settings.TABLE_NAME, null, null, null, null, null, null);
+        Cursor c1 = MyApplication.getDB().query(Settings.TABLE_NAME, null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
         Log.e(TAG, "SETTINGS TABLE");
         Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -725,7 +722,8 @@ public class MainActivity extends AppCompatActivity implements
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
             builder.setPriority(2);
             //Set sound mode
-            int mode = Settings.getMode(db);
+            // TODO: 002 02 Aug 17 null pointer from here 
+            int mode = Settings.getMode();
             if (mode != 0) {
                 builder.setDefaults(mode);
             }
@@ -804,8 +802,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        suggestionsCursor.close();
-        db.close();
     }
 
 }

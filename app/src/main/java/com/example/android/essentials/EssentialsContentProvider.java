@@ -9,13 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-
+import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.TagEntry;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 
 /**
@@ -35,7 +31,6 @@ public class EssentialsContentProvider extends ContentProvider {
     /**
      * URI matcher code for the content URI for a single question in the questions table
      */
-
 
 
     /**
@@ -74,17 +69,9 @@ public class EssentialsContentProvider extends ContentProvider {
     }
 
 
-    /**
-     * Database helper object
-     */
-    private EssentialsDbHelper mDbHelper;
-    private static SQLiteDatabase db;
-
 
     @Override
     public boolean onCreate() {
-        mDbHelper = new EssentialsDbHelper(getContext());
-        db = mDbHelper.getReadableDatabase();
         return true;
     }
 
@@ -115,7 +102,7 @@ public class EssentialsContentProvider extends ContentProvider {
         switch (match) {
             case TAGS:
                 //Multiple rows - perform a query
-                cursor = db.query(TagEntry.TABLE_NAME,
+                cursor = MyApplication.getDB().query(TagEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -127,7 +114,7 @@ public class EssentialsContentProvider extends ContentProvider {
                 //Single row - extract ID from the URI and perform a query
                 selection = TagEntry.COLUMN_ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                cursor = db.query(TagEntry.TABLE_NAME,
+                cursor = MyApplication.getDB().query(TagEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -157,7 +144,7 @@ public class EssentialsContentProvider extends ContentProvider {
         switch (match) {
             case TAGS:
                 // Insert the new pet with the given values
-                long id = db.insert(TagEntry.TABLE_NAME, null, values);
+                long id = MyApplication.getDB().insert(TagEntry.TABLE_NAME, null, values);
                 // If the ID is -1, then the insertion failed. Log an error and return null.
                 if (id == -1) {
                     return null;
@@ -181,7 +168,6 @@ public class EssentialsContentProvider extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         return 0;
     }
-
 
 
 }

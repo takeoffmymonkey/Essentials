@@ -24,13 +24,12 @@ public final class EssentialsContract {
     //The "Content authority" is a name for the entire content provider
     static final String CONTENT_AUTHORITY = "com.example.android.essentials";
 
-
     //base of all URI's which apps will use to contact the content provider.
     private static Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-
     static final String PATH_TAGS = "tags";
 
+    private static SQLiteDatabase db;
 
     public static final class TagEntry implements BaseColumns {
         public static final String TABLE_NAME = "TAGS";
@@ -76,10 +75,13 @@ public final class EssentialsContract {
         public final static String COLUMN_SOUND_MODE = "SOUND_MODE";
 
 
-        public static int getMode(SQLiteDatabase db) {
+        public static int getMode() {
+            db = MyApplication.getDB();
+
             int mode = -1;
             String selection = COLUMN_ID + "=?";
             String[] selectionArgs = {Integer.toString(1)};
+            // TODO: 002 02 Aug 17 Null pointer here 
             Cursor c = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
             if (c.getCount() == 1) {
                 c.moveToFirst();
@@ -105,11 +107,14 @@ public final class EssentialsContract {
                     break;
                 }
             }
+
             return mode;
         }
 
-        public static void setMode(int mode, SQLiteDatabase db) {
+        public static void setMode(int mode) {
             if (mode > -1 && mode < 3) {
+                db = MyApplication.getDB();
+
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(COLUMN_SOUND_MODE, mode);
                 String selection = COLUMN_ID + "=?";
