@@ -16,6 +16,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -133,12 +134,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
                 levelTextView.setText(Integer.toString(currentQuestion.levelDown()));
+                MainActivity.testNotificationTable();
             }
         });
         buttonLevelUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 levelTextView.setText(Integer.toString(currentQuestion.levelUp()));
+                MainActivity.testNotificationTable();
             }
         });
 

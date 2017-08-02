@@ -608,7 +608,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /*FOR DEBUGGING PURPOSES*/
-    static void testTagsTable() {
+    public static void testTagsTable() {
         Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
         Log.e(TAG, "TAGS TABLE");
@@ -629,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /*FOR DEBUGGING PURPOSES*/
-    static void testQuestionsTable(String relativePath) {
+    public static void testQuestionsTable(String relativePath) {
 
         Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
@@ -697,6 +697,7 @@ public class MainActivity extends AppCompatActivity implements
         Log.e(TAG, "========================================================");
         c1.close();
     }
+
 
     public static void scheduleNotification(long id, String question, int level,
                                             Notification notification, long delay) {
@@ -797,6 +798,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
     public static void rescheduleNotifications() {
         int id;
         String question;
@@ -841,6 +843,7 @@ public class MainActivity extends AppCompatActivity implements
         }
         c.close();
     }
+
 
     @Override
     protected void onDestroy() {

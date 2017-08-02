@@ -12,6 +12,7 @@
         android:text="fsdf"
         android:textAllCaps="true"
         android:textSize="30sp"
+        android:textColor="@color/colorBlack"
         android:textStyle="bold" />
 
 

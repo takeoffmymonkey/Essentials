@@ -9,6 +9,7 @@
         android:id="@+id/sub_nav_text"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:textColor="@color/colorBlack"
         android:text="Essentials"
         android:textStyle="bold"
         android:gravity="center_vertical"/>
