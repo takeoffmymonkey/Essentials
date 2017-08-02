@@ -8,13 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import static android.content.ContentValues.TAG;
 
@@ -66,6 +64,7 @@ public class NotificationPublisher extends BroadcastReceiver {
             currentLevel = cursor.getInt(cursor.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
             if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
                 notificationManager.notify((int) id, notification);
+                Log.e(TAG, "NotificationPublisher.onReceive: firing notification with id: " + id);
                 refreshAlarm((int) id, question, currentLevel);
             }
         }

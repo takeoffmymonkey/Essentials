@@ -22,14 +22,14 @@ import static android.content.ContentValues.TAG;
 public final class EssentialsContract {
 
     //The "Content authority" is a name for the entire content provider
-    public static final String CONTENT_AUTHORITY = "com.example.android.essentials";
+    static final String CONTENT_AUTHORITY = "com.example.android.essentials";
 
 
     //base of all URI's which apps will use to contact the content provider.
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 
-    public static final String PATH_TAGS = "tags";
+    static final String PATH_TAGS = "tags";
 
 
     public static final class TagEntry implements BaseColumns {
@@ -41,11 +41,11 @@ public final class EssentialsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI, PATH_TAGS);
 
         //vnd.android.cursor.dir/com.example.android.essentials/tags
-        public static final String CONTENT_LIST_TYPE =
+        static final String CONTENT_LIST_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
 
         //vnd.android.cursor.item/com.example.android.essentials/tags
-        public static final String CONTENT_ITEM_TYPE =
+        static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
 
 
@@ -59,6 +59,7 @@ public final class EssentialsContract {
         public final static String COLUMN_QUESTION = "QUESTION";
     }
 
+
     public static final class NotificationsEntry implements BaseColumns {
         public final static String TABLE_NAME = "NOTIFICATIONS";
         public final static String COLUMN_ID = BaseColumns._ID;
@@ -67,6 +68,7 @@ public final class EssentialsContract {
         public final static String COLUMN_LEVEL = "LEVEL";
         public final static String COLUMN_TIME_EDITED = "TIME_EDITED";
     }
+
 
     public static final class Settings implements BaseColumns {
         public final static String TABLE_NAME = "SETTINGS";
