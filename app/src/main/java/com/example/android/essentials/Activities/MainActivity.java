@@ -719,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
             builder.setContentTitle(question);
             builder.setContentText(relativePath);
-            builder.setSmallIcon(R.drawable.ic_launcher_round);
+            builder.setSmallIcon(R.drawable.ic_help_outline_white_24dp);
             builder.setAutoCancel(true);
             builder.setContentIntent(resultPendingIntent);
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
