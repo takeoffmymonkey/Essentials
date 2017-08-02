@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,7 +16,7 @@ import com.example.android.essentials.EssentialsContract.TagEntry;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 import static com.example.android.essentials.Activities.MainActivity.TAG;
-import static com.example.android.essentials.Activities.MainActivity.db;
+
 
 /**
  * Created by takeoff on 021 21 Jul 17.
@@ -77,11 +78,13 @@ public class EssentialsContentProvider extends ContentProvider {
      * Database helper object
      */
     private EssentialsDbHelper mDbHelper;
+    private static SQLiteDatabase db;
 
 
     @Override
     public boolean onCreate() {
         mDbHelper = new EssentialsDbHelper(getContext());
+        db = mDbHelper.getReadableDatabase();
         return true;
     }
 
@@ -180,5 +183,7 @@ public class EssentialsContentProvider extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         return 0;
     }
+
+
 
 }

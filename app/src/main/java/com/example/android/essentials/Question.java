@@ -2,16 +2,15 @@ package com.example.android.essentials;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
-import com.example.android.essentials.EssentialsContract.QuestionEntry;
 
 import java.util.concurrent.TimeUnit;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
-import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
  * Created by takeoff on 018 18 Jul 17.
@@ -24,14 +23,15 @@ public class Question {
     private String fileName;
     private String relativeFolderPath;
     private String tableName;
-    private long notificationId;
+    private static SQLiteDatabase db;
 
-    public Question(String question, String fileFullPath) {
+    public Question(String question, String fileFullPath, SQLiteDatabase db) {
         this.question = question;
         this.fileFullPath = fileFullPath;
         setFileName();
         setRelativeFolderPath();
         setTableName(relativeFolderPath);
+        this.db = db;
     }
 
     public String getQuestion() {

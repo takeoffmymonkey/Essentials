@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
@@ -16,7 +17,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.ContentValues.TAG;
-import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
  * Created by takeoff on 027 27 Jul 17.
@@ -30,8 +30,15 @@ public class NotificationPublisher extends BroadcastReceiver {
 
     public NotificationManager notificationManager;
 
+    private EssentialsDbHelper dbHelper;
+    private static SQLiteDatabase db;
+
     @Override
     public void onReceive(Context context, Intent intent) {
+
+
+        dbHelper = new EssentialsDbHelper(MainActivity.context);
+        db = dbHelper.getReadableDatabase();
 
         //Create notification manager
         notificationManager =
@@ -65,6 +72,7 @@ public class NotificationPublisher extends BroadcastReceiver {
             }
         }
         cursor.close();
+        db.close();
     }
 
 

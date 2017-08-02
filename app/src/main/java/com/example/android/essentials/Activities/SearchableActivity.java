@@ -3,6 +3,7 @@ package com.example.android.essentials.Activities;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,13 +12,13 @@ import android.widget.ExpandableListView;
 
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
 import java.util.ArrayList;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
-import static com.example.android.essentials.Activities.MainActivity.db;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
@@ -31,12 +32,17 @@ public class SearchableActivity extends AppCompatActivity {
     ExpandableListView expList;
     ExpandableListAdapter expListAdapter;
     String mainPath;
+    private EssentialsDbHelper dbHelper;
+    private static SQLiteDatabase db;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        dbHelper = new EssentialsDbHelper(this);
+        db = dbHelper.getReadableDatabase();
 
         handleIntent();
 
@@ -126,7 +132,13 @@ public class SearchableActivity extends AppCompatActivity {
             }
             cursor.close();
             //Add question object to the list of questions
-            questions.add(new Question(name, fileFullPath));
+            questions.add(new Question(name, fileFullPath, db));
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
     }
 }

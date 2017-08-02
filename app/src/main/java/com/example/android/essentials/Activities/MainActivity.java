@@ -59,10 +59,11 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    private static Context context;
+    public static Context context;
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
-    public static SQLiteDatabase db;
+    private EssentialsDbHelper dbHelper;
+    private static SQLiteDatabase db;
     public static String mainPath; // /storage/sdcard0/Essentials
     String currentRelativePath; //""
     String currentTableName; //FILES
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements
     ListView mainList;
     static Cursor suggestionsCursor;
     static SimpleCursorAdapter suggestionsAdapter;
+
 
 
     @Override
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements
         MainActivity.context = getApplicationContext();
 
         //Create db
-        EssentialsDbHelper dbHelper = new EssentialsDbHelper(this);
+        dbHelper = new EssentialsDbHelper(this);
         db = dbHelper.getReadableDatabase();
 
         //Get main relativePath, set relative relativePath and get currentTableName
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         //Make list of folders in the current dir and set adapter
-        setListsOfFilesAndDirs(currentTableName, listOfDirs, null);
+        setListsOfFilesAndDirs(currentTableName, listOfDirs, null, db);
         mainList = (ListView) findViewById(R.id.main_list);
         mainList.setEmptyView(emptyView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
@@ -500,7 +502,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /*Menu options*/
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -537,10 +538,11 @@ public class MainActivity extends AppCompatActivity implements
     static void setListsOfFilesAndDirs(
             String currentTableName,
             ArrayList<String> listOfDirs,
-            @Nullable ArrayList<String> listOfFiles) {
+            @Nullable ArrayList<String> listOfFiles, SQLiteDatabase db) {
 
         //Create cursor based on whether only dirs are need or files too
         String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
+
         Cursor cursor = db.query(
                 currentTableName,
                 projection,
@@ -794,5 +796,11 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
         c.close();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
     }
 }

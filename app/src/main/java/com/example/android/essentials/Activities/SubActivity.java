@@ -9,6 +9,7 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
@@ -28,6 +29,7 @@ import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.TagEntry;
+import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
@@ -35,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.example.android.essentials.Activities.MainActivity.TAG;
-import static com.example.android.essentials.Activities.MainActivity.db;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
 
@@ -59,12 +60,19 @@ public class SubActivity extends AppCompatActivity implements
     ExpandableNavAdapter subExpNavAdapter;
     ExpandableDirsAdapter subExpDirsAdapter;
     String[] subPathArray;
+    private EssentialsDbHelper dbHelper;
+    private static SQLiteDatabase db;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
+
+
+        //Create db
+        dbHelper = new EssentialsDbHelper(this);
+        db = dbHelper.getReadableDatabase();
 
         //Get and set main and current dir's full and relative relativePaths
         mainPath = MainActivity.getMainPath();
@@ -81,26 +89,7 @@ public class SubActivity extends AppCompatActivity implements
         subTableName = MainActivity.relativePathToTableName(subRelativePath);
 
         //Create separate arrays for files and dirs in the current relativePath
-        MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
-
-/*        //Make list for dirs and set array adapter
-        subDirsList = (ListView) findViewById(R.id.sub_list);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
-                R.id.main_list_item_text, subListOfDirs);
-        subDirsList.setAdapter(adapter);
-
-        //Set clicklistener on list
-        subDirsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(SubActivity.this, SubActivity.class);
-                intent.putExtra("subPath", mainPath +
-                        subRelativePath + "/" + subListOfDirs.get((int) id));
-                view.getContext().startActivity(intent);
-
-            }
-        });*/
-
+        MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles, db);
 
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
@@ -144,7 +133,6 @@ public class SubActivity extends AppCompatActivity implements
             }
         });
 
-
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -153,7 +141,6 @@ public class SubActivity extends AppCompatActivity implements
 
         //Create item_suggestions list and set adapder
         prepareSuggestions();
-
     }
 
 
@@ -281,7 +268,7 @@ public class SubActivity extends AppCompatActivity implements
             cursor.close();
 
             //Add question object to the list of questions
-            questions.add(new Question(name, path));
+            questions.add(new Question(name, path, db));
         }
     }
 
@@ -372,5 +359,11 @@ public class SubActivity extends AppCompatActivity implements
         suggestionsCursor.close();
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        db.close();
+    }
 
 }
