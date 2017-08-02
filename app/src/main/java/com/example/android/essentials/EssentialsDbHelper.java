@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
 import com.example.android.essentials.EssentialsContract.Settings;

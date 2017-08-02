@@ -118,7 +118,7 @@ public class SearchableActivity extends AppCompatActivity {
             String[] projection = {QuestionEntry.COLUMN_QUESTION};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
-            Cursor cursor = db.query(tableName,
+            Cursor cursor = MyApplication.getDB().query(tableName,
                     projection,
                     selection,
                     selectionArgs,

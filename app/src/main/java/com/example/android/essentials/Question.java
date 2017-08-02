@@ -47,7 +47,7 @@ public class Question {
         String[] projection = {NotificationsEntry.COLUMN_LEVEL};
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             c.moveToFirst();
@@ -67,7 +67,7 @@ public class Question {
         String[] projection2 = {NotificationsEntry.COLUMN_QUESTION};
         String selection2 = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs2 = {getQuestion()};
-        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection2, selection2, selectionArgs2,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection2, selection2, selectionArgs2,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             questionExists = true;
@@ -93,7 +93,7 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_RELATIVE_PATH, relativePath);
         contentValues.put(NotificationsEntry.COLUMN_LEVEL, 1);
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
-        long r = db.insert(NotificationsEntry.TABLE_NAME, null, contentValues);
+        long r = MyApplication.getDB().insert(NotificationsEntry.TABLE_NAME, null, contentValues);
         Log.e(TAG, "adding to notification table response (id): " + r);
     }
 
@@ -102,7 +102,7 @@ public class Question {
         String[] projection = {NotificationsEntry.COLUMN_ID};
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        Cursor c = db.query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             c.moveToFirst();
@@ -115,7 +115,7 @@ public class Question {
     private void deleteNotification() {
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        long r = db.delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
+        long r = MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
         Log.e(TAG, "deleting from notification table response: " + r);
     }
 
@@ -125,7 +125,7 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        long r = db.update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        long r = MyApplication.getDB().update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
         Log.e(TAG, "updating notification table response: " + r);
     }
 

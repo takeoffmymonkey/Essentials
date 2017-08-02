@@ -82,7 +82,7 @@ public final class EssentialsContract {
             String selection = COLUMN_ID + "=?";
             String[] selectionArgs = {Integer.toString(1)};
             // TODO: 002 02 Aug 17 Null pointer here 
-            Cursor c = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
+            Cursor c = MyApplication.getDB().query(TABLE_NAME, null, selection, selectionArgs, null, null, null);
             if (c.getCount() == 1) {
                 c.moveToFirst();
                 mode = c.getInt(c.getColumnIndex(COLUMN_SOUND_MODE));
@@ -119,7 +119,7 @@ public final class EssentialsContract {
                 contentValues.put(COLUMN_SOUND_MODE, mode);
                 String selection = COLUMN_ID + "=?";
                 String[] selectionArgs = {Integer.toString(1)};
-                db.update(TABLE_NAME, contentValues, selection, selectionArgs);
+                MyApplication.getDB().update(TABLE_NAME, contentValues, selection, selectionArgs);
                 MainActivity.rescheduleNotifications();
                 String modeString = null;
                 if (mode == 0) {

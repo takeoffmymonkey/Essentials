@@ -83,7 +83,7 @@ public class SubActivity extends AppCompatActivity implements
         subTableName = MainActivity.relativePathToTableName(subRelativePath);
 
         //Create separate arrays for files and dirs in the current relativePath
-        MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles, db);
+        MainActivity.setListsOfFilesAndDirs(subTableName, subListOfDirs, subListOfFiles);
 
         //Make expandable list and set adapter
         subExpList = (ExpandableListView) findViewById(R.id.sub_exp_list);
@@ -259,7 +259,7 @@ public class SubActivity extends AppCompatActivity implements
             String[] projection = {QuestionEntry.COLUMN_QUESTION};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
-            Cursor cursor = db.query(subTableName,
+            Cursor cursor = MyApplication.getDB().query(subTableName,
                     projection,
                     selection,
                     selectionArgs,

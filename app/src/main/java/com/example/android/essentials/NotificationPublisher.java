@@ -47,7 +47,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         String[] projection = {NotificationsEntry.COLUMN_LEVEL};
         String selection = NotificationsEntry.COLUMN_ID + "=?";
         String[] selectionArgs = {Long.toString(id)};
-        Cursor cursor = db.query(NotificationsEntry.TABLE_NAME,
+        Cursor cursor = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -72,7 +72,7 @@ public class NotificationPublisher extends BroadcastReceiver {
         String[] projection = {NotificationsEntry.COLUMN_RELATIVE_PATH};
         String selection = NotificationsEntry.COLUMN_ID + "=?";
         String[] selectionArgs = {Integer.toString(id)};
-        Cursor cursor = db.query(NotificationsEntry.TABLE_NAME,
+        Cursor cursor = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -96,6 +96,6 @@ public class NotificationPublisher extends BroadcastReceiver {
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection2 = NotificationsEntry.COLUMN_ID + "=?";
         String[] selectionArgs2 = {Integer.toString(id)};
-        db.update(NotificationsEntry.TABLE_NAME, contentValues, selection2, selectionArgs2);
+        MyApplication.getDB().update(NotificationsEntry.TABLE_NAME, contentValues, selection2, selectionArgs2);
     }
 }

@@ -13,7 +13,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Environment;
@@ -56,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements
 
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
-    private static SQLiteDatabase db;
     public static String mainPath; // /storage/sdcard0/Essentials
     String currentRelativePath; //""
     String currentTableName; //FILES
@@ -70,9 +68,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //Create db
-        db = MyApplication.getDB();
 
         //Get main relativePath, set relative relativePath and get currentTableName
         mainPath = getMainPath();
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements
         });
 
         //Make list of folders in the current dir and set adapter
-        setListsOfFilesAndDirs(currentTableName, listOfDirs, null, db);
+        setListsOfFilesAndDirs(currentTableName, listOfDirs, null);
         mainList = (ListView) findViewById(R.id.main_list);
         mainList.setEmptyView(emptyView);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
@@ -151,13 +146,13 @@ public class MainActivity extends AppCompatActivity implements
                     if (file.isDirectory() && !file.getName().endsWith(".files")) {//This is a dir
                         contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
-                        db.insert(table, null, contentValues);
+                        MyApplication.getDB().insert(table, null, contentValues);
                         sync(relativePath + "/" + file.getName());
                     } else {//This is a file
                         if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
                             contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                             contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
-                            db.insert(table, null, contentValues);
+                            MyApplication.getDB().insert(table, null, contentValues);
                         }
                     }
                 }
@@ -177,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements
 
                 //Get old file listing and separate files from dirs
                 String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
-                Cursor c = db.query(table, projection, null, null, null, null, null);
+                Cursor c = MyApplication.getDB().query(table, projection, null, null, null, null, null);
                 int rows = c.getCount();
                 ArrayList<String> oldDirsList = new ArrayList<>();
                 ArrayList<String> oldFilesList = new ArrayList<>();
@@ -214,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_NAME, search);
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
-                        db.insert(table, null, contentValues);
+                        MyApplication.getDB().insert(table, null, contentValues);
                     }
                 }
                 //Same for files: check if dir is in list
@@ -234,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(QuestionEntry.COLUMN_NAME, search);
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
-                        db.insert(table, null, contentValues);
+                        MyApplication.getDB().insert(table, null, contentValues);
                     }
                 }
 
@@ -244,27 +239,27 @@ public class MainActivity extends AppCompatActivity implements
                     //Remove from the table
                     String selection = QuestionEntry.COLUMN_NAME + "=?";
                     String[] selectionArgs = {oldDir};
-                    db.delete(table, selection, selectionArgs);
+                    MyApplication.getDB().delete(table, selection, selectionArgs);
                     //Remove from tags table
                     String dirRelativePath = relativePath + "/" + oldDir;
                     String selection2 = TagEntry.COLUMN_PATH + "=?";
                     String[] selectionArgs2 = {dirRelativePath};
-                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                    MyApplication.getDB().delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                 }
                 //Delete files references
                 for (String oldFile : oldFilesList) {
                     //Remove from the table
                     String selection = QuestionEntry.COLUMN_NAME + "=?";
                     String[] selectionArgs = {oldFile};
-                    db.delete(table, selection, selectionArgs);
+                    MyApplication.getDB().delete(table, selection, selectionArgs);
                     //Remove from tags table
                     String fileRelativePath = relativePath + "/" + oldFile;
                     String selection2 = TagEntry.COLUMN_PATH + "=?";
                     String[] selectionArgs2 = {fileRelativePath};
-                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                    MyApplication.getDB().delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                     //Remove from notifications table
                     String selection3 = NotificationsEntry.COLUMN_RELATIVE_PATH + "=?";
-                    db.delete(NotificationsEntry.TABLE_NAME, selection3, selectionArgs2);
+                    MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME, selection3, selectionArgs2);
                 }
             }
 
@@ -289,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements
                             if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
                                 ContentValues contentValues = new ContentValues();
                                 contentValues.put(QuestionEntry.COLUMN_QUESTION, question);
-                                db.update(table,
+                                MyApplication.getDB().update(table,
                                         contentValues,
                                         QuestionEntry.COLUMN_NAME + "=?",
                                         new String[]{name});
@@ -299,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements
                             String[] projection = {TagEntry.COLUMN_ID};
                             String selection = TagEntry.COLUMN_PATH + "=?";
                             String[] selectionArgs = {tagPath};
-                            Cursor c = db.query(TagEntry.TABLE_NAME,
+                            Cursor c = MyApplication.getDB().query(TagEntry.TABLE_NAME,
                                     projection,
                                     selection,
                                     selectionArgs,
@@ -311,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements
                                     int id = c.getInt(c.getColumnIndex(TagEntry.COLUMN_ID));
                                     String selection2 = NotificationsEntry.COLUMN_ID + "=?";
                                     String[] selectionArgs2 = {Integer.toString(id)};
-                                    db.delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
+                                    MyApplication.getDB().delete(TagEntry.TABLE_NAME, selection2, selectionArgs2);
                                     c.moveToNext();
                                 }
                             }
@@ -323,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements
                                 ContentValues contentValues = new ContentValues();
                                 contentValues.put(TagEntry.COLUMN_PATH, tagPath);
                                 contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                                db.insert(TagEntry.TABLE_NAME, null, contentValues);
+                                MyApplication.getDB().insert(TagEntry.TABLE_NAME, null, contentValues);
                                 //getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
                             }
                         }
@@ -364,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements
                 + QuestionEntry.COLUMN_NAME + " TEXT NOT NULL, "
                 + QuestionEntry.COLUMN_FOLDER + " INTEGER NOT NULL, "
                 + QuestionEntry.COLUMN_QUESTION + " TEXT);";
-        db.execSQL(SQL_CREATE_QUESTIONS_TABLE);
+        MyApplication.getDB().execSQL(SQL_CREATE_QUESTIONS_TABLE);
         return table;
     }
 
@@ -514,12 +509,12 @@ public class MainActivity extends AppCompatActivity implements
     static void setListsOfFilesAndDirs(
             String currentTableName,
             ArrayList<String> listOfDirs,
-            @Nullable ArrayList<String> listOfFiles, SQLiteDatabase db) {
+            @Nullable ArrayList<String> listOfFiles) {
 
         //Create cursor based on whether only dirs are need or files too
         String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
 
-        Cursor cursor = db.query(
+        Cursor cursor = MyApplication.getDB().query(
                 currentTableName,
                 projection,
                 null,
@@ -768,7 +763,7 @@ public class MainActivity extends AppCompatActivity implements
         long timeEdited;
 
         //Parse table
-        Cursor c = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
         int rows = c.getCount();
         if (rows > 0) {//Should be at least 1 row
             c.moveToFirst();
