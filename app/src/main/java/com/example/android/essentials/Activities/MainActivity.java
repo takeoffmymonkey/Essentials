@@ -804,6 +804,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        suggestionsCursor.close();
         db.close();
     }
 

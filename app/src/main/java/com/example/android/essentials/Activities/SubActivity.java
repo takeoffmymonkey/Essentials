@@ -364,13 +364,13 @@ public class SubActivity extends AppCompatActivity implements
                 0
         );
 
-        suggestionsCursor.close();
     }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        suggestionsCursor.close();
         db.close();
     }
 

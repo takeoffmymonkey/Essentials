@@ -34,7 +34,6 @@ public class NotificationPublisher extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-
         dbHelper = new EssentialsDbHelper(MyApplication.getAppContext());
         db = dbHelper.getReadableDatabase();
 
@@ -52,8 +51,8 @@ public class NotificationPublisher extends BroadcastReceiver {
         String question = intent.getStringExtra(QUESTION);
         int currentLevel;
         String[] projection = {NotificationsEntry.COLUMN_LEVEL};
-        String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
-        String[] selectionArgs = {question};
+        String selection = NotificationsEntry.COLUMN_ID + "=?";
+        String[] selectionArgs = {Long.toString(id)};
         Cursor cursor = db.query(NotificationsEntry.TABLE_NAME,
                 projection,
                 selection,
@@ -64,7 +63,6 @@ public class NotificationPublisher extends BroadcastReceiver {
             currentLevel = cursor.getInt(cursor.getColumnIndex(NotificationsEntry.COLUMN_LEVEL));
             if (currentLevel == exLevel && currentLevel != 0) { //Level is still the same, fire notification
                 notificationManager.notify((int) id, notification);
-                Log.e(TAG, "NotificationPublisher.onReceive: firing notification with id: " + id);
                 refreshAlarm((int) id, question, currentLevel);
             }
         }
