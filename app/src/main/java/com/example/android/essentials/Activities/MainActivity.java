@@ -37,6 +37,7 @@ import android.widget.ListView;
 
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.NotificationPublisher;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
 
-    public static Context context;
     private static final int TAG_LOADER = 0;
     public static final String TAG = "ESSENTIALS: ";
     private EssentialsDbHelper dbHelper;
@@ -75,9 +75,6 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //Update context
-
 
         //Create db
         dbHelper = new EssentialsDbHelper(this);
@@ -455,6 +452,8 @@ public class MainActivity extends AppCompatActivity implements
                 cursor.moveToPosition(position);
                 searchView.setQuery(cursor.getString(cursor.getColumnIndex
                         (TagEntry.COLUMN_SUGGESTION)), true);
+                //Not sure I need to close this one
+                cursor.close();
                 return true;
             }
         });
@@ -507,6 +506,17 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.action_sync:
                 sync(currentRelativePath);
                 recreate();
+                return true;
+            case R.id.action_notification_mode:
+                int currentMode = Settings.getMode(db);
+                MainActivity.testSettingsTable();
+                if (currentMode < 2) {
+                    Settings.setMode(currentMode + 1, db);
+                    MainActivity.testSettingsTable();
+                } else if (currentMode == 2) {
+                    MainActivity.testSettingsTable();
+                    Settings.setMode(0, db);
+                }
                 return true;
             case R.id.action_restart_notifications:
                 rescheduleNotifications();
@@ -597,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*FOR DEBUGGING PURPOSES: show the look of TAGS table*/
+    /*FOR DEBUGGING PURPOSES*/
     static void testTagsTable() {
         Cursor c = db.query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
         Log.e(TAG, "========================================================");
@@ -618,7 +628,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative relativePath*/
+    /*FOR DEBUGGING PURPOSES*/
     static void testQuestionsTable(String relativePath) {
 
         Cursor c1 = db.query(relativePathToTableName(relativePath), null, null, null, null, null, null);
@@ -641,7 +651,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*FOR DEBUGGING PURPOSES: show the look of FILES table for the specified relative relativePath*/
+    /*FOR DEBUGGING PURPOSES*/
     public static void testNotificationTable() {
 
         Cursor c1 = db.query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
@@ -659,6 +669,27 @@ public class MainActivity extends AppCompatActivity implements
             Log.e(TAG, "TIME_EDITED: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_TIME_EDITED)));
             Log.e(TAG, "--------------------------------------------------------");
             Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_LEVEL)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
+    }
+
+
+    /*FOR DEBUGGING PURPOSES*/
+    public static void testSettingsTable() {
+
+        Cursor c1 = db.query(Settings.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "SETTINGS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_ID)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "SOUND_MODE: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_SOUND_MODE)));
             Log.e(TAG, "--------------------------------------------------------");
             c1.moveToNext();
             Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -722,10 +753,14 @@ public class MainActivity extends AppCompatActivity implements
             builder.setContentText(relativePath);
             builder.setSmallIcon(R.drawable.ic_launcher_round);
             builder.setAutoCancel(true);
-            builder.setDefaults(Notification.DEFAULT_VIBRATE);
             builder.setContentIntent(resultPendingIntent);
             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(relativePath));
             builder.setPriority(2);
+            //Set sound mode
+            int mode = Settings.getMode(db);
+            if (mode != 0) {
+                builder.setDefaults(mode);
+            }
 
             return builder.build();
         } else {

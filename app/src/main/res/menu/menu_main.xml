@@ -20,4 +20,9 @@
         android:title="@string/restart_notifications"
         app:showAsAction="never" />
 
+
+    <item android:id="@+id/action_notification_mode"
+        android:title="@string/notification_mode"
+        app:showAsAction="never" />
+
 </menu>

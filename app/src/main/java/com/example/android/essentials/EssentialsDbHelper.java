@@ -1,11 +1,13 @@
 package com.example.android.essentials;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 
 /**
@@ -17,7 +19,8 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "essentials";
     private static final int DATABASE_VERSION = 1;
-
+    private EssentialsDbHelper dbHelper;
+    private static SQLiteDatabase db;
 
     public EssentialsDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -52,6 +55,15 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
                 + NotificationsEntry.COLUMN_LEVEL + " INTEGER, "
                 + NotificationsEntry.COLUMN_TIME_EDITED + " INTEGER);";
         db.execSQL(SQL_CREATE_NOTIFICATIONS_TABLE);
+
+        //Create NOTIFICATION table
+        String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE " + Settings.TABLE_NAME + " ("
+                + Settings.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + Settings.COLUMN_SOUND_MODE + " INTEGER DEFAULT 2);";
+        db.execSQL(SQL_CREATE_SETTINGS_TABLE);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(Settings.COLUMN_SOUND_MODE, 2);
+        db.insert(Settings.TABLE_NAME, null, contentValues);
 
     }
 

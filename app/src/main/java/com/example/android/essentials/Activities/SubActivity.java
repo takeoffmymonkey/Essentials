@@ -28,6 +28,7 @@ import com.example.android.essentials.Adapters.ExpandableDirsAdapter;
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
+import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.EssentialsDbHelper;
 import com.example.android.essentials.Question;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import static com.example.android.essentials.Activities.MainActivity.TAG;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
+import static com.example.android.essentials.Activities.MainActivity.testSettingsTable;
 
 public class SubActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -175,6 +177,8 @@ public class SubActivity extends AppCompatActivity implements
                 cursor.moveToPosition(position);
                 searchView.setQuery(cursor.getString(cursor.getColumnIndex
                         (TagEntry.COLUMN_SUGGESTION)), true);
+                //Not sure I need to close this one
+                cursor.close();
                 return true;
             }
         });
@@ -191,6 +195,7 @@ public class SubActivity extends AppCompatActivity implements
                 Bundle appData = new Bundle();
                 appData.putStringArrayList("relativePaths", paths);
                 searchView.setAppSearchData(appData);
+
                 return false;
             }
 
@@ -220,9 +225,20 @@ public class SubActivity extends AppCompatActivity implements
 
     /*Menu options*/
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) /**/ {
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
+                return true;
+            case R.id.action_notification_mode:
+                int currentMode = Settings.getMode(db);
+                MainActivity.testSettingsTable();
+                if (currentMode < 2) {
+                    Settings.setMode(currentMode + 1, db);
+                    MainActivity.testSettingsTable();
+                } else if (currentMode == 2) {
+                    MainActivity.testSettingsTable();
+                    Settings.setMode(0, db);
+                }
                 return true;
             case android.R.id.home:
                 this.finish();
