@@ -14,12 +14,15 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ExpandableListView;
 
 import com.example.android.essentials.Adapters.ExpandableDirsAdapter;
@@ -57,6 +60,7 @@ public class SubActivity extends AppCompatActivity implements
     ExpandableDirsAdapter subExpDirsAdapter;
     String[] subPathArray;
     private static SQLiteDatabase db;
+    ActionBar actionBar;
 
 
     @Override
@@ -64,9 +68,10 @@ public class SubActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
 
-
         //Create db
         db = MyApplication.getDB();
+
+        actionBar = getSupportActionBar();
 
         //Get and set main and current dir's full and relative relativePaths
         mainPath = MainActivity.getMainPath();
@@ -88,6 +93,7 @@ public class SubActivity extends AppCompatActivity implements
         prepareQuestionsList();
         subExpListAdapter = new ExpandableListAdapter(this, questions);
         subExpList.setAdapter(subExpListAdapter);
+
 
         //Make expandable navigator
         subExpNav = (ExpandableListView) findViewById(R.id.sub_exp_navigate);
@@ -129,9 +135,11 @@ public class SubActivity extends AppCompatActivity implements
         if (Settings.getListsVisibility() == 1) {//Lists should be visible
             subExpNav.setVisibility(View.VISIBLE);
             subExpDirs.setVisibility(View.VISIBLE);
+            actionBar.show();
         } else if (Settings.getListsVisibility() == 0) {//Lists are hidden
             subExpNav.setVisibility(View.GONE);
             subExpDirs.setVisibility(View.GONE);
+            actionBar.hide();
         }
 
         //Enable back option
@@ -386,12 +394,14 @@ public class SubActivity extends AppCompatActivity implements
             //Make lists invisible
             subExpDirs.setVisibility(View.GONE);
             subExpNav.setVisibility(View.GONE);
+            actionBar.hide();
             //Update settings
             Settings.setListsVisibility(0);
         } else if (Settings.getListsVisibility() == 0) {//Lists are invisible
             //Make lists visible
             subExpDirs.setVisibility(View.VISIBLE);
             subExpNav.setVisibility(View.VISIBLE);
+            actionBar.show();
             //Update settings
             Settings.setListsVisibility(1);
         }
