@@ -40,6 +40,20 @@
                 android:resource="@xml/searchable" />
         </activity>
 
+
+        <activity
+            android:name=".Activities.SearchableActivity2"
+            android:noHistory="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+
         <provider
             android:name=".EssentialsContentProvider"
             android:authorities="com.example.android.essentials"

@@ -500,12 +500,12 @@ public class MainActivity extends AppCompatActivity implements
         Context context = MyApplication.getAppContext();
 
         if (context != null) {
-            Intent resultIntent = new Intent(MyApplication.getAppContext(), SearchableActivity.class);
+            Intent resultIntent = new Intent(MyApplication.getAppContext(), SearchableActivity2.class);
             resultIntent.putExtra("relativePath", relativePath);
 
             //Make artificial back stack to go back to Home screen on back passed
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-            stackBuilder.addParentStack(SearchableActivity.class);
+            stackBuilder.addParentStack(SearchableActivity2.class);
             stackBuilder.addNextIntent(resultIntent);
 
             PendingIntent resultPendingIntent =

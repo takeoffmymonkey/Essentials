@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * Created by takeoff on 020 20 Jul 17.
  */
 
-public class SearchableActivity extends AppCompatActivity {
+public class SearchableActivity2 extends AppCompatActivity {
 
     ArrayList<String> relativePaths = new ArrayList<>();
     String relativePath = null;
@@ -136,7 +136,7 @@ public class SearchableActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-/*                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 //Set custom view of the dialog
                 builder.setMessage("Change level?")
                         //Set ability to press back
@@ -147,14 +147,14 @@ public class SearchableActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialog, int id) {
                                         questions.get(0).levelUp();
                                         dialog.cancel();
-                                        SearchableActivity.this.finish();
+                                        SearchableActivity2.this.finish();
                                     }
                                 })
                         .setNeutralButton("Keep",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         dialog.cancel();
-                                        SearchableActivity.this.finish();
+                                        SearchableActivity2.this.finish();
                                     }
                                 })
                         //Set cancel button with click listener
@@ -164,19 +164,19 @@ public class SearchableActivity extends AppCompatActivity {
                                         //Close the dialog window
                                         questions.get(0).levelDown();
                                         dialog.cancel();
-                                        SearchableActivity.this.finish();
+                                        SearchableActivity2.this.finish();
                                     }
                                 });
                 AlertDialog alert = builder.create();
-                alert.show();*/
-                this.finish();
+                alert.show();
+
                 return false;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-/*    @Override
+    @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         //Set custom view of the dialog
@@ -189,14 +189,14 @@ public class SearchableActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 questions.get(0).levelUp();
                                 dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
+                                SearchableActivity2.super.onBackPressed();
                             }
                         })
                 .setNeutralButton("Keep",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
+                                SearchableActivity2.super.onBackPressed();
                             }
                         })
                 //Set cancel button with click listener
@@ -206,10 +206,10 @@ public class SearchableActivity extends AppCompatActivity {
                                 //Close the dialog window
                                 questions.get(0).levelDown();
                                 dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
+                                SearchableActivity2.super.onBackPressed();
                             }
                         });
         AlertDialog alert = builder.create();
         alert.show();
-    }*/
+    }
 }
