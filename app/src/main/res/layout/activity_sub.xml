@@ -3,18 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorDarkGrey"
     android:orientation="vertical"
     tools:context="com.example.android.essentials.Activities.SubActivity">
-
-
-
-
 
     <ExpandableListView
         android:id="@+id/sub_exp_navigate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorDarkGrey">
 
     </ExpandableListView>
 
@@ -22,7 +19,8 @@
     <ExpandableListView
         android:id="@+id/sub_exp_dirs"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorLightGrey">
 
     </ExpandableListView>
 
