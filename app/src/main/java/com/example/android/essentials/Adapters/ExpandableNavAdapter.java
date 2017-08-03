@@ -78,7 +78,7 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getGroup(int groupPosition) {
-        return "Navigate up";
+        return "Navigate up ^";
     }
 
 
