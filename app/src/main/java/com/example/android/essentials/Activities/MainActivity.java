@@ -148,13 +148,14 @@ public class MainActivity extends AppCompatActivity implements
                         contentValues.put(QuestionEntry.COLUMN_FOLDER, 1);
                         MyApplication.getDB().insert(table, null, contentValues);
                         sync(relativePath + "/" + file.getName());
-                    } else {//This is a file
-                        if (!file.getName().equalsIgnoreCase("tags.txt")) {//This is a question file
+                    } else //This is a file
+                        if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")
+                                && !file.getName().endsWith(".files")) {//This is a question file
                             contentValues.put(QuestionEntry.COLUMN_NAME, file.getName());
                             contentValues.put(QuestionEntry.COLUMN_FOLDER, 0);
                             MyApplication.getDB().insert(table, null, contentValues);
                         }
-                    }
+
                 }
             } else {//We are in resyncing mode
                 //Get new file listing and separate files from dirs
@@ -165,7 +166,8 @@ public class MainActivity extends AppCompatActivity implements
                     if (file.isDirectory() && !file.getName().endsWith(".files")) {//It's a dir
                         newDirsList.add(file);
                         sync(relativePath + "/" + file.getName());
-                    } else if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")) {//A file
+                    } else if (file.isFile() && !file.getName().equalsIgnoreCase("tags.txt")
+                            && !file.getName().endsWith(".files")) {//A file
                         newFilesList.add(file);
                     }
                 }
@@ -343,7 +345,38 @@ public class MainActivity extends AppCompatActivity implements
         String[] locations = relativePath.split("/");
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
-            sb.append(locations[i].replaceAll(" ", "_"));
+            String location = locations[i];
+            location = location.replaceAll(" ", "_");
+            location = location.replaceAll("~", "_");
+            location = location.replaceAll("`", "_");
+            location = location.replaceAll("!", "_");
+            location = location.replaceAll("@", "_");
+            location = location.replaceAll("#", "_");
+            location = location.replaceAll("$", "_");
+            location = location.replaceAll("%", "_");
+            location = location.replaceAll("^", "_");
+            location = location.replaceAll("&", "_");
+            location = location.replaceAll("\\*", "_");
+            location = location.replaceAll("\\(", "_");
+            location = location.replaceAll("\\)", "_");
+            location = location.replaceAll("-", "_");
+            location = location.replaceAll("\\+", "_");
+            location = location.replaceAll("\\{", "_");
+            location = location.replaceAll("\\}", "_");
+            location = location.replaceAll("\\[", "_");
+            location = location.replaceAll("\\]", "_");
+            location = location.replaceAll("|", "_");
+            location = location.replaceAll(":", "_");
+            location = location.replaceAll(";", "_");
+            location = location.replaceAll("\"", "_");
+            location = location.replaceAll("'", "_");
+            location = location.replaceAll("<", "_");
+            location = location.replaceAll(">", "_");
+            location = location.replaceAll("\\?", "_");
+            location = location.replaceAll(",", "_");
+            location = location.replaceAll("\\.", "_");
+            location = location.replaceAll("/", "_");
+            sb.append(location);
             sb.append("_");
         }
         sb.append("FILES");
@@ -513,13 +546,12 @@ public class MainActivity extends AppCompatActivity implements
 
         //Create cursor based on whether only dirs are need or files too
         String[] projection = {QuestionEntry.COLUMN_NAME, QuestionEntry.COLUMN_FOLDER};
-
+        String orderBy = QuestionEntry.COLUMN_NAME + " ASC";
         Cursor cursor = MyApplication.getDB().query(
                 currentTableName,
                 projection,
-                null,
-                null,
-                null, null, null);
+                null, null, null, null,
+                orderBy);
 
         //Add files and folders to corresponding array lists
         int numberOfRows = cursor.getCount();
@@ -744,7 +776,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public static String getRelativePathOfDirForFile(String fileFullPath) {
         File file = new File(fileFullPath);
-        if (file.isFile()) {
+        if (file.isFile() && !file.getName().endsWith(".files")) {
             String relativeFilePath = MainActivity.getRelativePathFromFull(fileFullPath);
             String relativeDirPath = relativeFilePath.substring(0,
                     relativeFilePath.lastIndexOf("/") + 1);
