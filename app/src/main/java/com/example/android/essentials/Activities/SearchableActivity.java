@@ -32,7 +32,6 @@ public class SearchableActivity extends AppCompatActivity {
     ExpandableListAdapter expListAdapter;
     String mainPath;
     private static SQLiteDatabase db;
-    private Question question;
 
 
     @Override
@@ -105,6 +104,7 @@ public class SearchableActivity extends AppCompatActivity {
                         .setPositiveButton("Increase",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
+                                        questions.get(0).levelUp();
                                         dialog.cancel();
                                         SearchableActivity.this.finish();
                                     }
@@ -121,6 +121,7 @@ public class SearchableActivity extends AppCompatActivity {
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         //Close the dialog window
+                                        questions.get(0).levelDown();
                                         dialog.cancel();
                                         SearchableActivity.this.finish();
                                     }
