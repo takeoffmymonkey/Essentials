@@ -36,11 +36,11 @@ import android.widget.ListView;
 
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
-import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.NotificationPublisher;
 import com.example.android.essentials.R;
 import com.example.android.essentials.Schedule;
+import com.example.android.essentials.Settings;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -525,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements
             builder.setPriority(2);
             //Set sound mode
             // TODO: 002 02 Aug 17 null pointer from here 
-            int mode = Settings.getMode();
+            int mode = Settings.getSoundMode();
             if (mode != 0) {
                 builder.setDefaults(mode);
             }
@@ -716,14 +716,14 @@ public class MainActivity extends AppCompatActivity implements
                 recreate();
                 return true;
             case R.id.action_notification_mode:
-                int currentMode = Settings.getMode();
+                int currentMode = Settings.getSoundMode();
                 MainActivity.testSettingsTable();
                 if (currentMode < 2) {
-                    Settings.setMode(currentMode + 1);
+                    Settings.setSoundMode(currentMode + 1);
                     MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
                     MainActivity.testSettingsTable();
-                    Settings.setMode(0);
+                    Settings.setSoundMode(0);
                 }
                 return true;
             case R.id.action_restart_notifications:

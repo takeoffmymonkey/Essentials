@@ -21,16 +21,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
 
 import com.example.android.essentials.Adapters.ExpandableDirsAdapter;
 import com.example.android.essentials.Adapters.ExpandableListAdapter;
 import com.example.android.essentials.Adapters.ExpandableNavAdapter;
 import com.example.android.essentials.EssentialsContract.QuestionEntry;
-import com.example.android.essentials.EssentialsContract.Settings;
 import com.example.android.essentials.EssentialsContract.TagEntry;
 import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
+import com.example.android.essentials.Settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +48,6 @@ public class SubActivity extends AppCompatActivity implements
     String subTableName; //CS_FILES
     ArrayList<String> subListOfDirs = new ArrayList<String>();
     ArrayList<String> subListOfFiles = new ArrayList<String>();
-    ListView subDirsList;
     ExpandableListView subExpList;
     ExpandableListView subExpNav;
     ExpandableListView subExpDirs;
@@ -126,6 +124,15 @@ public class SubActivity extends AppCompatActivity implements
                 return false;
             }
         });
+
+        //Set visibility of lists
+        if (Settings.getListsVisibility() == 1) {//Lists should be visible
+            subExpNav.setVisibility(View.VISIBLE);
+            subExpDirs.setVisibility(View.VISIBLE);
+        } else if (Settings.getListsVisibility() == 0) {//Lists are hidden
+            subExpNav.setVisibility(View.GONE);
+            subExpDirs.setVisibility(View.GONE);
+        }
 
         //Enable back option
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -221,15 +228,18 @@ public class SubActivity extends AppCompatActivity implements
         switch (item.getItemId()) {
             case R.id.action_search:
                 return true;
+            case R.id.action_hide_lists:
+                showHideExpLists();
+                return true;
             case R.id.action_notification_mode:
-                int currentMode = Settings.getMode();
+                int currentMode = Settings.getSoundMode();
                 MainActivity.testSettingsTable();
                 if (currentMode < 2) {
-                    Settings.setMode(currentMode + 1);
+                    Settings.setSoundMode(currentMode + 1);
                     MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
                     MainActivity.testSettingsTable();
-                    Settings.setMode(0);
+                    Settings.setSoundMode(0);
                 }
                 return true;
             case android.R.id.home:
@@ -368,6 +378,23 @@ public class SubActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+
+    private void showHideExpLists() {
+        if (Settings.getListsVisibility() == 1) {//Lists are visible
+            //Make lists invisible
+            subExpDirs.setVisibility(View.GONE);
+            subExpNav.setVisibility(View.GONE);
+            //Update settings
+            Settings.setListsVisibility(0);
+        } else if (Settings.getListsVisibility() == 0) {//Lists are invisible
+            //Make lists visible
+            subExpDirs.setVisibility(View.VISIBLE);
+            subExpNav.setVisibility(View.VISIBLE);
+            //Update settings
+            Settings.setListsVisibility(1);
+        }
     }
 
 }

@@ -25,4 +25,8 @@
         android:title="@string/notification_mode"
         app:showAsAction="never" />
 
+    <item android:id="@+id/action_hide_lists"
+        android:title="@string/show_hide_lists"
+        app:showAsAction="never" />
+
 </menu>
