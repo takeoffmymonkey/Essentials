@@ -66,6 +66,7 @@ public class SearchableActivity extends AppCompatActivity {
 
     }
 
+
     public boolean handleIntent() {
         boolean isFile = true;
         // Get the intent, verify the action and get the additional data (relativePath)
@@ -89,6 +90,46 @@ public class SearchableActivity extends AppCompatActivity {
         }
         return isFile;
     }
+
+
+    /*Prepare questions list for adapter*/
+    private void prepareQuestionsList() {
+        for (int i = 0; i < relativePaths.size(); i++) {
+            //Get fileRelativePath of the question and create full relativePath
+            String fileRelativePath = relativePaths.get(i);
+            String fileFullPath = mainPath + fileRelativePath;
+
+            //Get name of the file
+            String name = fileRelativePath.substring(fileRelativePath.lastIndexOf("/") + 1);
+
+            //Get table of the file
+            String folderRelativePath = fileRelativePath.substring(0, fileRelativePath.lastIndexOf("/"));
+            String tableName = MainActivity.relativePathToTableName(folderRelativePath);
+
+            //Rename question if it has question text provided, add level
+            String[] projection = {QuestionEntry.COLUMN_QUESTION};
+            String selection = QuestionEntry.COLUMN_NAME + "=?";
+            String[] selectionArgs = {name};
+            Cursor cursor = MyApplication.getDB().query(tableName,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null, null, null);
+            if (cursor.getCount() == 1) { //Row is found
+                cursor.moveToFirst();
+                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
+                if (q != null) {//There is a question provided
+                    name = q;
+                } else {//No question, cut out extension
+                    name = name.substring(0, name.lastIndexOf("."));
+                }
+            }
+            cursor.close();
+            //Add question object to the list of questions
+            questions.add(new Question(name, fileFullPath));
+        }
+    }
+
 
     /*Menu options*/
     @Override
@@ -135,42 +176,40 @@ public class SearchableActivity extends AppCompatActivity {
     }
 
 
-    /*Prepare questions list for adapter*/
-    private void prepareQuestionsList() {
-        for (int i = 0; i < relativePaths.size(); i++) {
-            //Get fileRelativePath of the question and create full relativePath
-            String fileRelativePath = relativePaths.get(i);
-            String fileFullPath = mainPath + fileRelativePath;
-
-            //Get name of the file
-            String name = fileRelativePath.substring(fileRelativePath.lastIndexOf("/") + 1);
-
-            //Get table of the file
-            String folderRelativePath = fileRelativePath.substring(0, fileRelativePath.lastIndexOf("/"));
-            String tableName = MainActivity.relativePathToTableName(folderRelativePath);
-
-            //Rename question if it has question text provided, add level
-            String[] projection = {QuestionEntry.COLUMN_QUESTION};
-            String selection = QuestionEntry.COLUMN_NAME + "=?";
-            String[] selectionArgs = {name};
-            Cursor cursor = MyApplication.getDB().query(tableName,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null, null, null);
-            if (cursor.getCount() == 1) { //Row is found
-                cursor.moveToFirst();
-                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
-                if (q != null) {//There is a question provided
-                    name = q;
-                } else {//No question, cut out extension
-                    name = name.substring(0, name.lastIndexOf("."));
-                }
-            }
-            cursor.close();
-            //Add question object to the list of questions
-            questions.add(new Question(name, fileFullPath));
-        }
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        //Set custom view of the dialog
+        builder.setMessage("Change level?")
+                //Set ability to press back
+                .setCancelable(false)
+                //Set Ok button with click listener
+                .setPositiveButton("Increase",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                questions.get(0).levelUp();
+                                dialog.cancel();
+                                SearchableActivity.super.onBackPressed();
+                            }
+                        })
+                .setNeutralButton("Keep",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                SearchableActivity.super.onBackPressed();
+                            }
+                        })
+                //Set cancel button with click listener
+                .setNegativeButton("Decrease",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //Close the dialog window
+                                questions.get(0).levelDown();
+                                dialog.cancel();
+                                SearchableActivity.super.onBackPressed();
+                            }
+                        });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
-
 }
