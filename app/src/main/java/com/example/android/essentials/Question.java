@@ -59,8 +59,6 @@ public class Question {
     }
 
     public void setLevel(int level) {
-
-
         //Update Notifications table
         //Check if question exist
         Boolean questionExists = false;
@@ -139,8 +137,6 @@ public class Question {
     }
 
     public int levelUp() {
-
-
         int currentLevel = getLevel();
         int newLevel;
         if (currentLevel < 4) {
@@ -150,7 +146,6 @@ public class Question {
             newLevel = currentLevel;
         }
         setQuestionNotification();
-        Log.e(TAG, "Leveled up");
         return newLevel;
     }
 
@@ -164,7 +159,6 @@ public class Question {
             newLevel = currentLevel;
         }
         setQuestionNotification();
-        Log.e(TAG, "Leveled down");
         return newLevel;
     }
 

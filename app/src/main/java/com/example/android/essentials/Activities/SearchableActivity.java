@@ -1,6 +1,8 @@
 package com.example.android.essentials.Activities;
 
+import android.app.AlertDialog;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -30,6 +32,7 @@ public class SearchableActivity extends AppCompatActivity {
     ExpandableListAdapter expListAdapter;
     String mainPath;
     private static SQLiteDatabase db;
+    private Question question;
 
 
     @Override
@@ -93,8 +96,39 @@ public class SearchableActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                this.finish();
-                return true;
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                //Set custom view of the dialog
+                builder.setMessage("Change level?")
+                        //Set ability to press back
+                        .setCancelable(false)
+                        //Set Ok button with click listener
+                        .setPositiveButton("Increase",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        SearchableActivity.this.finish();
+                                    }
+                                })
+                        .setNeutralButton("Keep",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        SearchableActivity.this.finish();
+                                    }
+                                })
+                        //Set cancel button with click listener
+                        .setNegativeButton("Decrease",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        //Close the dialog window
+                                        dialog.cancel();
+                                        SearchableActivity.this.finish();
+                                    }
+                                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+                return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -128,8 +162,9 @@ public class SearchableActivity extends AppCompatActivity {
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
                 if (q != null) {//There is a question provided
                     name = q;
+                } else {//No question, cut out extension
+                    name = name.substring(0, name.lastIndexOf("."));
                 }
-
             }
             cursor.close();
             //Add question object to the list of questions
@@ -137,8 +172,4 @@ public class SearchableActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 }

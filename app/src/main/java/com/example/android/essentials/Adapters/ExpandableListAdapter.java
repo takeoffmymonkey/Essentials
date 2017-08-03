@@ -6,6 +6,7 @@ package com.example.android.essentials.Adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import com.example.android.essentials.Question;
 import com.example.android.essentials.R;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
