@@ -255,7 +255,6 @@ public class SubActivity extends AppCompatActivity implements
             String path = mainPath + subRelativePath + "/" + name;
 
             //Rename question if it has question text provided
-            int level = 0;
             String[] projection = {QuestionEntry.COLUMN_QUESTION};
             String selection = QuestionEntry.COLUMN_NAME + "=?";
             String[] selectionArgs = {name};
@@ -269,6 +268,8 @@ public class SubActivity extends AppCompatActivity implements
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
                 if (q != null) {//There is a question provided
                     name = q;
+                } else {//question is not provided, get file name without extension
+                    name = name.substring(0, name.lastIndexOf("."));
                 }
             }
             cursor.close();
