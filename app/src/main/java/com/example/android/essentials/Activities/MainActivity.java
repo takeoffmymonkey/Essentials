@@ -335,8 +335,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*Convert relative relativePath to name of the table with listing of current files*/
+    /*Return main relativePath (/storage/sdcard0/Essentials) */
+    static String getMainPath() {
+        //Check if card is mount
+        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+        if (!cardMount) {
+            return "Card not found";
+        } else {//Card is mount
+            return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
+        }
+    }
 
+
+    /*Convert relative relativePath to name of the table with listing of current files*/
     public static String relativePathToTableName(String relativePath) {
         //Path should start with /
         if (!relativePath.startsWith("/")) {
@@ -345,17 +356,17 @@ public class MainActivity extends AppCompatActivity implements
         String[] locations = relativePath.split("/");
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < locations.length; i++) {
-            String location = locations[i];
+            String location = locations[i].trim();
             location = location.replaceAll(" ", "_");
             location = location.replaceAll("~", "_");
             location = location.replaceAll("`", "_");
             location = location.replaceAll("!", "_");
             location = location.replaceAll("@", "_");
             location = location.replaceAll("#", "_");
-            location = location.replaceAll("$", "_");
+            location = location.replaceAll("$", "");
             location = location.replaceAll("%", "_");
-            location = location.replaceAll("^", "_");
-            location = location.replaceAll("&", "_");
+            location = location.replaceAll("^", "");
+            location = location.replaceAll("&", "");
             location = location.replaceAll("\\*", "_");
             location = location.replaceAll("\\(", "_");
             location = location.replaceAll("\\)", "_");
@@ -365,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements
             location = location.replaceAll("\\}", "_");
             location = location.replaceAll("\\[", "_");
             location = location.replaceAll("\\]", "_");
-            location = location.replaceAll("|", "_");
+            location = location.replaceAll("|", "");
             location = location.replaceAll(":", "_");
             location = location.replaceAll(";", "_");
             location = location.replaceAll("\"", "_");
@@ -380,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements
             sb.append("_");
         }
         sb.append("FILES");
+        Log.e(TAG, "Returning table name: " + sb);
         return sb.toString();
     }
 
@@ -421,123 +433,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    /*Create menu*/
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        //Create menu
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-
-        //Set up searchView menu item and adapter
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        ComponentName componentName = new ComponentName(this, SearchableActivity.class);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
-        searchView.setSubmitButtonEnabled(true);
-        searchView.setSuggestionsAdapter(suggestionsAdapter);
-
-        //set OnSuggestionListener
-        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
-            @Override
-            public boolean onSuggestionSelect(int position) {
-                return false;
-            }
-
-            @Override
-            public boolean onSuggestionClick(int position) {
-                // Add clicked text to search box
-                CursorAdapter ca = searchView.getSuggestionsAdapter();
-                Cursor cursor = ca.getCursor();
-                cursor.moveToPosition(position);
-                searchView.setQuery(cursor.getString(cursor.getColumnIndex
-                        (TagEntry.COLUMN_SUGGESTION)), true);
-                //Not sure I need to close this one
-                cursor.close();
-                return true;
-            }
-        });
-
-        //set OnQueryTextListener
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                //add relativePath of the queried file to search data
-                CursorAdapter ca = searchView.getSuggestionsAdapter();
-                Cursor cursor = ca.getCursor();
-                ArrayList<String> paths = new ArrayList<String>();
-                paths.add(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH)));
-                Bundle appData = new Bundle();
-                appData.putStringArrayList("relativePaths", paths);
-                searchView.setAppSearchData(appData);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //Update cursor on typing
-                final ContentResolver resolver = getContentResolver();
-                final String[] projection = {
-                        TagEntry.COLUMN_ID,
-                        TagEntry.COLUMN_SUGGESTION,
-                        TagEntry.COLUMN_PATH};
-                final String sa1 = "%" + newText + "%";
-                Cursor cursor = resolver.query(
-                        TagEntry.CONTENT_URI,
-                        projection,
-                        TagEntry.COLUMN_SUGGESTION + " LIKE ?",
-                        new String[]{sa1},
-                        null);
-                suggestionsAdapter.changeCursor(cursor);
-                return false;
-            }
-        });
-
-        return true;
-    }
-
-
-    /*Menu options*/
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_search:
-                return true;
-            case R.id.action_sync:
-                sync(currentRelativePath);
-                recreate();
-                return true;
-            case R.id.action_notification_mode:
-                int currentMode = Settings.getMode();
-                MainActivity.testSettingsTable();
-                if (currentMode < 2) {
-                    Settings.setMode(currentMode + 1);
-                    MainActivity.testSettingsTable();
-                } else if (currentMode == 2) {
-                    MainActivity.testSettingsTable();
-                    Settings.setMode(0);
-                }
-                return true;
-            case R.id.action_restart_notifications:
-                rescheduleNotifications();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    /*Return main relativePath (/storage/sdcard0/Essentials) */
-    static String getMainPath() {
-        //Check if card is mount
-        boolean cardMount = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-        if (!cardMount) {
-            return "Card not found";
-        } else {//Card is mount
-            return Environment.getExternalStorageDirectory().getPath() + "/Essentials";
-        }
-    }
-
-
     /*Create array list of directories in the current folder*/
     static void setListsOfFilesAndDirs(
             String currentTableName,
@@ -570,126 +465,6 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
         cursor.close();
-    }
-
-
-    /*Instantiate and return a new Loader for the given ID*/
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // This loader will execute the ContentProvider's query method on a background thread
-        return new CursorLoader(this,
-                TagEntry.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
-    }
-
-
-    /*Called when a previously created loader has finished its load*/
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        //Refresh cursor
-        suggestionsAdapter.swapCursor(data);
-    }
-
-
-    /*Called when a previously created loader is being reset, and thus making its data unavailable*/
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        suggestionsAdapter.swapCursor(null);
-    }
-
-
-    /*FOR DEBUGGING PURPOSES*/
-    public static void testTagsTable() {
-        Cursor c = MyApplication.getDB().query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "TAGS TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c.moveToFirst();
-        for (int i = 0; i < c.getCount(); i++) {
-            Log.e(TAG, "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        }
-        Log.e(TAG, "========================================================");
-        c.close();
-
-    }
-
-
-    /*FOR DEBUGGING PURPOSES*/
-    public static void testQuestionsTable(String relativePath) {
-
-        Cursor c1 = MyApplication.getDB().query(relativePathToTableName(relativePath), null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "QUESTIONS TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c1.moveToFirst();
-        for (int i = 0; i < c1.getCount(); i++) {
-            Log.e(TAG, "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c1.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        }
-        Log.e(TAG, "========================================================");
-        c1.close();
-    }
-
-
-    /*FOR DEBUGGING PURPOSES*/
-    public static void testNotificationTable() {
-
-        Cursor c1 = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "NOTIFICATION TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c1.moveToFirst();
-        for (int i = 0; i < c1.getCount(); i++) {
-            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_ID)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_QUESTION)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "RELATIVE_PATH: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_RELATIVE_PATH)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "TIME_EDITED: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_TIME_EDITED)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_LEVEL)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c1.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        }
-        Log.e(TAG, "========================================================");
-        c1.close();
-    }
-
-
-    /*FOR DEBUGGING PURPOSES*/
-    public static void testSettingsTable() {
-
-        Cursor c1 = MyApplication.getDB().query(Settings.TABLE_NAME, null, null, null, null, null, null);
-        Log.e(TAG, "========================================================");
-        Log.e(TAG, "SETTINGS TABLE");
-        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        c1.moveToFirst();
-        for (int i = 0; i < c1.getCount(); i++) {
-            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_ID)));
-            Log.e(TAG, "--------------------------------------------------------");
-            Log.e(TAG, "SOUND_MODE: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_SOUND_MODE)));
-            Log.e(TAG, "--------------------------------------------------------");
-            c1.moveToNext();
-            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        }
-        Log.e(TAG, "========================================================");
-        c1.close();
     }
 
 
@@ -826,9 +601,228 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
+    /*Instantiate and return a new Loader for the given ID*/
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        // This loader will execute the ContentProvider's query method on a background thread
+        return new CursorLoader(this,
+                TagEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+    }
+
+
+    /*Called when a previously created loader has finished its load*/
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        //Refresh cursor
+        suggestionsAdapter.swapCursor(data);
+    }
+
+
+    /*Called when a previously created loader is being reset, and thus making its data unavailable*/
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        suggestionsAdapter.swapCursor(null);
+    }
+
+
+    /*Create menu*/
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //Create menu
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
+        //Set up searchView menu item and adapter
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        ComponentName componentName = new ComponentName(this, SearchableActivity.class);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setSuggestionsAdapter(suggestionsAdapter);
+
+        //set OnSuggestionListener
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                // Add clicked text to search box
+                CursorAdapter ca = searchView.getSuggestionsAdapter();
+                Cursor cursor = ca.getCursor();
+                cursor.moveToPosition(position);
+                searchView.setQuery(cursor.getString(cursor.getColumnIndex
+                        (TagEntry.COLUMN_SUGGESTION)), true);
+                //Not sure I need to close this one
+                cursor.close();
+                return true;
+            }
+        });
+
+        //set OnQueryTextListener
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //add relativePath of the queried file to search data
+                CursorAdapter ca = searchView.getSuggestionsAdapter();
+                Cursor cursor = ca.getCursor();
+                ArrayList<String> paths = new ArrayList<String>();
+                paths.add(cursor.getString(cursor.getColumnIndex(TagEntry.COLUMN_PATH)));
+                Bundle appData = new Bundle();
+                appData.putStringArrayList("relativePaths", paths);
+                searchView.setAppSearchData(appData);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //Update cursor on typing
+                final ContentResolver resolver = getContentResolver();
+                final String[] projection = {
+                        TagEntry.COLUMN_ID,
+                        TagEntry.COLUMN_SUGGESTION,
+                        TagEntry.COLUMN_PATH};
+                final String sa1 = "%" + newText + "%";
+                Cursor cursor = resolver.query(
+                        TagEntry.CONTENT_URI,
+                        projection,
+                        TagEntry.COLUMN_SUGGESTION + " LIKE ?",
+                        new String[]{sa1},
+                        null);
+                suggestionsAdapter.changeCursor(cursor);
+                return false;
+            }
+        });
+
+        return true;
+    }
+
+
+    /*Menu options*/
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                return true;
+            case R.id.action_sync:
+                sync(currentRelativePath);
+                recreate();
+                return true;
+            case R.id.action_notification_mode:
+                int currentMode = Settings.getMode();
+                MainActivity.testSettingsTable();
+                if (currentMode < 2) {
+                    Settings.setMode(currentMode + 1);
+                    MainActivity.testSettingsTable();
+                } else if (currentMode == 2) {
+                    MainActivity.testSettingsTable();
+                    Settings.setMode(0);
+                }
+                return true;
+            case R.id.action_restart_notifications:
+                rescheduleNotifications();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    /*FOR DEBUGGING PURPOSES*/
+    public static void testTagsTable() {
+        Cursor c = MyApplication.getDB().query(TagEntry.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "TAGS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c.moveToFirst();
+        for (int i = 0; i < c.getCount(); i++) {
+            Log.e(TAG, "SUGG: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_SUGGESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "PATH: " + c.getString(c.getColumnIndex(TagEntry.COLUMN_PATH)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c.close();
+
+    }
+
+
+    /*FOR DEBUGGING PURPOSES*/
+    public static void testQuestionsTable(String relativePath) {
+
+        Cursor c1 = MyApplication.getDB().query(relativePathToTableName(relativePath), null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "QUESTIONS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "NAME: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_NAME)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "FOLDER: " + c1.getInt(c1.getColumnIndex(QuestionEntry.COLUMN_FOLDER)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(QuestionEntry.COLUMN_QUESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
+    }
+
+
+    /*FOR DEBUGGING PURPOSES*/
+    public static void testNotificationTable() {
+
+        Cursor c1 = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "NOTIFICATION TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_ID)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "QUESTION: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_QUESTION)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "RELATIVE_PATH: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_RELATIVE_PATH)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "TIME_EDITED: " + c1.getString(c1.getColumnIndex(NotificationsEntry.COLUMN_TIME_EDITED)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "LEVEL: " + c1.getInt(c1.getColumnIndex(NotificationsEntry.COLUMN_LEVEL)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
+    }
+
+
+    /*FOR DEBUGGING PURPOSES*/
+    public static void testSettingsTable() {
+
+        Cursor c1 = MyApplication.getDB().query(Settings.TABLE_NAME, null, null, null, null, null, null);
+        Log.e(TAG, "========================================================");
+        Log.e(TAG, "SETTINGS TABLE");
+        Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        c1.moveToFirst();
+        for (int i = 0; i < c1.getCount(); i++) {
+            Log.e(TAG, "ID: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_ID)));
+            Log.e(TAG, "--------------------------------------------------------");
+            Log.e(TAG, "SOUND_MODE: " + c1.getInt(c1.getColumnIndex(Settings.COLUMN_SOUND_MODE)));
+            Log.e(TAG, "--------------------------------------------------------");
+            c1.moveToNext();
+            Log.e(TAG, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        }
+        Log.e(TAG, "========================================================");
+        c1.close();
     }
 
 }
