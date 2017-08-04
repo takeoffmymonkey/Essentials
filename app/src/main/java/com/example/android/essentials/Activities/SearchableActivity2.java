@@ -136,37 +136,38 @@ public class SearchableActivity2 extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                int currentLevel = questions.get(0).getLevel();
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                //Set custom view of the dialog
-                builder.setMessage("Change level?")
-                        //Set ability to press back
-                        .setCancelable(false)
-                        //Set Ok button with click listener
-                        .setPositiveButton("Increase",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        questions.get(0).levelUp();
-                                        dialog.cancel();
-                                        SearchableActivity2.this.finish();
-                                    }
-                                })
-                        .setNeutralButton("Keep",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                        SearchableActivity2.this.finish();
-                                    }
-                                })
-                        //Set cancel button with click listener
-                        .setNegativeButton("Decrease",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        //Close the dialog window
-                                        questions.get(0).levelDown();
-                                        dialog.cancel();
-                                        SearchableActivity2.this.finish();
-                                    }
-                                });
+                builder.setMessage("Change current level (" + currentLevel + ")?");
+                builder.setCancelable(false);
+                if (currentLevel < 4) {
+                    builder.setPositiveButton("Increase",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    questions.get(0).levelUp();
+                                    dialog.cancel();
+                                    SearchableActivity2.this.finish();
+                                }
+                            });
+                }
+                builder.setNeutralButton("Keep",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                SearchableActivity2.this.finish();
+                            }
+                        });
+                if (currentLevel > 0) {
+                    builder.setNegativeButton("Decrease",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    //Close the dialog window
+                                    questions.get(0).levelDown();
+                                    dialog.cancel();
+                                    SearchableActivity2.this.finish();
+                                }
+                            });
+                }
                 AlertDialog alert = builder.create();
                 alert.show();
 
@@ -178,37 +179,38 @@ public class SearchableActivity2 extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        int currentLevel = questions.get(0).getLevel();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        //Set custom view of the dialog
-        builder.setMessage("Change level?")
-                //Set ability to press back
-                .setCancelable(false)
-                //Set Ok button with click listener
-                .setPositiveButton("Increase",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                questions.get(0).levelUp();
-                                dialog.cancel();
-                                SearchableActivity2.super.onBackPressed();
-                            }
-                        })
-                .setNeutralButton("Keep",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                SearchableActivity2.super.onBackPressed();
-                            }
-                        })
-                //Set cancel button with click listener
-                .setNegativeButton("Decrease",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //Close the dialog window
-                                questions.get(0).levelDown();
-                                dialog.cancel();
-                                SearchableActivity2.super.onBackPressed();
-                            }
-                        });
+        builder.setMessage("Change current level (" + currentLevel + ")?");
+        builder.setCancelable(false);
+        if (currentLevel < 4) {
+            builder.setPositiveButton("Increase",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            questions.get(0).levelUp();
+                            dialog.cancel();
+                            SearchableActivity2.super.onBackPressed();
+                        }
+                    });
+        }
+        builder.setNeutralButton("Keep",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        SearchableActivity2.super.onBackPressed();
+                    }
+                });
+        if (currentLevel > 0) {
+            builder.setNegativeButton("Decrease",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            //Close the dialog window
+                            questions.get(0).levelDown();
+                            dialog.cancel();
+                            SearchableActivity2.super.onBackPressed();
+                        }
+                    });
+        }
         AlertDialog alert = builder.create();
         alert.show();
     }
