@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity implements
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
                 intent.putExtra("subPath", mainPath + "/" + listOfDirs.get((int) id));
+                //Turn on bars
+                Settings.setListsVisibility(1);
                 view.getContext().startActivity(intent);
             }
         });

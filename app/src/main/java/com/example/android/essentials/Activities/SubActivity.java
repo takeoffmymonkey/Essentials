@@ -124,6 +124,8 @@ public class SubActivity extends AppCompatActivity implements
                 Intent intent = new Intent(SubActivity.this, SubActivity.class);
                 intent.putExtra("subPath", mainPath +
                         subRelativePath + "/" + subListOfDirs.get((int) id));
+                //Turn on bars
+                Settings.setListsVisibility(1);
                 v.getContext().startActivity(intent);
                 return false;
             }
@@ -326,6 +328,8 @@ public class SubActivity extends AppCompatActivity implements
             intent.putExtra("subPath", tempSubPath);
         }
 
+        //Turn on bars
+        Settings.setListsVisibility(1);
 
         //Start intent
         v.getContext().startActivity(intent);
