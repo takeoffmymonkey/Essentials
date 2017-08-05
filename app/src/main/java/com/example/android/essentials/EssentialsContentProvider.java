@@ -5,13 +5,15 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.TagEntry;
+
+import static android.content.ContentValues.TAG;
 
 
 /**
@@ -20,54 +22,21 @@ import com.example.android.essentials.EssentialsContract.TagEntry;
 
 public class EssentialsContentProvider extends ContentProvider {
 
-    /**
-     * URI matcher code for the content URI for the questions table
-     */
-
+    //URI matcher code for the content URI for the questions table
     private static final int TAGS = 200;
     private static final int TAG_ID = 201;
 
-
-    /**
-     * URI matcher code for the content URI for a single question in the questions table
-     */
-
-
-    /**
-     * UriMatcher object to match a content URI to a corresponding code.
-     * The input passed into the constructor represents the code to return for the root URI.
-     * It's common to use NO_MATCH as the input for this case.
-     */
+    //UriMatcher object to match a content URI to a corresponding code.
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-    // Static initializer. This is run the first time anything is called from this class.
     static {
-        // The calls to addURI() go here, for all of the content URI patterns that the provider
-        // should recognize. All paths added to the UriMatcher have a corresponding code to return
-        // when a match is found.
-
-        // The content URI of the form "content://com.example.android.pets/pets" will map to the
-        // integer code {@link #PETS}. This URI is used to provide access to MULTIPLE rows
-        // of the pets table.
-        //com.example.android.essentials questions
-
-
         sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
                 EssentialsContract.PATH_TAGS, TAGS);
 
-
-        // The content URI of the form "content://com.example.android.pets/pets/#" will map to the
-        // integer code {@link #PET_ID}. This URI is used to provide access to ONE single row
-        // of the pets table.
-        //
-        // In this case, the "#" wildcard is used where "#" can be substituted for an integer.
-        // For example, "content://com.example.android.pets/pets/3" matches, but
         // "content://com.example.android.pets/pets" (without a number at the end) doesn't match.
-
         sUriMatcher.addURI(EssentialsContract.CONTENT_AUTHORITY,
                 EssentialsContract.PATH_TAGS + "/#", TAG_ID);
     }
-
 
 
     @Override
@@ -129,7 +98,11 @@ public class EssentialsContentProvider extends ContentProvider {
         // Set notification URI on the Cursor,
         // so we know what content URI the Cursor was created for.
         // If the data at this URI changes, then we know we need to update the Cursor.
-        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        try {
+            cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        } catch (NullPointerException e) {
+            Log.e(TAG, e.toString());
+        }
 
         // Return the cursor
         return cursor;
@@ -150,7 +123,11 @@ public class EssentialsContentProvider extends ContentProvider {
                     return null;
                 }
                 // Notify all listeners that the data has changed for the pet content URI
-                getContext().getContentResolver().notifyChange(uri, null);
+                try {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                } catch (NullPointerException e) {
+                    Log.e(TAG, e.toString());
+                }
                 // Return the new URI with the ID (of the newly inserted row) appended at the end
                 return ContentUris.withAppendedId(uri, id);
         }
@@ -168,6 +145,4 @@ public class EssentialsContentProvider extends ContentProvider {
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
         return 0;
     }
-
-
 }

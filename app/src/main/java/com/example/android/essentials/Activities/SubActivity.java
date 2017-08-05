@@ -9,7 +9,6 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
@@ -17,6 +16,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -47,7 +47,7 @@ public class SubActivity extends AppCompatActivity implements
     String subPath;
     String subRelativePath;
     String subActivityName;
-    String subTableName; //CS_FILES
+    String subTableName;
     ArrayList<String> subListOfDirs = new ArrayList<String>();
     ArrayList<String> subListOfFiles = new ArrayList<String>();
     ExpandableListView subExpList;
@@ -58,7 +58,6 @@ public class SubActivity extends AppCompatActivity implements
     ExpandableNavAdapter subExpNavAdapter;
     ExpandableDirsAdapter subExpDirsAdapter;
     String[] subPathArray;
-    private static SQLiteDatabase db;
     ActionBar actionBar;
 
 
@@ -66,9 +65,6 @@ public class SubActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
-
-        //Create db
-        db = MyApplication.getDB();
 
         actionBar = getSupportActionBar();
 
@@ -144,7 +140,11 @@ public class SubActivity extends AppCompatActivity implements
         }
 
         //Enable back option
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        try {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        } catch (NullPointerException e) {
+            Log.e(MainActivity.TAG, e.toString());
+        }
 
         // Prepare the loader.  Either re-connect with an existing one, or start a new one.
         getLoaderManager().initLoader(TAG_LOADER, null, this);
@@ -322,7 +322,6 @@ public class SubActivity extends AppCompatActivity implements
         String tempSubPath = "";
         String[] tempSubPathArray = subPath.split("/", -1);
 
-
         //Prepare intent
         if (id == 0) {//main activity selected
             intent = new Intent(SubActivity.this, MainActivity.class);
@@ -389,12 +388,6 @@ public class SubActivity extends AppCompatActivity implements
                 0
         );
 
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
 

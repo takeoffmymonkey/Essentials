@@ -316,7 +316,6 @@ public class MainActivity extends AppCompatActivity implements
                                 contentValues.put(TagEntry.COLUMN_PATH, tagPath);
                                 contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
                                 MyApplication.getDB().insert(TagEntry.TABLE_NAME, null, contentValues);
-                                //getContentResolver().insert(TagEntry.CONTENT_URI, contentValues);
                             }
                         }
                     }
@@ -538,8 +537,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     public static String getRelativePathFromFull(String fullPath) {
-        String relativePath = fullPath.substring(getMainPath().length(), fullPath.length());
-        return relativePath;
+        return fullPath.substring(getMainPath().length(), fullPath.length());
     }
 
 
@@ -547,9 +545,8 @@ public class MainActivity extends AppCompatActivity implements
         File file = new File(fileFullPath);
         if (file.isFile() && !file.getName().endsWith(".files")) {
             String relativeFilePath = MainActivity.getRelativePathFromFull(fileFullPath);
-            String relativeDirPath = relativeFilePath.substring(0,
+            return relativeFilePath.substring(0,
                     relativeFilePath.lastIndexOf("/") + 1);
-            return relativeDirPath;
         } else {
             return "No file found at specified path";
         }
@@ -751,7 +748,6 @@ public class MainActivity extends AppCompatActivity implements
         }
         Log.e(TAG, "========================================================");
         c.close();
-
     }
 
 

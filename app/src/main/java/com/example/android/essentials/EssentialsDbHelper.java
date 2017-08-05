@@ -28,7 +28,6 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-
         //Create Main Questions table
         String table = "FILES";
         String SQL_CREATE_QUESTIONS_TABLE = "CREATE TABLE " + table + " ("

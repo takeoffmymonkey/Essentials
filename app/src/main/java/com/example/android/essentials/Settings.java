@@ -3,7 +3,6 @@ package com.example.android.essentials;
 import android.app.Notification;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,9 +19,6 @@ import static com.example.android.essentials.Activities.MyApplication.getDB;
 
 public final class Settings implements BaseColumns {
 
-    private static SQLiteDatabase db;
-
-
     public final static String TABLE_NAME = "SETTINGS";
     public final static String COLUMN_ID = BaseColumns._ID;
     public final static String COLUMN_SOUND_MODE = "SOUND_MODE";
@@ -31,8 +27,6 @@ public final class Settings implements BaseColumns {
 
 
     public static int getNotificationMode() {
-        db = getDB();
-
         int mode = -1;
         String[] projection = {COLUMN_NOTIFICATION_MODE};
         String selection = COLUMN_ID + "=?";
@@ -50,8 +44,6 @@ public final class Settings implements BaseColumns {
 
     public static void setNotificationMode(int mode) {
         if (mode == 0 || mode == 1) {
-            db = getDB();
-
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_NOTIFICATION_MODE, mode);
             String selection = COLUMN_ID + "=?";
@@ -72,8 +64,6 @@ public final class Settings implements BaseColumns {
 
 
     public static int getListsVisibility() {
-        db = getDB();
-
         int mode = -1;
         String[] projection = {COLUMN_LISTS_VISIBILITY};
         String selection = COLUMN_ID + "=?";
@@ -90,8 +80,6 @@ public final class Settings implements BaseColumns {
 
     public static void setListsVisibility(int visibility) {
         if (visibility == 0 || visibility == 1) {
-            db = getDB();
-
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_LISTS_VISIBILITY, visibility);
             String selection = COLUMN_ID + "=?";
@@ -101,8 +89,6 @@ public final class Settings implements BaseColumns {
     }
 
     public static int getSoundMode() {
-        db = getDB();
-
         int mode = -1;
         String[] projection = {COLUMN_SOUND_MODE};
         String selection = COLUMN_ID + "=?";
@@ -138,8 +124,6 @@ public final class Settings implements BaseColumns {
 
     public static void setSoundMode(int mode) {
         if (mode > -1 && mode < 3) {
-            db = getDB();
-
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_SOUND_MODE, mode);
             String selection = COLUMN_ID + "=?";

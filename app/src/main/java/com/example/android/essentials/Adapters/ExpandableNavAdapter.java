@@ -42,7 +42,6 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-
         //For new view
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
@@ -50,10 +49,8 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.item_sub_nav, null);
         }
 
-
         //Get current question's path
         final String location = (String) getChild(groupPosition, childPosition);
-
 
         //Set text
         String arrow = "";
@@ -64,7 +61,6 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
         TextView textView = (TextView) convertView.findViewById(R.id.sub_nav_text);
         textView.setText(arrow + location);
         textView.setTextSize(18);
-
 
         return convertView;
     }
@@ -105,14 +101,12 @@ public class ExpandableNavAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.sub_nav_list_group, null);
         }
 
-
         //Set title of header
         String headerTitle = (String) getGroup(groupPosition);
         TextView headerTextView = (TextView) convertView
                 .findViewById(R.id.sub_nav_list_header);
         headerTextView.setTypeface(null, Typeface.BOLD);
         headerTextView.setText(headerTitle);
-
 
         return convertView;
     }

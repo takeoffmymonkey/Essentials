@@ -1,13 +1,11 @@
 package com.example.android.essentials.Activities;
 
-import android.app.AlertDialog;
 import android.app.SearchManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
@@ -31,7 +29,6 @@ public class SearchableActivity extends AppCompatActivity {
     ExpandableListView expList;
     ExpandableListAdapter expListAdapter;
     String mainPath;
-    private static SQLiteDatabase db;
 
 
     @Override
@@ -39,13 +36,9 @@ public class SearchableActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        db = MyApplication.getDB();
-
         mainPath = MainActivity.getMainPath();
 
         if (handleIntent()) {
-
-
             //Make expandable list and set adapter
             expList = (ExpandableListView) findViewById(R.id.search_exp_list);
             prepareQuestionsList();
@@ -53,9 +46,12 @@ public class SearchableActivity extends AppCompatActivity {
             expList.setAdapter(expListAdapter);
 
             //Enable back option
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            try {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (NullPointerException e) {
+                Log.e(MainActivity.TAG, e.toString());
+            }
         }
-
     }
 
 
@@ -63,7 +59,6 @@ public class SearchableActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         handleIntent();
-
     }
 
 
@@ -77,12 +72,16 @@ public class SearchableActivity extends AppCompatActivity {
             if (appData != null) {
                 relativePaths = appData.getStringArrayList("relativePaths");
                 //Check if this is a folder
-                String fullPath = mainPath + relativePaths.get(0);
-                if ((new File(fullPath)).isDirectory()) {
-                    isFile = false;
-                    Intent intent2 = new Intent(MyApplication.getAppContext(), SubActivity.class);
-                    intent2.putExtra("subPath", fullPath);
-                    startActivity(intent2);
+                try {
+                    String fullPath = mainPath + relativePaths.get(0);
+                    if ((new File(fullPath)).isDirectory()) {
+                        isFile = false;
+                        Intent intent2 = new Intent(MyApplication.getAppContext(), SubActivity.class);
+                        intent2.putExtra("subPath", fullPath);
+                        startActivity(intent2);
+                    }
+                } catch (NullPointerException e) {
+                    Log.e(MainActivity.TAG, e.toString());
                 }
             }
         } else if (relativePath != null) {
@@ -136,80 +135,10 @@ public class SearchableActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-/*                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                //Set custom view of the dialog
-                builder.setMessage("Change level?")
-                        //Set ability to press back
-                        .setCancelable(false)
-                        //Set Ok button with click listener
-                        .setPositiveButton("Increase",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        questions.get(0).levelUp();
-                                        dialog.cancel();
-                                        SearchableActivity.this.finish();
-                                    }
-                                })
-                        .setNeutralButton("Keep",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                        SearchableActivity.this.finish();
-                                    }
-                                })
-                        //Set cancel button with click listener
-                        .setNegativeButton("Decrease",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        //Close the dialog window
-                                        questions.get(0).levelDown();
-                                        dialog.cancel();
-                                        SearchableActivity.this.finish();
-                                    }
-                                });
-                AlertDialog alert = builder.create();
-                alert.show();*/
                 this.finish();
                 return false;
         }
         return super.onOptionsItemSelected(item);
     }
 
-
-/*    @Override
-    public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        //Set custom view of the dialog
-        builder.setMessage("Change level?")
-                //Set ability to press back
-                .setCancelable(false)
-                //Set Ok button with click listener
-                .setPositiveButton("Increase",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                questions.get(0).levelUp();
-                                dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
-                            }
-                        })
-                .setNeutralButton("Keep",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
-                            }
-                        })
-                //Set cancel button with click listener
-                .setNegativeButton("Decrease",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                //Close the dialog window
-                                questions.get(0).levelDown();
-                                dialog.cancel();
-                                SearchableActivity.super.onBackPressed();
-                            }
-                        });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }*/
 }

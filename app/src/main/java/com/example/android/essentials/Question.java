@@ -2,7 +2,6 @@ package com.example.android.essentials;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.Activities.MyApplication;
@@ -16,16 +15,11 @@ public class Question {
 
     private String question;
     private String fileFullPath;
-    private String fileName;
-    private String relativeFolderPath;
-    private String tableName;
+
 
     public Question(String question, String fileFullPath) {
         this.question = question;
         this.fileFullPath = fileFullPath;
-        setFileName();
-        setRelativeFolderPath();
-        setTableName(relativeFolderPath);
     }
 
     public String getQuestion() {
@@ -42,7 +36,10 @@ public class Question {
         String[] projection = {NotificationsEntry.COLUMN_LEVEL};
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             c.moveToFirst();
@@ -60,7 +57,10 @@ public class Question {
         String[] projection2 = {NotificationsEntry.COLUMN_QUESTION};
         String selection2 = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs2 = {getQuestion()};
-        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection2, selection2, selectionArgs2,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME,
+                projection2,
+                selection2,
+                selectionArgs2,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             questionExists = true;
@@ -75,8 +75,6 @@ public class Question {
         } else {
             updateNotification(level);
         }
-        //MainActivity.testNotificationTable();
-
     }
 
     private void addNotification() {
@@ -95,7 +93,10 @@ public class Question {
         String[] projection = {NotificationsEntry.COLUMN_ID};
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME, projection, selection, selectionArgs,
+        Cursor c = MyApplication.getDB().query(NotificationsEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
                 null, null, null);
         if (c.getCount() == 1) {//Question exists
             c.moveToFirst();
@@ -108,7 +109,9 @@ public class Question {
     private void deleteNotification() {
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
+        MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME,
+                selection,
+                selectionArgs);
     }
 
     private void updateNotification(int level) {
@@ -117,7 +120,10 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        MyApplication.getDB().update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+        MyApplication.getDB().update(NotificationsEntry.TABLE_NAME,
+                contentValues,
+                selection,
+                selectionArgs);
 
     }
 
@@ -147,26 +153,13 @@ public class Question {
         return newLevel;
     }
 
-    private void setFileName() {
-        fileName = MainActivity.getLastValueOfPath(fileFullPath);
-    }
-
-    private void setRelativeFolderPath() {
-        relativeFolderPath = MainActivity.getRelativePathOfDirForFile(fileFullPath);
-    }
-
-    private void setTableName(String relativeFolderPath) {
-        tableName = MainActivity.relativePathToTableName(relativeFolderPath);
-    }
-
     private void setQuestionNotification() {
         //set delay
         int level = getLevel();
         long delay = Schedule.getDelayByLevel(level);
 
         //Create notification
-        MainActivity.scheduleNotification(getNotificationId(), getQuestion(),
-                getLevel(),
+        MainActivity.scheduleNotification(getNotificationId(), getQuestion(), getLevel(),
                 MainActivity.getNotification(getQuestion(), MainActivity.getRelativePathFromFull
                         (getFileFullPath())),
                 delay);

@@ -5,9 +5,9 @@ import android.app.SearchManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
 
@@ -31,21 +31,15 @@ public class SearchableActivity2 extends AppCompatActivity {
     ExpandableListView expList;
     ExpandableListAdapter expListAdapter;
     String mainPath;
-    private static SQLiteDatabase db;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        db = MyApplication.getDB();
-
         mainPath = MainActivity.getMainPath();
 
         if (handleIntent()) {
-
-
             //Make expandable list and set adapter
             expList = (ExpandableListView) findViewById(R.id.search_exp_list);
             prepareQuestionsList();
@@ -53,7 +47,11 @@ public class SearchableActivity2 extends AppCompatActivity {
             expList.setAdapter(expListAdapter);
 
             //Enable back option
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            try {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            } catch (NullPointerException e) {
+                Log.e(MainActivity.TAG, e.toString());
+            }
         }
 
     }
@@ -63,7 +61,6 @@ public class SearchableActivity2 extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         handleIntent();
-
     }
 
 
@@ -77,12 +74,16 @@ public class SearchableActivity2 extends AppCompatActivity {
             if (appData != null) {
                 relativePaths = appData.getStringArrayList("relativePaths");
                 //Check if this is a folder
-                String fullPath = mainPath + relativePaths.get(0);
-                if ((new File(fullPath)).isDirectory()) {
-                    isFile = false;
-                    Intent intent2 = new Intent(MyApplication.getAppContext(), SubActivity.class);
-                    intent2.putExtra("subPath", fullPath);
-                    startActivity(intent2);
+                try {
+                    String fullPath = mainPath + relativePaths.get(0);
+                    if ((new File(fullPath)).isDirectory()) {
+                        isFile = false;
+                        Intent intent2 = new Intent(MyApplication.getAppContext(), SubActivity.class);
+                        intent2.putExtra("subPath", fullPath);
+                        startActivity(intent2);
+                    }
+                } catch (NullPointerException e) {
+                    Log.e(MainActivity.TAG, e.toString());
                 }
             }
         } else if (relativePath != null) {

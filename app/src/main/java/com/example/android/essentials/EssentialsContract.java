@@ -1,19 +1,8 @@
 package com.example.android.essentials;
 
-import android.app.Notification;
 import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.example.android.essentials.Activities.MainActivity;
-import com.example.android.essentials.Activities.MyApplication;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by takeoff on 021 21 Jul 17.
@@ -28,8 +17,6 @@ public final class EssentialsContract {
     private static Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     static final String PATH_TAGS = "tags";
-
-    private static SQLiteDatabase db;
 
     public static final class TagEntry implements BaseColumns {
         public static final String TABLE_NAME = "TAGS";
@@ -46,8 +33,6 @@ public final class EssentialsContract {
         //vnd.android.cursor.item/com.example.android.essentials/tags
         static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TAGS;
-
-
     }
 
 

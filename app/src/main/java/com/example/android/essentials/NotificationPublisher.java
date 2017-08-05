@@ -25,11 +25,8 @@ public class NotificationPublisher extends BroadcastReceiver {
 
     public NotificationManager notificationManager;
 
-    private static SQLiteDatabase db;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        db = MyApplication.getDB();
 
         //Create notification manager
         notificationManager =
