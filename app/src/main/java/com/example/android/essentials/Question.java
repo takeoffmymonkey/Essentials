@@ -3,13 +3,10 @@ package com.example.android.essentials;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.android.essentials.Activities.MainActivity;
 import com.example.android.essentials.Activities.MyApplication;
 import com.example.android.essentials.EssentialsContract.NotificationsEntry;
-
-import static com.example.android.essentials.Activities.MainActivity.TAG;
 
 /**
  * Created by takeoff on 018 18 Jul 17.
@@ -22,7 +19,6 @@ public class Question {
     private String fileName;
     private String relativeFolderPath;
     private String tableName;
-    private static SQLiteDatabase db;
 
     public Question(String question, String fileFullPath) {
         this.question = question;
@@ -30,7 +26,6 @@ public class Question {
         setFileName();
         setRelativeFolderPath();
         setTableName(relativeFolderPath);
-        db = MyApplication.getDB();
     }
 
     public String getQuestion() {
@@ -91,8 +86,8 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_RELATIVE_PATH, relativePath);
         contentValues.put(NotificationsEntry.COLUMN_LEVEL, 1);
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
-        long r = MyApplication.getDB().insert(NotificationsEntry.TABLE_NAME, null, contentValues);
-        Log.e(TAG, "adding to notification table response (id): " + r);
+        MyApplication.getDB().insert(NotificationsEntry.TABLE_NAME, null, contentValues);
+
     }
 
     private long getNotificationId() {
@@ -113,8 +108,7 @@ public class Question {
     private void deleteNotification() {
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        long r = MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
-        Log.e(TAG, "deleting from notification table response: " + r);
+        MyApplication.getDB().delete(NotificationsEntry.TABLE_NAME, selection, selectionArgs);
     }
 
     private void updateNotification(int level) {
@@ -123,17 +117,8 @@ public class Question {
         contentValues.put(NotificationsEntry.COLUMN_TIME_EDITED, System.currentTimeMillis());
         String selection = NotificationsEntry.COLUMN_QUESTION + "=?";
         String[] selectionArgs = {getQuestion()};
-        long r = MyApplication.getDB().update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
-        Log.e(TAG, "updating notification table response: " + r);
-    }
+        MyApplication.getDB().update(NotificationsEntry.TABLE_NAME, contentValues, selection, selectionArgs);
 
-
-    private String getFileName() {
-        return fileName;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public int levelUp() {

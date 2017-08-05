@@ -35,6 +35,7 @@ import com.example.android.essentials.Settings;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static com.example.android.essentials.Activities.MainActivity.rescheduleNotifications;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsAdapter;
 import static com.example.android.essentials.Activities.MainActivity.suggestionsCursor;
 
@@ -239,14 +240,11 @@ public class SubActivity extends AppCompatActivity implements
             case R.id.action_hide_lists:
                 showHideExpLists();
                 return true;
-            case R.id.action_notification_mode:
+            case R.id.action_sound_mode:
                 int currentMode = Settings.getSoundMode();
-                MainActivity.testSettingsTable();
                 if (currentMode < 2) {
                     Settings.setSoundMode(currentMode + 1);
-                    MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
-                    MainActivity.testSettingsTable();
                     Settings.setSoundMode(0);
                 }
                 return true;
@@ -258,7 +256,16 @@ public class SubActivity extends AppCompatActivity implements
                 recreate();
                 return true;
             case R.id.action_restart_notifications:
-                MainActivity.rescheduleNotifications();
+                rescheduleNotifications();
+                return true;
+            case R.id.action_notification_mode:
+                int currentNotificationMode = Settings.getNotificationMode();
+                if (currentNotificationMode == 0) {
+                    Settings.setNotificationMode(1);
+                } else if (currentNotificationMode == 1) {
+                    Settings.setNotificationMode(0);
+                }
+                rescheduleNotifications();
                 return true;
         }
         return super.onOptionsItemSelected(item);

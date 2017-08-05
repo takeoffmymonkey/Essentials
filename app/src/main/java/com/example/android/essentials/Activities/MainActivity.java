@@ -74,13 +74,6 @@ public class MainActivity extends AppCompatActivity implements
         currentRelativePath = "";
         currentTableName = relativePathToTableName(currentRelativePath);
 
-        //Sync data
-        //sync(currentRelativePath);
-
-        //For debugging
-        testTagsTable();
-        testQuestionsTable(currentRelativePath);
-
 
         //Empty
         Button resync = (Button) findViewById(R.id.resync);
@@ -393,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements
             sb.append("_");
         }
         sb.append("FILES");
-        Log.e(TAG, "Returning table name: " + sb);
         return sb.toString();
     }
 
@@ -717,18 +709,24 @@ public class MainActivity extends AppCompatActivity implements
                 sync(currentRelativePath);
                 recreate();
                 return true;
-            case R.id.action_notification_mode:
+            case R.id.action_sound_mode:
                 int currentMode = Settings.getSoundMode();
-                MainActivity.testSettingsTable();
                 if (currentMode < 2) {
                     Settings.setSoundMode(currentMode + 1);
-                    MainActivity.testSettingsTable();
                 } else if (currentMode == 2) {
-                    MainActivity.testSettingsTable();
                     Settings.setSoundMode(0);
                 }
                 return true;
             case R.id.action_restart_notifications:
+                rescheduleNotifications();
+                return true;
+            case R.id.action_notification_mode:
+                int currentNotificationMode = Settings.getNotificationMode();
+                if (currentNotificationMode == 0) {
+                    Settings.setNotificationMode(1);
+                } else if (currentNotificationMode == 1) {
+                    Settings.setNotificationMode(0);
+                }
                 rescheduleNotifications();
                 return true;
         }

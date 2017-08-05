@@ -58,11 +58,13 @@ public class EssentialsDbHelper extends SQLiteOpenHelper {
         String SQL_CREATE_SETTINGS_TABLE = "CREATE TABLE " + Settings.TABLE_NAME + " ("
                 + Settings.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + Settings.COLUMN_LISTS_VISIBILITY + " INTEGER DEFAULT 1, "
+                + Settings.COLUMN_NOTIFICATION_MODE + " INTEGER DEFAULT 0, "
                 + Settings.COLUMN_SOUND_MODE + " INTEGER DEFAULT 2);";
         db.execSQL(SQL_CREATE_SETTINGS_TABLE);
         ContentValues contentValues = new ContentValues();
         contentValues.put(Settings.COLUMN_SOUND_MODE, 2);
         contentValues.put(Settings.COLUMN_LISTS_VISIBILITY, 1);
+        contentValues.put(Settings.COLUMN_NOTIFICATION_MODE, 0);
         db.insert(Settings.TABLE_NAME, null, contentValues);
 
     }

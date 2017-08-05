@@ -3,7 +3,8 @@
     <string name="action_search">Search</string>
     <string name="action_search_hint">Search for topic or question</string>
     <string name="action_sync">Re-sync tags and folders</string>
-    <string name="notification_mode">Change notification mode</string>
-    <string name="show_hide_lists">Show/hide navigation and dirs</string>
+    <string name="sound_mode">Change sound mode</string>
+    <string name="notification_mode">Toggle test mode</string>
+    <string name="show_hide_lists">Toggle full screen</string>
     <string name="restart_notifications">Restart notifications</string>
 </resources>
