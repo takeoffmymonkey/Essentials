@@ -138,6 +138,9 @@ public class SubActivity extends AppCompatActivity implements
             subExpDirs.setVisibility(View.GONE);
             actionBar.hide();
         }
+        if (subListOfDirs.size() == 0){//hide dirs if there are none
+            subExpDirs.setVisibility(View.GONE);
+        }
 
         //Enable back option
         try {
@@ -406,6 +409,9 @@ public class SubActivity extends AppCompatActivity implements
             actionBar.show();
             //Update settings
             Settings.setListsVisibility(1);
+        }
+        if (subListOfDirs.size() == 0){//hide dirs if there are none
+            subExpDirs.setVisibility(View.GONE);
         }
     }
 
