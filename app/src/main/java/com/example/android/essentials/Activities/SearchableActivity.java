@@ -119,8 +119,10 @@ public class SearchableActivity extends AppCompatActivity {
                 String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
                 if (q != null) {//There is a question provided
                     name = q;
-                } else {//No question, cut out extension
-                    name = name.substring(0, name.lastIndexOf("."));
+                } else {//No question, cut out extension if this is a file
+                    if (new File(fileFullPath).isFile()) {
+                        name = name.substring(0, name.lastIndexOf("."));
+                    }
                 }
             }
             cursor.close();
