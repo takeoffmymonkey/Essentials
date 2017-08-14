@@ -49,6 +49,7 @@ public class SubActivity extends AppCompatActivity implements
     String subActivityName;
     String subTableName;
     ArrayList<String> subListOfDirs = new ArrayList<String>();
+    ArrayList<String> subListOfDirsAdapted = new ArrayList<String>();
     ArrayList<String> subListOfFiles = new ArrayList<String>();
     ExpandableListView subExpList;
     ExpandableListView subExpNav;
@@ -107,7 +108,8 @@ public class SubActivity extends AppCompatActivity implements
 
         //Make expandable dirs list
         subExpDirs = (ExpandableListView) findViewById(R.id.sub_exp_dirs);
-        subExpDirsAdapter = new ExpandableDirsAdapter(this, subListOfDirs);
+        prepareDirsList();
+        subExpDirsAdapter = new ExpandableDirsAdapter(this, subListOfDirsAdapted);
         subExpDirs.setAdapter(subExpDirsAdapter);
         for (int i = 0; i < subExpDirsAdapter.getGroupCount(); i++)
             subExpDirs.expandGroup(i);
@@ -278,6 +280,37 @@ public class SubActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+
+    /*Prepare dirs list for adapter*/
+    private void prepareDirsList() {
+
+        String[] projection = {QuestionEntry.COLUMN_QUESTION};
+        String selection = QuestionEntry.COLUMN_NAME + "=?";
+
+        for (int i = 0; i < subListOfDirs.size(); i++) {
+            String name = subListOfDirs.get(i);
+            String[] selectionArgs = {name};
+
+            Cursor cursor = MyApplication.getDB().query(subTableName,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null, null, null);
+
+            if (cursor.getCount() == 1) { //Row is found
+                cursor.moveToFirst();
+                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
+                if (q != null && !q.equals("") && !q.isEmpty()) {//There is a proper name provided
+                    name = q;
+                }
+            }
+
+            cursor.close();
+
+            //Add name to the list
+            subListOfDirsAdapted.add(name);
+        }
+    }
 
     /*Prepare questions list for adapter*/
     private void prepareQuestionsList() {
