@@ -46,9 +46,8 @@ public class SearchableActivity extends AppCompatActivity {
             expListAdapter = new ExpandableListAdapter(this, questions);
             expList.setAdapter(expListAdapter);
 
-            //Expand question
-            for (int i = 0; i < expListAdapter.getGroupCount(); i++)
-                expList.expandGroup(i);
+            //Expand question if it is the only result
+            if (expListAdapter.getGroupCount() == 1) expList.expandGroup(0);
 
             //Enable back option
             try {
