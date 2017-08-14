@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements
     String currentRelativePath; //""
     String currentTableName; //FILES
     ArrayList<String> listOfDirs = new ArrayList<String>();
+    ArrayList<String> listOfDirsAdapted = new ArrayList<String>();
     ListView mainList;
     static Cursor suggestionsCursor;
     static SimpleCursorAdapter suggestionsAdapter;
@@ -90,8 +91,9 @@ public class MainActivity extends AppCompatActivity implements
         setListsOfFilesAndDirs(currentTableName, listOfDirs, null);
         mainList = (ListView) findViewById(R.id.main_list);
         mainList.setEmptyView(emptyView);
+        prepareDirsList(currentTableName, listOfDirs, listOfDirsAdapted);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.item_main_list,
-                R.id.main_list_item_text, listOfDirs);
+                R.id.main_list_item_text, listOfDirsAdapted);
         mainList.setAdapter(adapter);
 
         //Set clicklistener on list
@@ -100,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
                 intent.putExtra("subPath", mainPath + "/" + listOfDirs.get((int) id));
+                intent.putExtra("subActivityName", listOfDirsAdapted.get((int) id));
                 //Turn on bars
                 Settings.setListsVisibility(1);
                 view.getContext().startActivity(intent);
@@ -351,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements
         }
         String[] locations = relativePath.split("/");
         StringBuilder sb = new StringBuilder();
+        sb.append("[");
         for (int i = 1; i < locations.length; i++) {
             String location = locations[i].trim();
             location = location.replaceAll(" ", "_");
@@ -387,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements
             sb.append("_");
         }
         sb.append("FILES");
+        sb.append("]");
         return sb.toString();
     }
 
@@ -591,6 +596,40 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
         c.close();
+    }
+
+
+    /*Prepare dirs list for adapter*/
+    public static void prepareDirsList(String currentTableName,
+                                       ArrayList<String> currentList,
+                                       ArrayList<String> newList) {
+
+        String[] projection = {QuestionEntry.COLUMN_QUESTION};
+        String selection = QuestionEntry.COLUMN_NAME + "=?";
+
+        for (int i = 0; i < currentList.size(); i++) {
+            String name = currentList.get(i);
+            String[] selectionArgs = {name};
+
+            Cursor cursor = MyApplication.getDB().query(currentTableName,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null, null, null);
+
+            if (cursor.getCount() == 1) { //Row is found
+                cursor.moveToFirst();
+                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
+                if (q != null && !q.equals("") && !q.isEmpty()) {//There is a proper name provided
+                    name = q;
+                }
+            }
+
+            cursor.close();
+
+            //Add name to the list
+            newList.add(name);
+        }
     }
 
 

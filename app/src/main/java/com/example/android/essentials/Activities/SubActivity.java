@@ -45,6 +45,7 @@ public class SubActivity extends AppCompatActivity implements
     private static final int TAG_LOADER = 0;
     String mainPath;
     String subPath;
+    String properName;
     String subRelativePath;
     String subActivityName;
     String subTableName;
@@ -75,7 +76,7 @@ public class SubActivity extends AppCompatActivity implements
         subRelativePath = "/" + subPath.substring(mainPath.length() + 1);
 
         //Set subActivity name
-        subActivityName = subRelativePath.substring(subRelativePath.lastIndexOf("/") + 1);
+        subActivityName = getIntent().getStringExtra("subActivityName");
         setTitle(subActivityName);
 
         //Get subTableName
@@ -108,7 +109,7 @@ public class SubActivity extends AppCompatActivity implements
 
         //Make expandable dirs list
         subExpDirs = (ExpandableListView) findViewById(R.id.sub_exp_dirs);
-        prepareDirsList();
+        MainActivity.prepareDirsList(subTableName, subListOfDirs, subListOfDirsAdapted);
         subExpDirsAdapter = new ExpandableDirsAdapter(this, subListOfDirsAdapted);
         subExpDirs.setAdapter(subExpDirsAdapter);
         for (int i = 0; i < subExpDirsAdapter.getGroupCount(); i++)
@@ -127,6 +128,7 @@ public class SubActivity extends AppCompatActivity implements
                 Intent intent = new Intent(SubActivity.this, SubActivity.class);
                 intent.putExtra("subPath", mainPath +
                         subRelativePath + "/" + subListOfDirs.get((int) id));
+                intent.putExtra("subActivityName", subListOfDirsAdapted.get((int) id));
                 //Turn on bars
                 Settings.setListsVisibility(1);
                 v.getContext().startActivity(intent);
@@ -280,37 +282,6 @@ public class SubActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-
-    /*Prepare dirs list for adapter*/
-    private void prepareDirsList() {
-
-        String[] projection = {QuestionEntry.COLUMN_QUESTION};
-        String selection = QuestionEntry.COLUMN_NAME + "=?";
-
-        for (int i = 0; i < subListOfDirs.size(); i++) {
-            String name = subListOfDirs.get(i);
-            String[] selectionArgs = {name};
-
-            Cursor cursor = MyApplication.getDB().query(subTableName,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null, null, null);
-
-            if (cursor.getCount() == 1) { //Row is found
-                cursor.moveToFirst();
-                String q = cursor.getString(cursor.getColumnIndex(QuestionEntry.COLUMN_QUESTION));
-                if (q != null && !q.equals("") && !q.isEmpty()) {//There is a proper name provided
-                    name = q;
-                }
-            }
-
-            cursor.close();
-
-            //Add name to the list
-            subListOfDirsAdapted.add(name);
-        }
-    }
 
     /*Prepare questions list for adapter*/
     private void prepareQuestionsList() {
