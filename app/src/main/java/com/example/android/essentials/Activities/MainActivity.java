@@ -310,12 +310,14 @@ public class MainActivity extends AppCompatActivity implements
                             c.close();
 
                             //Insert each tag into tags table and specify its fileTags name
-                            String[] tags = separated[2].split(",");
-                            for (String tag : tags) {
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put(TagEntry.COLUMN_PATH, tagPath);
-                                contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
-                                MyApplication.getDB().insert(TagEntry.TABLE_NAME, null, contentValues);
+                            if (separated.length > 2) {
+                                String[] tags = separated[2].split(",");
+                                for (String tag : tags) {
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(TagEntry.COLUMN_PATH, tagPath);
+                                    contentValues.put(TagEntry.COLUMN_SUGGESTION, tag);
+                                    MyApplication.getDB().insert(TagEntry.TABLE_NAME, null, contentValues);
+                                }
                             }
                         }
                     }
