@@ -49,6 +49,7 @@ public class ExpandableDirsAdapter extends BaseExpandableListAdapter {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.item_sub_dirs, null);
+
         }
 
         //Get current question's path
