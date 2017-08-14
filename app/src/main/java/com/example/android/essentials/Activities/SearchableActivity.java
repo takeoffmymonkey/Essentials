@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
+ * This is searchable activity for search results presenting
  */
 
 public class SearchableActivity extends AppCompatActivity {
@@ -44,6 +45,10 @@ public class SearchableActivity extends AppCompatActivity {
             prepareQuestionsList();
             expListAdapter = new ExpandableListAdapter(this, questions);
             expList.setAdapter(expListAdapter);
+
+            //Expand question
+            for (int i = 0; i < expListAdapter.getGroupCount(); i++)
+                expList.expandGroup(i);
 
             //Enable back option
             try {

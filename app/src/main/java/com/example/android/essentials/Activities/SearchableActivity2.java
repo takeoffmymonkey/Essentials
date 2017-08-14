@@ -21,6 +21,7 @@ import java.util.ArrayList;
 
 /**
  * Created by takeoff on 020 20 Jul 17.
+ * This is searchable activity for notification presenting
  */
 
 public class SearchableActivity2 extends AppCompatActivity {
