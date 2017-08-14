@@ -89,7 +89,6 @@ public class SubActivity extends AppCompatActivity implements
         subExpListAdapter = new ExpandableListAdapter(this, questions);
         subExpList.setAdapter(subExpListAdapter);
 
-
         //Make expandable navigator
         subExpNav = (ExpandableListView) findViewById(R.id.sub_exp_navigate);
         prepareNavData();
@@ -112,6 +111,11 @@ public class SubActivity extends AppCompatActivity implements
         subExpDirs.setAdapter(subExpDirsAdapter);
         for (int i = 0; i < subExpDirsAdapter.getGroupCount(); i++)
             subExpDirs.expandGroup(i);
+
+        //Expand list if it is the only question and no folders
+        if (subExpListAdapter.getGroupCount() == 1 && subExpDirsAdapter.getChildrenCount(0) == 0)
+            subExpList.expandGroup(0);
+
 
         //Set click listener on navigation exp list
         subExpDirs.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -138,7 +142,7 @@ public class SubActivity extends AppCompatActivity implements
             subExpDirs.setVisibility(View.GONE);
             actionBar.hide();
         }
-        if (subListOfDirs.size() == 0){//hide dirs if there are none
+        if (subListOfDirs.size() == 0) {//hide dirs if there are none
             subExpDirs.setVisibility(View.GONE);
         }
 
@@ -410,7 +414,7 @@ public class SubActivity extends AppCompatActivity implements
             //Update settings
             Settings.setListsVisibility(1);
         }
-        if (subListOfDirs.size() == 0){//hide dirs if there are none
+        if (subListOfDirs.size() == 0) {//hide dirs if there are none
             subExpDirs.setVisibility(View.GONE);
         }
     }
