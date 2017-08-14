@@ -58,7 +58,7 @@ public class ExpandableDirsAdapter extends BaseExpandableListAdapter {
         TextView textView = (TextView) convertView.findViewById(R.id.sub_dirs_text);
         textView.setText(dir);
         textView.setTextSize(18);
-
+        convertView.setMinimumHeight(120);
         return convertView;
     }
 
