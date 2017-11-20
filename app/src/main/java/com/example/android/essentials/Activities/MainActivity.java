@@ -279,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements
                         //Check if file exists
                         File file = new File(mainPath + tagPath);
                         if (file.exists()) {
+                            //Log.e(TAG, "WORKING ON FILE: " + file.toString());
                             //Insert question if there is one
                             String question = separated[1].trim();
                             if (!question.equalsIgnoreCase("") && !question.isEmpty()) {//We have a question here
